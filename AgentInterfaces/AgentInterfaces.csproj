@@ -1,0 +1,29 @@
+﻿ <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
+    <RootNamespace>Microsoft.Azure.Gaming.AgentInterfaces</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Nuget Pack currently has an issue with packing the csproj. However, packing during 
+         build seems to work.
+    -->
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>PlayFab.MultiplayerServers.AgentInterfaces</PackageId>
+    <PackageVersion>5.0.2</PackageVersion>
+    <PackageDescription>Helper library for LocalMultiplayerAgent, part of Azure PlayFab Multiplayer Servers </PackageDescription>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/PlayFab/MpsAgent</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PlayFab/MpsAgent</RepositoryUrl>
+    <Authors>Microsoft</Authors>
+    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Docker.DotNet" Version="3.125.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="protobuf-net" Version="3.0.29" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.123" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+  </ItemGroup>
+ </Project>

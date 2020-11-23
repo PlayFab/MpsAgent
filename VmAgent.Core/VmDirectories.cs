@@ -1,0 +1,76 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System.IO;
+using System.Runtime.InteropServices;
+
+namespace Microsoft.Azure.Gaming.VmAgent.Core
+{
+    public class VmDirectories
+    {
+        // Temp storage on Azure VM: windows: D drive. On linux, /dev/sdb1 is the disk, but the mounted filesystem is /mnt
+        public string TempStorageRootVm { get; }
+
+        // Unfortunately can't re-use the same directory path as above, since they don't necessarily exist on the container
+        public static readonly string TempStorageRootContainer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? @"C:\"
+            : "/data/";
+
+        public VmDirectories(string rootPath)
+        {
+            TempStorageRootVm = rootPath;
+
+            GameSharedContentFolderVm = Path.Combine(TempStorageRootVm, "GameSharedContent");
+            GameLogsRootFolderVm = Path.Combine(TempStorageRootVm, "GameLogs");
+            AssetExtractionRootFolderVm = Path.Combine(TempStorageRootVm, "ExtAssets");
+            AssetDownloadRootFolderVm = Path.Combine(TempStorageRootVm, "DownloadedAssets");
+            CertificateRootFolderVm = Path.Combine(TempStorageRootVm, "GameCertificates");
+            GsdkConfigRootFolderVm = Path.Combine(TempStorageRootVm, "Config");
+
+            GameSharedContentFolderContainer = Path.Combine(TempStorageRootContainer, "GameSharedContent");
+            GameLogsRootFolderContainer = Path.Combine(TempStorageRootContainer, "GameLogs");
+            CertificateRootFolderContainer = Path.Combine(TempStorageRootContainer, "GameCertificates");
+
+            GsdkConfigRootFolderContainer = Path.Combine(TempStorageRootContainer, "Config");
+            GsdkConfigFilePathContainer = Path.Combine(GsdkConfigRootFolderContainer, GsdkConfigFilename);
+
+            AgentStateFile = Path.Combine(TempStorageRootVm, "PlayFabVmAgentState");
+            AgentStateTempFile = Path.Combine(TempStorageRootVm, "PlayFabVmAgentState.tmp");
+            HostConfigOverrideFile = Path.Combine(TempStorageRootVm, "HostConfigOverride.json");
+            AgentLogsFolder = Path.Combine(TempStorageRootVm, "PlayFabVmAgentLogs");
+        }
+
+        public string AgentStateFile { get; }
+
+        public string AgentStateTempFile { get; }
+        
+        public string HostConfigOverrideFile { get; }
+        
+        public string AgentLogsFolder { get; }
+
+        // A folder that is accessible by all games on the Vm, potentially for content that's downloaded once but used multiple times.
+        public string GameSharedContentFolderVm { get; }
+
+        public string GameSharedContentFolderContainer { get; set; }
+
+        public string GameLogsRootFolderVm { get; }
+
+        public string GameLogsRootFolderContainer { get; set; }
+
+        public string AssetExtractionRootFolderVm { get; }
+
+        public string AssetDownloadRootFolderVm { get; }
+
+        public string CertificateRootFolderVm { get; }
+
+        public string CertificateRootFolderContainer { get; set; }
+
+        public const string GsdkConfigFilename = "gsdkConfig.json";
+
+        public string GsdkConfigRootFolderVm { get; }
+
+        public string GsdkConfigRootFolderContainer { get; set; }
+
+        public string GsdkConfigFilePathContainer { get; set; }
+    }
+}

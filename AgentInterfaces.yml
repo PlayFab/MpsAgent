@@ -1,0 +1,65 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  projectName: 'AgentInterfaces'
+
+steps:
+- task: DotNetCoreCLI@2
+  name: 'test'
+  inputs:
+    command: 'test'
+    projects: '$(projectName).Tests/$(projectName).Tests.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+  displayName: 'dotnet test $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  name: 'build'
+  inputs:
+    command: 'build'
+    arguments: '--configuration $(buildConfiguration)'
+    projects: '$(projectName)/$(projectName).csproj'
+  displayName: 'dotnet build $(buildConfiguration)'
+
+- task: EsrpCodeSigning@1
+  inputs:
+    FolderPath: '/home/vsts/work/1/s/$(projectName)/bin/$(buildConfiguration)/'
+    ConnectedServiceName: 'Thunderhead Code-Sign service'
+    Pattern: '*.nupkg'
+    signConfigType: 'inlineSignParams'
+    inlineOperation: |
+      [
+       {
+       "keyCode": "CP-401405",
+       "operationSetCode": "NuGetSign",
+       "parameters": [ ],
+       "toolName": "sign",
+       "toolVersion": "1.0"
+       },
+       {
+       "keyCode": "CP-401405",
+       "operationSetCode": "NuGetVerify",
+       "parameters": [ ],
+       "toolName": "sign",
+       "toolVersion": "1.0"
+       }
+      ]
+    SessionTimeout: '60'
+    MaxConcurrency: '50'
+    MaxRetryAttempts: '5'
+- task: NuGetCommand@2
+  displayName: 'nuget push'
+  inputs:
+    command: 'push'
+    packagesToPush: '/home/vsts/work/1/s/$(projectName)/bin/$(buildConfiguration)/**/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'ab71e721-8bf3-4593-ad79-ef477a915924'

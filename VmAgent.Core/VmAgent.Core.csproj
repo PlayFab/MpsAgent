@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageVersion>1.0.5</PackageVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>Helper library for LocalMultiplayerAgent, part of Azure PlayFab Multiplayer Servers</PackageDescription>
+    <PackageProjectUrl>https://github.com/PlayFab/MpsAgent</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PlayFab/MpsAgent</RepositoryUrl>
+    <Authors>Microsoft</Authors>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <PackageId>PlayFab.MultiplayerServers.VmAgent.Core</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Docker.DotNet" Version="3.125.4" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.8.2" />
+    <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="PlayFab.AgentInterfaces" Version="1.0.0" />
+    <PackageReference Include="Polly" Version="7.1.1" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgentInterfaces\AgentInterfaces.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,2 @@
+Update https://github.com/MicrosoftDocs/playfab-docs-pr/blob/master/playfab-docs/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab.md instead.
+You might need to follow onboarding process at https://repos.opensource.microsoft.com/MicrosoftDocs/teams/playfab/join/.

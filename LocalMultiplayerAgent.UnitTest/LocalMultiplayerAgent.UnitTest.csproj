@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>    
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworkVersion>v3.1</TargetFrameworkVersion>
+    <RootNamespace>Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests</RootNamespace>
+
+    <!-- Temporary, for getting a successful build -->
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.7.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.1" />
+    <PackageReference Include="Moq" Version="4.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\LocalMultiplayerAgent\LocalMultiplayerAgent.csproj" />
+  </ItemGroup>
+</Project>

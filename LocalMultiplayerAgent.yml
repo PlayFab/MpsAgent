@@ -1,0 +1,95 @@
+# .NET Desktop
+
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'win-x64'
+  buildConfiguration: 'Debug'
+  projectName: 'LocalMultiplayerAgent'
+  framework: 'netcoreapp3.1'
+
+steps:
+- task: DotNetCoreCLI@2
+  name: 'test'
+  inputs:
+    command: 'test'
+    projects: '$(projectName).UnitTest/$(projectName).UnitTest.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+  displayName: 'dotnet test $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  name: 'build'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '$(projectName)/$(projectName).csproj'
+    arguments: '--framework $(framework) --runtime $(buildPlatform) -c $(buildConfiguration) -o $(projectName)Publish -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true'
+    zipAfterPublish: false
+    modifyOutputPath: false
+  displayName: 'dotnet publish $(buildConfiguration)'
+
+- task: CopyFiles@2
+  inputs:
+    Contents: |
+      $(projectName)\Setup.ps1
+      $(projectName)\SetupLinuxContainersOnWindows.ps1
+    TargetFolder: '$(projectName)Publish\'
+    flattenFolders: true
+
+- task: EsrpCodeSigning@1
+  inputs: 
+    FolderPath: '$(projectName)Publish\'
+    ConnectedServiceName: 'Thunderhead Code-Sign service'
+    Pattern: '*.exe'
+    signConfigType: 'inlineSignParams'
+    inlineOperation: |
+      [
+        {
+            "KeyCode" : "CP-230012",
+            "OperationCode" : "SigntoolSign",
+            "Parameters" : {
+                "OpusName" : "Microsoft",
+                "OpusInfo" : "http://www.microsoft.com",
+                "FileDigest" : "/fd \"SHA256\"",
+                "PageHash" : "/NPH",
+                "TimeStamp" : "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+            },
+            "ToolName" : "sign",
+            "ToolVersion" : "1.0"
+        },
+        {
+            "KeyCode" : "CP-230012",
+            "OperationCode" : "SigntoolVerify",
+            "Parameters" : {},
+            "ToolName" : "sign",
+            "ToolVersion" : "1.0"
+        }
+      ]
+    SessionTimeout: '60'
+    MaxConcurrency: '50'
+    MaxRetryAttempts: '5'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(projectName)Publish\'
+    archiveFile: '$(projectName).publish.zip'
+
+- task: GitHubRelease@1
+  inputs:
+    gitHubConnection: 'MPS_github.com_dgkanatsios'
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'userSpecifiedTag'
+    tag: '$(release_version)'
+    assets: '$(projectName).publish.zip'
+    addChangeLog: false

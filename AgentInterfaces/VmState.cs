@@ -101,6 +101,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// The game servers are exiting too quickly (potentially due to crashes).
         /// </summary>
         [ProtoEnum]
-        TooManyServerRestarts
+        TooManyServerRestarts,
+
+        /// <summary>
+        /// Vm was requested to be removed from the assigned pool.
+        /// </summary>
+        [ProtoEnum]
+        ManuallyDeallocated
     }
 }

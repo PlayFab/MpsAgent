@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.0.5</PackageVersion>
+    <PackageVersion>1.0.6</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageDescription>Helper library for LocalMultiplayerAgent, part of Azure PlayFab Multiplayer Servers</PackageDescription>
     <PackageProjectUrl>https://github.com/PlayFab/MpsAgent</PackageProjectUrl>
@@ -18,7 +18,6 @@
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.8.2" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="PlayFab.AgentInterfaces" Version="1.0.0" />
     <PackageReference Include="Polly" Version="7.1.1" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="4.5.0" />
   </ItemGroup>

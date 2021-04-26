@@ -107,7 +107,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// ignored in Windows VMs
         /// </summary>
         public LinuxInstrumentationConfiguration LinuxInstrumentationConfiguration { get; set; }
-        
+
+        /// <summary>
+        /// specified properties used for instrumentation in Windows VMs
+        /// ignored in Linux VMs
+        /// </summary>
+        public WindowsInstrumentationConfiguration WindowsInstrumentationConfiguration { get; set; }
+
         /// <summary>
         /// The working directory on Windows VM. If this is not provided
         /// we will do a best effort to retrieve it from the start game
@@ -139,6 +145,14 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     {
         /// <summary>
         /// Is Linux instrumentation enabled
+        /// </summary>
+        public bool IsEnabled { get; set; }
+    }
+
+    public class WindowsInstrumentationConfiguration
+    {
+        /// <summary>
+        /// Is Windows instrumentation enabled
         /// </summary>
         public bool IsEnabled { get; set; }
     }

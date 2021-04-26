@@ -175,6 +175,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 Cmd = startCmd
             };
 
+            _logger.LogInformation($"Creating container. Image='{imageName}'");
             CreateContainerResponse response =
                 await TaskUtil.TimedExecute(
                     async () => await _dockerClient.Containers.CreateContainerAsync(containerParams).ConfigureAwait(false),
@@ -358,7 +359,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // is the same as the remote image path.
             SessionHostsStartInfo sessionHostStartInfo = gameResourceDetails.SessionHostsStartInfo;
             ContainerImageDetails imageDetails = sessionHostStartInfo.ImageDetails;
-            string imageName = $"{imageDetails.Registry}/{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
+            string imageName = $"{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
+            
+            // Support running local images with no explicit registry in the name.
+            if (imageDetails.Registry.Length > 0)
+            {
+                imageName = $"{imageDetails.Registry}/{imageName}";
+            }
 
             // The game containers need a unique folder to write their logs. Ideally,
             // we would specify the containerId itself as the subfolder. However, we have to

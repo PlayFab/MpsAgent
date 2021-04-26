@@ -142,4 +142,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// </summary>
         public bool IsEnabled { get; set; }
     }
+
+    public class WindowsInstrumentationConfiguration
+    {
+        /// <summary>
+        /// Is Windows instrumentation enabled
+        /// </summary>
+        public bool IsEnabled { get; set; }
+    }
 }

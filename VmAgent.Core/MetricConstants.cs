@@ -40,5 +40,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public const string FileWriteDurationMs = "FileWriteDurationMs";
         public const string MdmInstall = "MdmInstall";
         public const string MdmStart = "MdmStart";
+        public const string TimeToEnterLockMs = "TimeToEnterLockMs";
     }
 }

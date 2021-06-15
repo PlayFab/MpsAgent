@@ -44,6 +44,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostUniqueId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
 
+            // Create the dumps folder as a subfolder of the logs folder
+            string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+            _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+
             ISessionHostConfiguration sessionHostConfiguration = new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations, sessionHostStartInfo);
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber);
             _systemOperations.CreateDirectory(configFolderPathOnVm);
@@ -79,8 +83,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
         {
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
-            // For now we don't do anything here. If required, we can add action handlers (see SystemOperations.RunProcess for example).
-            // However, keeping the file handle around can be tricky.
+            // For now the only thing we do is delete the dumps folder if it's empty.. If required, we can add action
+            // handlers (see SystemOperations.RunProcess for example). However, keeping the file handle around can be tricky.
+
+            try
+            {
+                string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
+                if (!Directory.EnumerateFileSystemEntries(dumpFolder).Any())
+                {
+                    Directory.Delete(dumpFolder);
+                }
+            }
+            catch (DirectoryNotFoundException) { }
+
             return Task.CompletedTask;
         }
 

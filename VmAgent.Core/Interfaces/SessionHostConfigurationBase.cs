@@ -53,6 +53,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         /// </summary>
         private const string LogsDirectoryEnvVariable = "PF_SERVER_LOG_DIRECTORY";
 
+        /// <summary>
+        /// An environment variable capturing the crash dumps folder for a game server.
+        /// This folder is a subfolder of PF_SERVER_LOG_DIRECTORY.
+        /// </summary>
+        private const string DumpsDirectoryEnvVariable = "PF_SERVER_DUMP_DIRECTORY";
+
         // Not sure if this is needed yet.
         private const string DefaultExePath = @"C:\app\";
 
@@ -90,6 +96,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 },
                 {
                     LogsDirectoryEnvVariable, GetLogFolder(logFolderId, VmConfiguration)
+                },
+                {
+                    DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration)
                 },
                 {
                     SharedContentFolderEnvVariable, GetSharedContentFolderPath()
@@ -162,6 +171,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         }
 
         protected abstract string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration);
+
+        protected string GetDumpFolder(string logFolderId, VmConfiguration vmConfiguration)
+        {
+            return Path.Combine(GetLogFolder(logFolderId, vmConfiguration), VmDirectories.GameDumpsFolderName);
+        }
 
         protected abstract string GetSharedContentFolder(VmConfiguration vmConfiguration);
 

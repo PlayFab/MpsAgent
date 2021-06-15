@@ -437,6 +437,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
 
+            // Create the dumps folder as a subfolder of the logs folder
+            string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+            _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+
             // Set up the log folder. Maps D:\GameLogs\{logFolderId} on the container host to C:\GameLogs on the container.
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.
             volumeBindings.Add($"{logFolderPathOnVm}:{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}");
@@ -496,6 +500,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                         _systemOperations.FileCopy(dockerLogsPath, destinationFileName);
                     }   
                 }
+
+                try
+                {
+                    string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
+                    if (!Directory.EnumerateFileSystemEntries(dumpFolder).Any())
+                    {
+                        Directory.Delete(dumpFolder);
+                    }
+                }
+                catch (DirectoryNotFoundException) { }
             }
             catch (DockerContainerNotFoundException)
             {

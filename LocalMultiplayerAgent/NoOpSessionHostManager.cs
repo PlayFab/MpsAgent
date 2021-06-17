@@ -147,5 +147,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         {
             return true;
         }
+
+        public bool SignalDumpFoundAndCheckIfThrottled(string sessionHostId)
+        {
+            return false;
+        }
     }
 }

@@ -466,9 +466,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 _logger.LogVerbose($"Collecting logs for container {id}.");
                 string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
-                
+
                 if (sessionHostManager.LinuxContainersOnWindows)
-                {   
+                {
                     // we do this for lcow since containers are running on a Hyper-V Linux machine
                     // which the host Windows machine does not have "copy" access to, to get the logs with a FileCopy
                     // this is only supposed to run on LocalMultiplayerAgent running on lcow
@@ -498,22 +498,50 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     {
                         _logger.LogVerbose($"Copying log file {dockerLogsPath} for container {id} to {destinationFileName}.");
                         _systemOperations.FileCopy(dockerLogsPath, destinationFileName);
-                    }   
-                }
-
-                try
-                {
-                    string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
-                    if (!Directory.EnumerateFileSystemEntries(dumpFolder).Any())
-                    {
-                        Directory.Delete(dumpFolder);
                     }
                 }
-                catch (DirectoryNotFoundException) { }
             }
             catch (DockerContainerNotFoundException)
             {
                 _logger.LogInformation($"Docker container {id} not found.");
+            }
+
+            try
+            {
+                string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
+                bool dumpFound = false;
+                try
+                {
+                    if (!_systemOperations.IsDirectoryEmpty(dumpFolder))
+                    {
+                        dumpFound = true;
+                    }
+                    else
+                    {
+                        // If dumps folder is empty, delete it
+                        _systemOperations.DeleteDirectoryIfExists(dumpFolder);
+                    }
+                }
+                catch (DirectoryNotFoundException) { }
+
+                if (dumpFound)
+                {
+                    bool shouldDeleteDump = sessionHostManager.SignalDumpFoundAndCheckIfThrottled(id);
+                    if (shouldDeleteDump)
+                    {
+                        _systemOperations.DeleteDirectoryIfExists(dumpFolder);
+                        _systemOperations.CreateDirectory(dumpFolder);
+                        string readmePath = Path.Combine(dumpFolder, "readme.txt");
+                        _systemOperations.FileWriteAllText(readmePath, $"The contents of \"{VmDirectories.GameDumpsFolderName}\" have been deleted due to throttling.");
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                // I think we'd only end up here if a game server spun up a background process that had a lock on some files
+                // in the dumps folder, and then the game server crashed. The background process could theoretically still be
+                // running, which would prevent us from processing the dump files.
+                _logger.LogWarning($"Unable to process dump files: {ex}");
             }
         }
 

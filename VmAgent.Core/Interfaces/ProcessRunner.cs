@@ -83,18 +83,46 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
         {
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
-            // For now the only thing we do is delete the dumps folder if it's empty.. If required, we can add action
+            // For now the only thing we do is process the dumps folder. If required, we can add action
             // handlers (see SystemOperations.RunProcess for example). However, keeping the file handle around can be tricky.
 
             try
             {
                 string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
-                if (!Directory.EnumerateFileSystemEntries(dumpFolder).Any())
+                bool dumpFound = false;
+                try
                 {
-                    Directory.Delete(dumpFolder);
+                    if (!_systemOperations.IsDirectoryEmpty(dumpFolder))
+                    {
+                        dumpFound = true;
+                    }
+                    else
+                    {
+                        // If dumps folder is empty, delete it
+                        _systemOperations.DeleteDirectoryIfExists(dumpFolder);
+                    }
+                }
+                catch (DirectoryNotFoundException) { }
+
+                if (dumpFound)
+                {
+                    bool shouldDeleteDump = sessionHostManager.SignalDumpFoundAndCheckIfThrottled(id);
+                    if (shouldDeleteDump)
+                    {
+                        _systemOperations.DeleteDirectoryIfExists(dumpFolder);
+                        _systemOperations.CreateDirectory(dumpFolder);
+                        string readmePath = Path.Combine(dumpFolder, "readme.txt");
+                        _systemOperations.FileWriteAllText(readmePath, $"The contents of \"{VmDirectories.GameDumpsFolderName}\" have been deleted due to throttling.");
+                    }
                 }
             }
-            catch (DirectoryNotFoundException) { }
+            catch (IOException ex)
+            {
+                // I think we'd only end up here if a game server spun up a background process that had a lock on some files
+                // in the dumps folder, and then the game server crashed. The background process could theoretically still be
+                // running, which would prevent us from processing the dump files.
+                _logger.LogWarning($"Unable to process dump files: {ex}");
+            }
 
             return Task.CompletedTask;
         }

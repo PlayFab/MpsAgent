@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Diagnostics;
     using System.IO;
     using System.IO.Compression;
+    using System.Linq;
     using System.Net;
     using System.Runtime.InteropServices;
     using System.Security.Cryptography.X509Certificates;
@@ -66,6 +67,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             {
                 Directory.Delete(pathToDirectory, true);
             }
+        }
+
+        public bool IsDirectoryEmpty(string pathToDirectory)
+        {
+            return Directory.EnumerateFileSystemEntries(pathToDirectory).Any();
         }
 
         public Stream OpenFileForRead(string filePath)

@@ -101,6 +101,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// The game servers are exiting too quickly (potentially due to crashes).
         /// </summary>
         [ProtoEnum]
-        TooManyServerRestarts
+        TooManyServerRestarts,
+
+        /// <summary>
+        /// There are game servers with active sessions
+        /// </summary>
+        [ProtoEnum]
+        HasActiveSessions
     }
 }

@@ -23,12 +23,12 @@
         /// <summary>
         /// The publicly accessible port exposed on the software load balancer.
         /// </summary>
-        public int? FrontEndPort { get; set; }
+        public int FrontEndPort { get; set; }
 
         /// <summary>
         /// The port on the Node that the FrontEndPort is mapped to.
         /// </summary>
-        public int? BackEndPort { get; set; }
+        public int BackEndPort { get; set; }
 
         /// <summary>
         /// The protocol for the network traffic.

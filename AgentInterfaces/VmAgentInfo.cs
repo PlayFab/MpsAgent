@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
                 string networkConfiguration = NetworkConfiguration?.ToJsonString() ?? string.Empty;
                 string sessionHostSummary = SessionHostHeartbeatMap.Values.GroupBy(x => x.CurrentGameState).ToDictionary(y => y.Key, y => y.Count()).ToJsonString();
                 return
-                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration} SessionHostSummary: {sessionHostSummary}";
+                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}";
             }
 
             return this.ToJsonString();

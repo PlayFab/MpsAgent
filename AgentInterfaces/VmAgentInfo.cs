@@ -41,14 +41,21 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         [ProtoMember(7)]
         public bool? IsUnassignable { get; set; }
 
+        /// <summary>
+        /// The network configuration of the agent, describing the endpoints available on the VM.
+        /// </summary>
+        [ProtoMember(8)]
+        public VmNetworkConfiguration NetworkConfiguration { get; set; }
+
         public string ToLogString()
         {
             if (SessionHostHeartbeatMap?.Count > 10)
             {
                 string maintenanceSchedule = MaintenanceSchedule?.ToJsonString() ?? string.Empty;
+                string networkConfiguration = NetworkConfiguration?.ToJsonString() ?? string.Empty;
                 string sessionHostSummary = SessionHostHeartbeatMap.Values.GroupBy(x => x.CurrentGameState).ToDictionary(y => y.Key, y => y.Count()).ToJsonString();
                 return
-                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false},  SessionHostSummary: {sessionHostSummary}";
+                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration} SessionHostSummary: {sessionHostSummary}";
             }
 
             return this.ToJsonString();

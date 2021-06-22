@@ -5,8 +5,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 {
     public class VmAgentSettings
     {
-        public bool ProcessCrashDumps { get; set; }
+        public bool EnableCrashDumpProcessing { get; set; }
 
-        public bool SendTelemetry { get; set; }
+        public bool EnableTelemetry { get; set; }
     }
 }

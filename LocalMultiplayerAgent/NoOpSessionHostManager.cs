@@ -29,8 +29,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
         public VmAgentSettings VmAgentSettings { get; } = new VmAgentSettings() 
         { 
-            EnableCrashDumpProcessing = true,
-            EnableTelemetry = true,
+            EnableCrashDumpProcessing = false,
+            EnableTelemetry = false,
         };
 
         public void Assign(SessionHostsStartInfo request)

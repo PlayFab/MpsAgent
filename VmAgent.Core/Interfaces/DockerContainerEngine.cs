@@ -501,6 +501,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 _logger.LogInformation($"Docker container {id} not found.");
             }
+
+            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
+            {
+                // TODO
+            }
         }
 
         public async Task<bool> TryDelete(string id)

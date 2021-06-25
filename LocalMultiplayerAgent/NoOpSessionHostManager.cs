@@ -27,6 +27,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
         public int StateChangeSequenceNumber { get; }
 
+        public VmAgentSettings VmAgentSettings { get; } = new VmAgentSettings() 
+        { 
+            EnableCrashDumpProcessing = false,
+            EnableTelemetry = false,
+        };
+
         public void Assign(SessionHostsStartInfo request)
         {
         }

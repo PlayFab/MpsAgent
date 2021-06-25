@@ -81,6 +81,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // For now we don't do anything here. If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
+
+            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
+            {
+                // TODO
+            }
+
             return Task.CompletedTask;
         }
 

@@ -196,9 +196,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 MetricConstants.ContainerStartTime);
             _logger.LogInformation($"Container {containerId} start completed.");
         }
-
-
-
+        
         private class LogReporter : IProgress<JSONMessage>
         {
             private readonly ConcurrentDictionary<string, LayerProgress> _layerProgresses = new ConcurrentDictionary<string, LayerProgress>();
@@ -248,7 +246,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     default:
                         break;
                 }
-                _logger.LogVerbose(value.ProgressMessage);
+
+                _logger.LogVerbose(value.ToJsonString());
 
             }
 
@@ -570,19 +569,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             await retryPolicy.ExecuteAsync(async () =>
             {
                 await _dockerClient.Images.CreateImageAsync(
-                new ImagesCreateParameters { FromImage = registryWithImageName, Tag = imageTag },
-                new AuthConfig() { Username = username, Password = password },
-                logReporter).ConfigureAwait(false);
+                    new ImagesCreateParameters {FromImage = registryWithImageName, Tag = imageTag},
+                    new AuthConfig() {Username = username, Password = password},
+                    logReporter);
+
+                // Making sure that the image was actually downloaded properly
+                // We have seen some cases where Docker Registry API returns 'success' on pull while the image has not been properly downloaded
+                IEnumerable<ImagesListResponse> images = await _dockerClient.Images.ListImagesAsync(new ImagesListParameters { All = true });
+                if (images.All(image => !image.RepoTags.Contains($"{registryWithImageName}:{imageTag}")))
+                {
+                    throw new ApplicationException("CreateImageAsync is completed but the image doesn't exist");
+                }
             });
-
-            // Making sure that the image was actually downloaded properly
-            // We have seen some cases where Docker Registry API returns 'success' on pull while the image has not been properly downloaded
-            IEnumerable<ImagesListResponse> images = await _dockerClient.Images.ListImagesAsync(new ImagesListParameters { All = true });
-            if (images.All(image => !image.RepoTags.Contains($"{registryWithImageName}:{imageTag}")))
-            {
-                throw new ApplicationException("CreateImageAsync is completed but the image doesn't exist");
-            }
-
+            
             _logger.LogEvent(MetricConstants.PullImage, null, new Dictionary<string, double>
                 {
                     { MetricConstants.DownloadDurationInMilliseconds, logReporter.DownloadSummary?.DurationInMilliseconds ?? 0d },

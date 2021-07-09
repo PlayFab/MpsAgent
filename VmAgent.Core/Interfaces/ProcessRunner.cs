@@ -92,7 +92,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         private (string, string) GetExecutableAndArguments(SessionHostsStartInfo sessionHostsStartInfo, int instanceNumber)
         {
-            string[] parts = sessionHostsStartInfo.StartGameCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var command = sessionHostsStartInfo.StartGameCommand.Replace("\\ ", "\\SPACE");
+            string[] parts = command
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => part.Replace("\\SPACE", " "))
+                .ToArray();
             string localPathForAsset0 = sessionHostsStartInfo.UseReadOnlyAssets ? _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, 0) :
                 _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(instanceNumber, 0);
 

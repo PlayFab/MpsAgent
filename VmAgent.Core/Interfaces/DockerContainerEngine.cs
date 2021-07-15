@@ -196,9 +196,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 MetricConstants.ContainerStartTime);
             _logger.LogInformation($"Container {containerId} start completed.");
         }
-
-
-
+        
         private class LogReporter : IProgress<JSONMessage>
         {
             private readonly ConcurrentDictionary<string, LayerProgress> _layerProgresses = new ConcurrentDictionary<string, LayerProgress>();
@@ -248,7 +246,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     default:
                         break;
                 }
-                _logger.LogVerbose(value.ProgressMessage);
+
+                _logger.LogVerbose(value.ToJsonString());
 
             }
 
@@ -506,42 +505,45 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 _logger.LogInformation($"Docker container {id} not found.");
             }
 
-            try
+            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
             {
-                string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
-                bool dumpFound = false;
                 try
                 {
-                    if (!_systemOperations.IsDirectoryEmpty(dumpFolder))
+                    string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
+                    bool dumpFound = false;
+                    try
                     {
-                        dumpFound = true;
+                        if (!_systemOperations.IsDirectoryEmpty(dumpFolder))
+                        {
+                            dumpFound = true;
+                        }
+                        else
+                        {
+                            // If dumps folder is empty, delete it
+                            _systemOperations.DeleteDirectoryIfExists(dumpFolder);
+                        }
                     }
-                    else
-                    {
-                        // If dumps folder is empty, delete it
-                        _systemOperations.DeleteDirectoryIfExists(dumpFolder);
-                    }
-                }
-                catch (DirectoryNotFoundException) { }
+                    catch (DirectoryNotFoundException) { }
 
-                if (dumpFound)
-                {
-                    bool shouldDeleteDump = sessionHostManager.SignalDumpFoundAndCheckIfThrottled(id);
-                    if (shouldDeleteDump)
+                    if (dumpFound)
                     {
-                        _systemOperations.DeleteDirectoryIfExists(dumpFolder);
-                        _systemOperations.CreateDirectory(dumpFolder);
-                        string readmePath = Path.Combine(dumpFolder, "readme.txt");
-                        _systemOperations.FileWriteAllText(readmePath, $"The contents of \"{VmDirectories.GameDumpsFolderName}\" have been deleted due to throttling.");
+                        bool shouldDeleteDump = sessionHostManager.SignalDumpFoundAndCheckIfThrottled(id);
+                        if (shouldDeleteDump)
+                        {
+                            _systemOperations.DeleteDirectoryIfExists(dumpFolder);
+                            _systemOperations.CreateDirectory(dumpFolder);
+                            string readmePath = Path.Combine(dumpFolder, "readme.txt");
+                            _systemOperations.FileWriteAllText(readmePath, $"The contents of \"{VmDirectories.GameDumpsFolderName}\" have been deleted due to throttling.");
+                        }
                     }
                 }
-            }
-            catch (IOException ex)
-            {
-                // I think we'd only end up here if a game server spun up a background process that had a lock on some files
-                // in the dumps folder, and then the game server crashed. The background process could theoretically still be
-                // running, which would prevent us from processing the dump files.
-                _logger.LogWarning($"Unable to process dump files: {ex}");
+                catch (IOException ex)
+                {
+                    // I think we'd only end up here if a game server spun up a background process that had a lock on some files
+                    // in the dumps folder, and then the game server crashed. The background process could theoretically still be
+                    // running, which would prevent us from processing the dump files.
+                    _logger.LogWarning($"Unable to process dump files: {ex}");
+                }
             }
         }
 
@@ -607,19 +609,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             await retryPolicy.ExecuteAsync(async () =>
             {
                 await _dockerClient.Images.CreateImageAsync(
-                new ImagesCreateParameters { FromImage = registryWithImageName, Tag = imageTag },
-                new AuthConfig() { Username = username, Password = password },
-                logReporter).ConfigureAwait(false);
+                    new ImagesCreateParameters {FromImage = registryWithImageName, Tag = imageTag},
+                    new AuthConfig() {Username = username, Password = password},
+                    logReporter);
+
+                // Making sure that the image was actually downloaded properly
+                // We have seen some cases where Docker Registry API returns 'success' on pull while the image has not been properly downloaded
+                IEnumerable<ImagesListResponse> images = await _dockerClient.Images.ListImagesAsync(new ImagesListParameters { All = true });
+                if (images.All(image => !image.RepoTags.Contains($"{registryWithImageName}:{imageTag}")))
+                {
+                    throw new ApplicationException("CreateImageAsync is completed but the image doesn't exist");
+                }
             });
-
-            // Making sure that the image was actually downloaded properly
-            // We have seen some cases where Docker Registry API returns 'success' on pull while the image has not been properly downloaded
-            IEnumerable<ImagesListResponse> images = await _dockerClient.Images.ListImagesAsync(new ImagesListParameters { All = true });
-            if (images.All(image => !image.RepoTags.Contains($"{registryWithImageName}:{imageTag}")))
-            {
-                throw new ApplicationException("CreateImageAsync is completed but the image doesn't exist");
-            }
-
+            
             _logger.LogEvent(MetricConstants.PullImage, null, new Dictionary<string, double>
                 {
                     { MetricConstants.DownloadDurationInMilliseconds, logReporter.DownloadSummary?.DurationInMilliseconds ?? 0d },

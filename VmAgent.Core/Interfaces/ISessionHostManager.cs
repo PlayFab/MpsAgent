@@ -12,6 +12,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     {
         bool LinuxContainersOnWindows { get; }
         int StateChangeSequenceNumber { get; }
+
+        VmAgentSettings VmAgentSettings { get; }
+
         void Assign(SessionHostsStartInfo request);
 
         bool TrySetGoalStateInfo(string sessionHostId, SessionHostGoalStateInfo goalStateInfo);

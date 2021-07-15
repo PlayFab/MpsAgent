@@ -10,7 +10,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     {
         void Create(int instanceNumber, string sessionHostUniqueId, string agentEndpoint, VmConfiguration vmConfiguration, string logFoldeId);
 
-        IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId);
+        IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId, VmAgentSettings agentSettings);
 
         IList<PortMapping> GetPortMappings(int instanceNumber);
     }

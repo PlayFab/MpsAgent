@@ -44,9 +44,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostUniqueId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
 
-            // Create the dumps folder as a subfolder of the logs folder
-            string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
-            _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
+            {
+                // Create the dumps folder as a subfolder of the logs folder
+                string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+                _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+            }
 
             ISessionHostConfiguration sessionHostConfiguration = new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations, sessionHostStartInfo);
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber);
@@ -57,7 +60,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             processStartInfo.FileName = executableFileName;
             processStartInfo.Arguments = arguments;
             processStartInfo.WorkingDirectory = sessionHostStartInfo.GameWorkingDirectory ?? Path.GetDirectoryName(executableFileName);
-            processStartInfo.Environment.AddRange(sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, sessionHostUniqueId));
+            processStartInfo.Environment.AddRange(sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, sessionHostUniqueId, sessionHostManager.VmAgentSettings));
 
             _logger.LogInformation($"Starting process for session host with instance number {instanceNumber} and process info: FileName - {executableFileName}, Args - {arguments}.");
 

@@ -373,13 +373,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             string logFolderId = _systemOperations.NewGuid().ToString("D");
             ISessionHostConfiguration sessionHostConfiguration = new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient, sessionHostStartInfo);
             IList<PortMapping> portMappings = sessionHostConfiguration.GetPortMappings(instanceNumber);
-            List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId)
+            List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId, sessionHostManager.VmAgentSettings)
                 .Select(x => $"{x.Key}={x.Value}").ToList();
 
             string dockerId = await CreateContainer(
                 imageName,
                 environmentValues,
-                GetVolumeBindings(sessionHostStartInfo, instanceNumber, logFolderId),
+                GetVolumeBindings(sessionHostStartInfo, instanceNumber, logFolderId, sessionHostManager.VmAgentSettings),
                 portMappings,
                 GetStartGameCmd(sessionHostStartInfo),
                 sessionHostStartInfo.HostConfigOverrides,
@@ -418,7 +418,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return sessionHost;
         }
 
-        private IList<string> GetVolumeBindings(SessionHostsStartInfo request, int sessionHostInstance, string logFolderId)
+        private IList<string> GetVolumeBindings(SessionHostsStartInfo request, int sessionHostInstance, string logFolderId, VmAgentSettings agentSettings)
         {
             List<string> volumeBindings = new List<string>();
             if (request.AssetDetails?.Length > 0)
@@ -436,9 +436,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
 
-            // Create the dumps folder as a subfolder of the logs folder
-            string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
-            _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+            if (agentSettings.EnableCrashDumpProcessing)
+            {
+                // Create the dumps folder as a subfolder of the logs folder
+                string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+                _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+            }
 
             // Set up the log folder. Maps D:\GameLogs\{logFolderId} on the container host to C:\GameLogs on the container.
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.

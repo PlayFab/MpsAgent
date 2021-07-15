@@ -84,21 +84,18 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             _sessionHostsStartInfo = sessionHostsStartInfo;
         }
 
-        public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId)
+        public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId, VmAgentSettings agentSettings)
         {
             VmConfiguration.ParseAssignmentId(_sessionHostsStartInfo.AssignmentId, out Guid titleId, out Guid deploymentId, out string region);
 
             // Note that most of these are being provided based on customer request
-            return new Dictionary<string, string>()
+            var environmentVariables = new Dictionary<string, string>()
             {
                 {
                     ConfigFileEnvVariable, GetGsdkConfigFilePath(_sessionHostsStartInfo.AssignmentId, instanceNumber)
                 },
                 {
                     LogsDirectoryEnvVariable, GetLogFolder(logFolderId, VmConfiguration)
-                },
-                {
-                    DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration)
                 },
                 {
                     SharedContentFolderEnvVariable, GetSharedContentFolderPath()
@@ -125,6 +122,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     PublicIPv4AddressEnvVariable, _sessionHostsStartInfo.PublicIpV4Address
                 }
             };
+
+            if (agentSettings.EnableCrashDumpProcessing)
+            {
+                environmentVariables.Add(DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration));
+            }
+
+            return environmentVariables;
         }
 
         public void Create(int instanceNumber, string sessionHostUniqueId, string agentEndpoint, VmConfiguration vmConfiguration, string logFolderId)

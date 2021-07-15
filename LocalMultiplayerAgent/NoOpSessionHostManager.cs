@@ -156,6 +156,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
         public bool SignalDumpFoundAndCheckIfThrottled(string sessionHostId)
         {
+            // don't do anything to signal that a dump was found,
+            // and don't throttle
             return false;
         }
     }

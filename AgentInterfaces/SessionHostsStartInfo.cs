@@ -131,6 +131,27 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Flag to indicate the build should not replicate assets for each of the session hosts. 
         /// </summary>
         public bool UseReadOnlyAssets { get; set; }
+
+        /// <summary>
+        /// Reference to the assets that contain the monitoring bits, to be used by the Performance profilers
+        /// </summary>
+        public AssetDetail MonitoringAssetReference { get; set; }
+
+        /// <summary>
+        /// Montioring application installation script. 
+        /// </summary>
+        public string MonitortingInstallationScript { get; set; }
+
+        /// <summary>
+        /// Monitoring application running script. 
+        /// </summary>
+        public string MonitoringExecutionScript { get; set; }
+
+        /// <summary>
+        /// Indicates whether the monitoring application should be run in on demand mode or from the beggining 
+        /// </summary>
+        public bool MonitoringApplicationRunOnDemand { get; set; }
+
     }
 
     public class LogUploadParameters

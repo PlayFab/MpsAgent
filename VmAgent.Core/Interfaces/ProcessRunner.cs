@@ -10,34 +10,25 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Linq;
     using System.Threading.Tasks;
     using AgentInterfaces;
-    using Extensions;
+    using Microsoft.Azure.Gaming.VmAgent.ContainerEngines;
     using Model;
-    using Newtonsoft.Json;
     using VmAgent.Extensions;
 
-    public class ProcessRunner : ISessionHostRunner
+    public class ProcessRunner : BaseSessionHostRunner
     {
-        private readonly MultiLogger _logger;
-
-        private readonly VmConfiguration _vmConfiguration;
-
         private readonly IProcessWrapper _processWrapper;
-
-        private readonly ISystemOperations _systemOperations;
 
         public ProcessRunner(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
             ISystemOperations systemOperations,
             IProcessWrapper processWrapper = null)
+            : base (vmConfiguration, logger, systemOperations)
         {
-            _logger = logger;
-            _vmConfiguration = vmConfiguration;
-            _systemOperations = systemOperations;
             _processWrapper = processWrapper;
         }
 
-        public Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
+        public override Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
         {
             SessionHostsStartInfo sessionHostStartInfo = gameResourceDetails.SessionHostsStartInfo;
             string sessionHostUniqueId = Guid.NewGuid().ToString("D");
@@ -83,52 +74,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(sessionHost);
         }
 
-        public Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
         {
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // For now we don't do anything here. If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
 
-            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
-            {
-                try
-                {
-                    string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
-                    bool dumpFound = false;
-                    try
-                    {
-                        if (!_systemOperations.IsDirectoryEmpty(dumpFolder))
-                        {
-                            dumpFound = true;
-                        }
-                        else
-                        {
-                            // If dumps folder is empty, delete it
-                            _systemOperations.DeleteDirectoryIfExists(dumpFolder);
-                        }
-                    }
-                    catch (DirectoryNotFoundException) { }
-
-                    if (dumpFound)
-                    {
-                        bool shouldDeleteDump = sessionHostManager.SignalDumpFoundAndCheckIfThrottled(id);
-                        if (shouldDeleteDump)
-                        {
-                            _systemOperations.DeleteDirectoryIfExists(dumpFolder);
-                            _systemOperations.CreateDirectory(dumpFolder);
-                            string readmePath = Path.Combine(dumpFolder, "readme.txt");
-                            _systemOperations.FileWriteAllText(readmePath, $"The contents of \"{VmDirectories.GameDumpsFolderName}\" have been deleted due to throttling.");
-                        }
-                    }
-                }
-                catch (IOException ex)
-                {
-                    // I think we'd only end up here if a game server spun up a background process that had a lock on some files
-                    // in the dumps folder, and then the game server crashed. The background process could theoretically still be
-                    // running, which would prevent us from processing the dump files.
-                    _logger.LogWarning($"Unable to process dump files: {ex}");
-                }
-            }
+            ProcessDumps(id, logsFolder, sessionHostManager);
 
             return Task.CompletedTask;
         }
@@ -148,7 +100,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return (executablePath, args);
         }
 
-        public Task<bool> TryDelete(string id)
+        public override Task<bool> TryDelete(string id)
         {
             // TODO: We do not have a good way of cross-platform support to get all children of that process and then kill all of them.
             // We recommend that developers write a bootstrapper that waits for all underlying processes to exit and use the bootstrapper as the startup executable.
@@ -165,30 +117,30 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(false);
         }
 
-        public Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             // no-op
             return Task.CompletedTask;
         }
 
-        public Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             // no-op
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<string>> List()
+        public override Task<IEnumerable<string>> List()
         {
             return Task.FromResult(_processWrapper.List().Select(x => x.ToString()));
         }
 
-        public Task WaitOnServerExit(string containerId)
+        public override Task WaitOnServerExit(string containerId)
         {
             _processWrapper.WaitForProcessExit(int.Parse(containerId));
             return Task.CompletedTask;
         }
 
-        public string GetVmAgentIpAddress()
+        public override string GetVmAgentIpAddress()
         {
             return "127.0.0.1";
         }

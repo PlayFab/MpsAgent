@@ -17,14 +17,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
     using System.Diagnostics;
     using System.IO;
     using System.Text;
-    using System.Threading;
     using Core;
     using Core.Interfaces;
 
     using Microsoft.Azure.Gaming.AgentInterfaces;
     using Polly;
 
-    public class DockerContainerEngine : ISessionHostRunner
+    public class DockerContainerEngine : BaseSessionHostRunner
     {
         private const string DockerWindowsNamedPipe = "npipe://./pipe/docker_engine";
 
@@ -32,12 +31,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         private const string DockerApiVersion = "1.25";
         private static readonly ContainerStartParameters DefaultStartParameters = new ContainerStartParameters();
-
-        private readonly MultiLogger _logger;
-
-        private readonly VmConfiguration _vmConfiguration;
-
-        private readonly Core.Interfaces.ISystemOperations _systemOperations;
 
         private readonly double _createImageRetryTimeMins = 5.0;
 
@@ -58,11 +51,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             MultiLogger logger,
             Core.Interfaces.ISystemOperations systemOperations,
             IDockerClient dockerClient = null)
+            : base (vmConfiguration, logger, systemOperations)
         {
             // This can be moved to dependency injection pattern when unit tests are added for this class.
-            _logger = logger;
-            _vmConfiguration = vmConfiguration;
-            _systemOperations = systemOperations;
             _dockerClient = dockerClient ?? CreateDockerClient();
         }
 
@@ -118,7 +109,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         ///    }
         /// ]
         /// </remarks>
-        public string GetVmAgentIpAddress()
+        public override string GetVmAgentIpAddress()
         {
             try
             {
@@ -137,7 +128,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             }
         }
 
-        public async Task WaitOnServerExit(string containerId)
+        public override async Task WaitOnServerExit(string containerId)
         {
             ContainerWaitResponse containerWaitResponse = await _dockerClient.Containers.WaitContainerAsync(containerId).ConfigureAwait(false);
             _logger.LogInformation($"Container {containerId} exited with exit code {containerWaitResponse.StatusCode}.");
@@ -351,7 +342,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         /// and then re-use for container recycling.
         /// </param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
+        public override async Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
         {
             // The current Docker client doesn't yet allow specifying a local name for the image.
             // It is stored with as the remote path name. Thus, the parameter to CreateAndStartContainers
@@ -462,7 +453,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return volumeBindings;
         }
 
-        public async Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override async Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
         {
             try
             {
@@ -508,49 +499,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 _logger.LogInformation($"Docker container {id} not found.");
             }
 
-            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
-            {
-                try
-                {
-                    string dumpFolder = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName);
-                    bool dumpFound = false;
-                    try
-                    {
-                        if (!_systemOperations.IsDirectoryEmpty(dumpFolder))
-                        {
-                            dumpFound = true;
-                        }
-                        else
-                        {
-                            // If dumps folder is empty, delete it
-                            _systemOperations.DeleteDirectoryIfExists(dumpFolder);
-                        }
-                    }
-                    catch (DirectoryNotFoundException) { }
-
-                    if (dumpFound)
-                    {
-                        bool shouldDeleteDump = sessionHostManager.SignalDumpFoundAndCheckIfThrottled(id);
-                        if (shouldDeleteDump)
-                        {
-                            _systemOperations.DeleteDirectoryIfExists(dumpFolder);
-                            _systemOperations.CreateDirectory(dumpFolder);
-                            string readmePath = Path.Combine(dumpFolder, "readme.txt");
-                            _systemOperations.FileWriteAllText(readmePath, $"The contents of \"{VmDirectories.GameDumpsFolderName}\" have been deleted due to throttling.");
-                        }
-                    }
-                }
-                catch (IOException ex)
-                {
-                    // I think we'd only end up here if a game server spun up a background process that had a lock on some files
-                    // in the dumps folder, and then the game server crashed. The background process could theoretically still be
-                    // running, which would prevent us from processing the dump files.
-                    _logger.LogWarning($"Unable to process dump files: {ex}");
-                }
-            }
+            ProcessDumps(id, logsFolder, sessionHostManager);
         }
 
-        public async Task<bool> TryDelete(string id)
+        public override async Task<bool> TryDelete(string id)
         {
             bool result = true;
             try
@@ -571,7 +523,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return result;
         }
 
-        public async Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override async Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             ContainerImageDetails imageDetails = sessionHostsStartInfo.ImageDetails;
             string imageName = $"{imageDetails.Registry}/{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
@@ -587,7 +539,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             }
         }
 
-        public async Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override async Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             string registryWithImageName = $"{sessionHostsStartInfo.ImageDetails.Registry}/{sessionHostsStartInfo.ImageDetails.ImageName}";
             string imageTag = sessionHostsStartInfo.ImageDetails.ImageTag;
@@ -634,7 +586,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             );
         }
 
-        public async Task<IEnumerable<string>> List()
+        public override async Task<IEnumerable<string>> List()
         {
             return (await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters())).Select(x => x.ID);
         }

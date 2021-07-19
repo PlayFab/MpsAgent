@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     // I think we'd only end up here if a game server spun up a background process that had a lock on some files
                     // in the dumps folder, and then the game server crashed. The background process could theoretically still be
                     // running, which would prevent us from processing the dump files.
-                    _logger.LogWarning($"Unable to process dump files: {ex}");
+                    _logger.LogWarning($"Unable to process dump files on session host {id}: {ex}");
                 }
             }
         }

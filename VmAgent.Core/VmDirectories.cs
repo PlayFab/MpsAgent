@@ -43,9 +43,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public string AgentStateFile { get; }
 
         public string AgentStateTempFile { get; }
-        
+
         public string HostConfigOverrideFile { get; }
-        
+
         public string AgentLogsFolder { get; }
 
         // A folder that is accessible by all games on the Vm, potentially for content that's downloaded once but used multiple times.
@@ -56,6 +56,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public string GameLogsRootFolderVm { get; }
 
         public string GameLogsRootFolderContainer { get; set; }
+
+        public const string GameDumpsFolderName = "_dumps";
 
         public string AssetExtractionRootFolderVm { get; }
 

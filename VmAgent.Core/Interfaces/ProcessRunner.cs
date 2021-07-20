@@ -10,39 +10,37 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Linq;
     using System.Threading.Tasks;
     using AgentInterfaces;
-    using Extensions;
+    using Microsoft.Azure.Gaming.VmAgent.ContainerEngines;
     using Model;
-    using Newtonsoft.Json;
     using VmAgent.Extensions;
 
-    public class ProcessRunner : ISessionHostRunner
+    public class ProcessRunner : BaseSessionHostRunner
     {
-        private readonly MultiLogger _logger;
-
-        private readonly VmConfiguration _vmConfiguration;
-
         private readonly IProcessWrapper _processWrapper;
-
-        private readonly ISystemOperations _systemOperations;
 
         public ProcessRunner(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
             ISystemOperations systemOperations,
             IProcessWrapper processWrapper = null)
+            : base (vmConfiguration, logger, systemOperations)
         {
-            _logger = logger;
-            _vmConfiguration = vmConfiguration;
-            _systemOperations = systemOperations;
             _processWrapper = processWrapper;
         }
 
-        public Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
+        public override Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
         {
             SessionHostsStartInfo sessionHostStartInfo = gameResourceDetails.SessionHostsStartInfo;
             string sessionHostUniqueId = Guid.NewGuid().ToString("D");
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostUniqueId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
+
+            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
+            {
+                // Create the dumps folder as a subfolder of the logs folder
+                string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+                _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+            }
 
             ISessionHostConfiguration sessionHostConfiguration = new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations, sessionHostStartInfo);
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber);
@@ -53,7 +51,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             processStartInfo.FileName = executableFileName;
             processStartInfo.Arguments = arguments;
             processStartInfo.WorkingDirectory = sessionHostStartInfo.GameWorkingDirectory ?? Path.GetDirectoryName(executableFileName);
-            processStartInfo.Environment.AddRange(sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, sessionHostUniqueId));
+            processStartInfo.Environment.AddRange(sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, sessionHostUniqueId, sessionHostManager.VmAgentSettings));
 
             _logger.LogInformation($"Starting process for session host with instance number {instanceNumber} and process info: FileName - {executableFileName}, Args - {arguments}.");
 
@@ -76,16 +74,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(sessionHost);
         }
 
-        public Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
         {
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // For now we don't do anything here. If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
 
-            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
-            {
-                // TODO
-            }
+            ProcessDumps(id, logsFolder, sessionHostManager);
 
             return Task.CompletedTask;
         }
@@ -105,7 +100,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return (executablePath, args);
         }
 
-        public Task<bool> TryDelete(string id)
+        public override Task<bool> TryDelete(string id)
         {
             // TODO: We do not have a good way of cross-platform support to get all children of that process and then kill all of them.
             // We recommend that developers write a bootstrapper that waits for all underlying processes to exit and use the bootstrapper as the startup executable.
@@ -122,30 +117,30 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(false);
         }
 
-        public Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             // no-op
             return Task.CompletedTask;
         }
 
-        public Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             // no-op
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<string>> List()
+        public override Task<IEnumerable<string>> List()
         {
             return Task.FromResult(_processWrapper.List().Select(x => x.ToString()));
         }
 
-        public Task WaitOnServerExit(string containerId)
+        public override Task WaitOnServerExit(string containerId)
         {
             _processWrapper.WaitForProcessExit(int.Parse(containerId));
             return Task.CompletedTask;
         }
 
-        public string GetVmAgentIpAddress()
+        public override string GetVmAgentIpAddress()
         {
             return "127.0.0.1";
         }

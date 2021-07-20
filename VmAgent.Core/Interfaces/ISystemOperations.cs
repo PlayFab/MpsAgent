@@ -41,6 +41,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         void DeleteDirectoryIfExists(string pathToDirectory);
 
+        bool IsDirectoryEmpty(string pathToDirectory);
+
         void DeleteFile(string filePath);
 
         long FileInfoLength(string path);

@@ -17,14 +17,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
     using System.Diagnostics;
     using System.IO;
     using System.Text;
-    using System.Threading;
     using Core;
     using Core.Interfaces;
 
     using Microsoft.Azure.Gaming.AgentInterfaces;
     using Polly;
 
-    public class DockerContainerEngine : ISessionHostRunner
+    public class DockerContainerEngine : BaseSessionHostRunner
     {
         private const string DockerWindowsNamedPipe = "npipe://./pipe/docker_engine";
 
@@ -32,12 +31,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         private const string DockerApiVersion = "1.25";
         private static readonly ContainerStartParameters DefaultStartParameters = new ContainerStartParameters();
-
-        private readonly MultiLogger _logger;
-
-        private readonly VmConfiguration _vmConfiguration;
-
-        private readonly Core.Interfaces.ISystemOperations _systemOperations;
 
         private readonly double _createImageRetryTimeMins = 5.0;
 
@@ -58,11 +51,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             MultiLogger logger,
             Core.Interfaces.ISystemOperations systemOperations,
             IDockerClient dockerClient = null)
+            : base (vmConfiguration, logger, systemOperations)
         {
-            // This can be moved to dependency injection pattern when unit tests are added for this class.
-            _logger = logger;
-            _vmConfiguration = vmConfiguration;
-            _systemOperations = systemOperations;
             _dockerClient = dockerClient ?? CreateDockerClient();
         }
 
@@ -118,7 +108,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         ///    }
         /// ]
         /// </remarks>
-        public string GetVmAgentIpAddress()
+        public override string GetVmAgentIpAddress()
         {
             try
             {
@@ -137,7 +127,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             }
         }
 
-        public async Task WaitOnServerExit(string containerId)
+        public override async Task WaitOnServerExit(string containerId)
         {
             ContainerWaitResponse containerWaitResponse = await _dockerClient.Containers.WaitContainerAsync(containerId).ConfigureAwait(false);
             _logger.LogInformation($"Container {containerId} exited with exit code {containerWaitResponse.StatusCode}.");
@@ -351,7 +341,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         /// and then re-use for container recycling.
         /// </param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
+        public override async Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager)
         {
             // The current Docker client doesn't yet allow specifying a local name for the image.
             // It is stored with as the remote path name. Thus, the parameter to CreateAndStartContainers
@@ -373,13 +363,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             string logFolderId = _systemOperations.NewGuid().ToString("D");
             ISessionHostConfiguration sessionHostConfiguration = new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient, sessionHostStartInfo);
             IList<PortMapping> portMappings = sessionHostConfiguration.GetPortMappings(instanceNumber);
-            List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId)
+            List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId, sessionHostManager.VmAgentSettings)
                 .Select(x => $"{x.Key}={x.Value}").ToList();
 
             string dockerId = await CreateContainer(
                 imageName,
                 environmentValues,
-                GetVolumeBindings(sessionHostStartInfo, instanceNumber, logFolderId),
+                GetVolumeBindings(sessionHostStartInfo, instanceNumber, logFolderId, sessionHostManager.VmAgentSettings),
                 portMappings,
                 GetStartGameCmd(sessionHostStartInfo),
                 sessionHostStartInfo.HostConfigOverrides,
@@ -418,7 +408,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return sessionHost;
         }
 
-        private IList<string> GetVolumeBindings(SessionHostsStartInfo request, int sessionHostInstance, string logFolderId)
+        private IList<string> GetVolumeBindings(SessionHostsStartInfo request, int sessionHostInstance, string logFolderId, VmAgentSettings agentSettings)
         {
             List<string> volumeBindings = new List<string>();
             if (request.AssetDetails?.Length > 0)
@@ -435,6 +425,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // The folder needs to exist before the mount can happen.
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
+
+            if (agentSettings.EnableCrashDumpProcessing)
+            {
+                // Create the dumps folder as a subfolder of the logs folder
+                string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+                _systemOperations.CreateDirectory(dumpFolderPathOnVm);
+            }
 
             // Set up the log folder. Maps D:\GameLogs\{logFolderId} on the container host to C:\GameLogs on the container.
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.
@@ -455,15 +452,15 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return volumeBindings;
         }
 
-        public async Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override async Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
         {
             try
             {
                 _logger.LogVerbose($"Collecting logs for container {id}.");
                 string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
-                
+
                 if (sessionHostManager.LinuxContainersOnWindows)
-                {   
+                {
                     // we do this for lcow since containers are running on a Hyper-V Linux machine
                     // which the host Windows machine does not have "copy" access to, to get the logs with a FileCopy
                     // this is only supposed to run on LocalMultiplayerAgent running on lcow
@@ -493,7 +490,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     {
                         _logger.LogVerbose($"Copying log file {dockerLogsPath} for container {id} to {destinationFileName}.");
                         _systemOperations.FileCopy(dockerLogsPath, destinationFileName);
-                    }   
+                    }
                 }
             }
             catch (DockerContainerNotFoundException)
@@ -501,13 +498,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 _logger.LogInformation($"Docker container {id} not found.");
             }
 
-            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
-            {
-                // TODO
-            }
+            ProcessDumps(id, logsFolder, sessionHostManager);
         }
 
-        public async Task<bool> TryDelete(string id)
+        public override async Task<bool> TryDelete(string id)
         {
             bool result = true;
             try
@@ -528,7 +522,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return result;
         }
 
-        public async Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override async Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             ContainerImageDetails imageDetails = sessionHostsStartInfo.ImageDetails;
             string imageName = $"{imageDetails.Registry}/{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
@@ -544,7 +538,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             }
         }
 
-        public async Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
+        public override async Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             string registryWithImageName = $"{sessionHostsStartInfo.ImageDetails.Registry}/{sessionHostsStartInfo.ImageDetails.ImageName}";
             string imageTag = sessionHostsStartInfo.ImageDetails.ImageTag;
@@ -591,7 +585,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             );
         }
 
-        public async Task<IEnumerable<string>> List()
+        public override async Task<IEnumerable<string>> List()
         {
             return (await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters())).Select(x => x.ID);
         }

@@ -53,6 +53,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         /// </summary>
         private const string LogsDirectoryEnvVariable = "PF_SERVER_LOG_DIRECTORY";
 
+        /// <summary>
+        /// An environment variable capturing the crash dumps folder for a game server.
+        /// This folder is a subfolder of PF_SERVER_LOG_DIRECTORY.
+        /// </summary>
+        private const string DumpsDirectoryEnvVariable = "PF_SERVER_DUMP_DIRECTORY";
+
         // Not sure if this is needed yet.
         private const string DefaultExePath = @"C:\app\";
 
@@ -78,12 +84,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             _sessionHostsStartInfo = sessionHostsStartInfo;
         }
 
-        public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId)
+        public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId, VmAgentSettings agentSettings)
         {
             VmConfiguration.ParseAssignmentId(_sessionHostsStartInfo.AssignmentId, out Guid titleId, out Guid deploymentId, out string region);
 
             // Note that most of these are being provided based on customer request
-            return new Dictionary<string, string>()
+            var environmentVariables = new Dictionary<string, string>()
             {
                 {
                     ConfigFileEnvVariable, GetGsdkConfigFilePath(_sessionHostsStartInfo.AssignmentId, instanceNumber)
@@ -116,6 +122,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     PublicIPv4AddressEnvVariable, _sessionHostsStartInfo.PublicIpV4Address
                 }
             };
+
+            if (agentSettings.EnableCrashDumpProcessing)
+            {
+                environmentVariables.Add(DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration));
+            }
+
+            return environmentVariables;
         }
 
         public void Create(int instanceNumber, string sessionHostUniqueId, string agentEndpoint, VmConfiguration vmConfiguration, string logFolderId)
@@ -162,6 +175,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         }
 
         protected abstract string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration);
+
+        protected string GetDumpFolder(string logFolderId, VmConfiguration vmConfiguration)
+        {
+            return Path.Combine(GetLogFolder(logFolderId, vmConfiguration), VmDirectories.GameDumpsFolderName);
+        }
 
         protected abstract string GetSharedContentFolder(VmConfiguration vmConfiguration);
 

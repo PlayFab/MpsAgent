@@ -11,6 +11,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
     using Microsoft.Azure.Gaming.AgentInterfaces;
     using Microsoft.Azure.Gaming.VmAgent.Core;
     using System.IO;
+    using System;
 
     public abstract class BaseSessionHostRunner : ISessionHostRunner
     {
@@ -86,6 +87,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     // in the dumps folder, and then the game server crashed. The background process could theoretically still be
                     // running, which would prevent us from processing the dump files.
                     _logger.LogWarning($"Unable to process dump files on session host {id}: {ex}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Unexpected error processing dump files on session host {id}: {ex}");
                 }
             }
         }

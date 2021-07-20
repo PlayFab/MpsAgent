@@ -53,7 +53,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             IDockerClient dockerClient = null)
             : base (vmConfiguration, logger, systemOperations)
         {
-            // This can be moved to dependency injection pattern when unit tests are added for this class.
             _dockerClient = dockerClient ?? CreateDockerClient();
         }
 

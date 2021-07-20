@@ -71,7 +71,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public bool IsDirectoryEmpty(string pathToDirectory)
         {
-            return Directory.EnumerateFileSystemEntries(pathToDirectory).Any();
+            return !Directory.EnumerateFileSystemEntries(pathToDirectory).Any();
         }
 
         public Stream OpenFileForRead(string filePath)

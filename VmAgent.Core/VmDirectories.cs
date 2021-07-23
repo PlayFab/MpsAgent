@@ -36,8 +36,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
             AgentStateFile = Path.Combine(TempStorageRootVm, "PlayFabVmAgentState");
             AgentStateTempFile = Path.Combine(TempStorageRootVm, "PlayFabVmAgentState.tmp");
-            MonitoringStateFile = Path.Combine(TempStorageRootVm, "PlayfabMonitoringState");
-            MonitoringStateTempFile = Path.Combine(TempStorageRootVm, "PlayfabMonitoringState.tmp");
+            MonitoringStateFile = Path.Combine(TempStorageRootVm, "PlayFabMonitoringState");
+            MonitoringStateTempFile = Path.Combine(TempStorageRootVm, "PlayFabMonitoringState.tmp");
             HostConfigOverrideFile = Path.Combine(TempStorageRootVm, "HostConfigOverride.json");
             AgentLogsFolder = Path.Combine(TempStorageRootVm, "PlayFabVmAgentLogs");
             MonitoringAssetInstallationFolder = Path.Combine(TempStorageRootVm, "MonitoringApplication");

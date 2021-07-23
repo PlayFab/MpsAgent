@@ -138,7 +138,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public AssetDetail MonitoringAssetReference { get; set; }
 
         /// <summary>
-        /// Montioring application installation script. 
+        /// Monitoring application installation script. 
         /// </summary>
         public string MonitortingInstallationScript { get; set; }
 
@@ -148,7 +148,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string MonitoringExecutionScript { get; set; }
 
         /// <summary>
-        /// Indicates whether the monitoring application should be run in on demand mode or from the beggining 
+        /// Indicates whether the monitoring application should be run in on demand mode or from the beginning 
         /// </summary>
         public bool MonitoringApplicationRunOnDemand { get; set; }
 

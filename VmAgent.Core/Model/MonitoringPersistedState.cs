@@ -1,4 +1,4 @@
-﻿namespace VmAgent.Core.Model
+﻿namespace Microsoft.Azure.Gaming.VmAgent.Model
 {
     public enum MonitoringApplicationState
     {

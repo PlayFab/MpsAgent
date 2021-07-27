@@ -105,8 +105,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 string defaultOutputFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 Console.WriteLine($"No output directory specified, defaulting to agent directory");
                 OutputFolder = defaultOutputFolder;
-            } 
+            }
 
+            // on LocalMultiplayerAgent, PublicPort is the same as NodePort
             foreach (var portList in PortMappingsList)
             {
                 foreach (var portInfo in portList)

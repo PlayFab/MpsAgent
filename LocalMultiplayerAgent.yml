@@ -85,11 +85,12 @@ steps:
 
 - task: GitHubRelease@1
   inputs:
-    gitHubConnection: 'MPS_github.com_dgkanatsios'
+    gitHubConnection: 'github.com_dgkanatsios2'
     repositoryName: '$(Build.Repository.Name)'
     action: 'create'
     target: '$(Build.SourceVersion)'
     tagSource: 'userSpecifiedTag'
     tag: '$(release_version)'
     assets: '$(projectName).publish.zip'
-    addChangeLog: true
+    changeLogCompareToRelease: 'lastFullRelease'
+    changeLogType: 'commitBased'

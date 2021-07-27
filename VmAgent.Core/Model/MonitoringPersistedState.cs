@@ -17,7 +17,7 @@
     public class MonitoringPersistedState
     {
         public int MonitoringPID { get; set; }
-        public int RetriyCount { get; set; }
+        public int RetryCount { get; set; }
         public MonitoringApplicationState MonitoringState { get; set; }
     }
 }

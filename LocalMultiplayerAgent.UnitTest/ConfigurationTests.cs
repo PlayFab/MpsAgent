@@ -236,5 +236,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
             };
             new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
         }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void EmptyNodePortInContainerModeShouldFail()
+        {
+            dynamic config = GetValidConfig();            
+            config.RunContainer = true;
+            config.PortMappingsList[0][0].NodePort = 0;
+            MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+
+            settings.SetDefaultsIfNotSpecified();
+            new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+
+        }
     }
 }

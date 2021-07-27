@@ -159,11 +159,19 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
             }
 
             if (_settings.RunContainer) {
-                if (_settings.NodePort == 0)
+                // on LocalMultiplayerAgent, PublicPort is the same as NodePort
+                foreach (var portList in _settings.PortMappingsList)
                 {
-                    Console.WriteLine("No NodePort was specified (and RunContainer is true).");
-                    isSuccess = false;
+                    foreach (var portInfo in portList)
+                    {
+                        if (portInfo.NodePort == 0)
+                        {
+                            Console.WriteLine("No NodePort was specified (and RunContainer is true).");
+                            isSuccess = false;
+                        }
+                    }
                 }
+
             }
 
             return isSuccess;

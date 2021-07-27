@@ -46,8 +46,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
         public ProcessStartParameters ProcessStartParameters { get; set; }
 
         public SessionConfig SessionConfig { get; set; }
-
-        public int NodePort { get; set; }
         
        
 

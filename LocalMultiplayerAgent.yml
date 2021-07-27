@@ -92,5 +92,4 @@ steps:
     tagSource: 'userSpecifiedTag'
     tag: '$(release_version)'
     assets: '$(projectName).publish.zip'
-    changeLogCompareToRelease: 'lastFullRelease'
-    changeLogType: 'commitBased'
+    addChangeLog: false

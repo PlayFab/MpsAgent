@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Azure.Gaming.VmAgent.Model
+﻿namespace VmAgent.Core.Model
 {
     public enum MonitoringApplicationState
     {
@@ -17,6 +17,7 @@
     public class MonitoringPersistedState
     {
         public int MonitoringPID { get; set; }
+        public int RetriyCount { get; set; }
         public MonitoringApplicationState MonitoringState { get; set; }
     }
 }

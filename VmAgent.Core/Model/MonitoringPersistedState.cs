@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace Microsoft.Azure.Gaming.VmAgent.Model
+﻿namespace Microsoft.Azure.Gaming.VmAgent.Model
 {
+    using System;
     public enum MonitoringApplicationState
     {
         Initializing,

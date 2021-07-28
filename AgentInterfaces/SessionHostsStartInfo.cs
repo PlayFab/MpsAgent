@@ -133,25 +133,9 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public bool UseReadOnlyAssets { get; set; }
 
         /// <summary>
-        /// Reference to the assets that contain the monitoring bits, to be used by the Performance profilers
+        /// Configuration object for the monitoring application. 
         /// </summary>
-        public AssetDetail MonitoringAssetReference { get; set; }
-
-        /// <summary>
-        /// Monitoring application installation script. 
-        /// </summary>
-        public string MonitortingInstallationScript { get; set; }
-
-        /// <summary>
-        /// Monitoring application running script. 
-        /// </summary>
-        public string MonitoringExecutionScript { get; set; }
-
-        /// <summary>
-        /// Indicates whether the monitoring application should be run in on demand mode or from the beginning 
-        /// </summary>
-        public bool MonitoringApplicationRunOnDemand { get; set; }
-
+        public MonitoringApplicationConfiguration MonitoringApplicationConfiguration { get; set; }
     }
 
     public class LogUploadParameters
@@ -176,5 +160,28 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Is Windows instrumentation enabled
         /// </summary>
         public bool IsEnabled { get; set; }
+    }
+
+    public class MonitoringApplicationConfiguration
+    {
+        /// <summary>
+        /// Reference to the assets that contain the monitoring bits, to be used by the Performance profilers
+        /// </summary>
+        public AssetDetail MonitoringAssetReference { get; set; }
+
+        /// <summary>
+        /// Monitoring application installation script. 
+        /// </summary>
+        public string MonitortingInstallationScript { get; set; }
+
+        /// <summary>
+        /// Monitoring application running script. 
+        /// </summary>
+        public string MonitoringExecutionScript { get; set; }
+
+        /// <summary>
+        /// Indicates whether the monitoring application should be run in on demand mode or from the beginning 
+        /// </summary>
+        public bool MonitoringApplicationRunOnDemand { get; set; }
     }
 }

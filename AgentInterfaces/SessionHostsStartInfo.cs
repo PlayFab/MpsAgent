@@ -185,9 +185,9 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public bool RunOnDemand { get; set; }
 
         /// <summary>
-        /// If the monitoring application is to be run from the beggining, for how long should it run.
+        /// If the monitoring application is to be run from the beginning, for how long should it run.
         /// -1 means that it should run until the vm gets unassigned.
         /// </summary>
-        public int OnStartRuntime { get; set; } = -1;
+        public TimeSpan? OnStartRuntime { get; set; }
     }
 }

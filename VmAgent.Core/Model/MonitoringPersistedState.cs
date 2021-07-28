@@ -12,7 +12,6 @@
         Executing,
         ExecutionFailure,
         ExecutionComplete
-
     }
     public class MonitoringPersistedState
     {

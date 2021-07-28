@@ -167,21 +167,27 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// <summary>
         /// Reference to the assets that contain the monitoring bits, to be used by the Performance profilers
         /// </summary>
-        public AssetDetail MonitoringAssetReference { get; set; }
+        public AssetDetail AssetReference { get; set; }
 
         /// <summary>
         /// Monitoring application installation script. 
         /// </summary>
-        public string MonitortingInstallationScript { get; set; }
+        public string InstallationScript { get; set; }
 
         /// <summary>
         /// Monitoring application running script. 
         /// </summary>
-        public string MonitoringExecutionScript { get; set; }
+        public string ExecutionScript { get; set; }
 
         /// <summary>
         /// Indicates whether the monitoring application should be run in on demand mode or from the beginning 
         /// </summary>
-        public bool MonitoringApplicationRunOnDemand { get; set; }
+        public bool RunOnDemand { get; set; }
+
+        /// <summary>
+        /// If the monitoring application is to be run from the beginning, for how long should it run.
+        /// null means that it should run until the vm gets unassigned.
+        /// </summary>
+        public TimeSpan? OnStartRuntime { get; set; }
     }
 }

@@ -80,8 +80,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             // For now we don't do anything here. If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
 
-            ProcessDumps(id, logsFolder, sessionHostManager);
-
             return Task.CompletedTask;
         }
 

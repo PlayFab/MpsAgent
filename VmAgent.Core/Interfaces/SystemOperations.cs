@@ -4,7 +4,9 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using Mono.Unix;
+    using Mono.Unix.Native;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.IO.Compression;
@@ -14,13 +16,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using System.Threading.Tasks;
+    using OpenFlags = System.Security.Cryptography.X509Certificates.OpenFlags;
 
     public class SystemOperations : ISystemOperations
     {
-        public static readonly SystemOperations Default = new SystemOperations();
+        public static SystemOperations Default = new SystemOperations();
+        private VmConfiguration _vmConfiguration;
 
-        private SystemOperations()
+        private SystemOperations(VmConfiguration vmConfiguration = null)
         {
+            _vmConfiguration = vmConfiguration;
         }
 
         public DateTime UtcNow => DateTime.UtcNow;
@@ -34,11 +39,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
 
             ZipFile.ExtractToDirectory(sourcePath, targetPath);
+            SetUnixOwnerIfNeeded(targetPath);
+
         }
 
         public void CreateZipFile(string sourceDirectory, string destinationFilename)
         {
             ZipFile.CreateFromDirectory(sourceDirectory, destinationFilename);
+            SetUnixOwnerIfNeeded(destinationFilename);
         }
 
         public Task Delay(int milliseconds)
@@ -87,10 +95,18 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public void CreateDirectory(string fullPath)
         {
             Directory.CreateDirectory(fullPath);
+            SetUnixOwnerIfNeeded(fullPath);
+        }
+
+        
+        public void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo target)
+        {
+            CopyDirectoryContentsRecursive(source, target);
+            SetUnixOwnerIfNeeded(target.FullName);
         }
 
         // From MSDN: https://msdn.microsoft.com/en-us/library/system.io.directoryinfo.aspx
-        public void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo target)
+        private void CopyDirectoryContentsRecursive(DirectoryInfo source, DirectoryInfo target)
         {
             if (string.Equals(source.FullName, target.FullName, StringComparison.Ordinal))
             {
@@ -118,31 +134,37 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public void FileAppendAllText(string path, string contents)
         {
             File.AppendAllText(path, contents);
+            SetUnixOwnerIfNeeded(path);
         }
         
         public void FileWriteAllText(string path, string contents)
         {
             File.WriteAllText(path, contents);
+            SetUnixOwnerIfNeeded(path);
         }
 
         public void FileCopy(string sourceFilePath, string destinationFilePath)
         {
             File.Copy(sourceFilePath, destinationFilePath);
+            SetUnixOwnerIfNeeded(destinationFilePath);
         }
 
         public void FileMoveWithOverwrite(string sourceFilePath, string destinationFilePath)
         {
             File.Move(sourceFilePath, destinationFilePath, true);
+            SetUnixOwnerIfNeeded(destinationFilePath);
         }
 
-        public Task FileWriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task FileWriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return File.WriteAllBytesAsync(path, content, cancellationToken);
+            await File.WriteAllBytesAsync(path, content, cancellationToken);
+            SetUnixOwnerIfNeeded(path);
         }
 
-        public Task FileWriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task FileWriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return File.WriteAllTextAsync(path, content, cancellationToken);
+            await File.WriteAllTextAsync(path, content, cancellationToken);
+            SetUnixOwnerIfNeeded(path);
         }
 
         public long FileInfoLength(string path)
@@ -260,6 +282,46 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             var unixFileInfo = new UnixFileInfo(filePath);
             unixFileInfo.FileAccessPermissions = (FileAccessPermissions)permissions;
+        }
+
+        private void SetUnixOwner(string filePath, string owner)
+        {
+            var passwd = Syscall.getpwnam(owner);
+            if(passwd == null)
+            {
+                throw new ArgumentException($"The specified user {owner} could not be retrieved");
+            }
+            var result = Syscall.chown(filePath, passwd.pw_uid, passwd.pw_gid);
+            if(result != 0)
+            {
+                throw new ArgumentException($"Failed to give ownership of {filePath} to {owner}");
+            }
+        }
+
+        public void SetUnixOwnerIfNeeded(string path)
+        {
+            if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
+            {
+                FileAttributes attr = File.GetAttributes(path);
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+                    DirectoryInfo dirInfo = new DirectoryInfo(path);
+                    IEnumerable<FileInfo> files = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+                    IEnumerable<DirectoryInfo> subDirectories = dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories);
+
+                    foreach (FileInfo file in files)
+                    {
+                        SetUnixOwner(file.FullName, "glados");
+                    }
+
+                    foreach (DirectoryInfo directory in subDirectories)
+                    {
+                        SetUnixOwner(directory.FullName, "glados");
+                    }
+                }
+
+                SetUnixOwner(path, "glados");  
+            }
         }
     }
 }

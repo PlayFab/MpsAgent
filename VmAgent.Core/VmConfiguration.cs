@@ -19,13 +19,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         public VmDirectories VmDirectories { get; }
 
+        public bool RunContainersInUsermode { get; }
 
 
-        public VmConfiguration(int listeningPort, string vmId, VmDirectories vmDirectories)
+
+        public VmConfiguration(int listeningPort, string vmId, VmDirectories vmDirectories, bool runContainersInUserMode)
         {
             ListeningPort = listeningPort;
             VmId = vmId;
             VmDirectories = vmDirectories;
+            RunContainersInUsermode = runContainersInUserMode;
         }
 
         public const string AssignmentIdSeparator = ":";

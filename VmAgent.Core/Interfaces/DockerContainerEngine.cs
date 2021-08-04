@@ -417,7 +417,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 {
                     string pathOnHost = request.UseReadOnlyAssets ? _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, i) :
                     _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(sessionHostInstance, i);
-
+                    _systemOperations.SetUnixOwnerIfNeeded(pathOnHost);
                     volumeBindings.Add($"{pathOnHost}:{request.AssetDetails[i].MountPath}");
                 }
             }
@@ -435,18 +435,22 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
             // Set up the log folder. Maps D:\GameLogs\{logFolderId} on the container host to C:\GameLogs on the container.
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.
+            _systemOperations.SetUnixOwnerIfNeeded(logFolderPathOnVm);
             volumeBindings.Add($"{logFolderPathOnVm}:{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}");
 
             // All containers will have the certificate folder mapped
+            _systemOperations.SetUnixOwnerIfNeeded(_vmConfiguration.VmDirectories.CertificateRootFolderVm);
             volumeBindings.Add($"{_vmConfiguration.VmDirectories.CertificateRootFolderVm}:{_vmConfiguration.VmDirectories.CertificateRootFolderContainer}");
 
             // All containers have the same shared content folder mapped.
             _systemOperations.CreateDirectory(_vmConfiguration.VmDirectories.GameSharedContentFolderVm);
+            _systemOperations.SetUnixOwnerIfNeeded(_vmConfiguration.VmDirectories.GameSharedContentFolderVm);
             volumeBindings.Add($"{_vmConfiguration.VmDirectories.GameSharedContentFolderVm}:{_vmConfiguration.VmDirectories.GameSharedContentFolderContainer}");
 
             // Map the folder that will contain this session host's configuration file
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(sessionHostInstance);
             _systemOperations.CreateDirectory(configFolderPathOnVm);
+            _systemOperations.SetUnixOwnerIfNeeded(configFolderPathOnVm);
             volumeBindings.Add($"{configFolderPathOnVm}:{_vmConfiguration.VmDirectories.GsdkConfigRootFolderContainer}");
 
             return volumeBindings;

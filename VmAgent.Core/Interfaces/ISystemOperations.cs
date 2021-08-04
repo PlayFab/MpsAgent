@@ -74,5 +74,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         Stream OpenFileForRead(string filePath);
 
         void SetUnixFilePermissions(string filePath, int permissions);
+
+        void SetUnixOwnerIfNeeded(string path);
     }
 }

@@ -153,5 +153,15 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         {
             return true;
         }
+
+        public void SetCrashDumpState(string sessionHostId, CrashDumpState crashDumpState)
+        {
+            if (!SessionHostsMap.TryGetValue(sessionHostId, out SessionHostInfo sessionHostInfo))
+            {
+                throw new InvalidOperationException($"Could not find Session Host with id {sessionHostId}");
+            }
+
+            sessionHostInfo.SessionHostHeartbeatRequest.CrashDumpState = crashDumpState;
+        }
     }
 }

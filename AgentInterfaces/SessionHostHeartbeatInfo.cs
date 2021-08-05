@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// The state of the crash dump (if any) on this session host.
         /// </summary>
         [ProtoMember(12)]
-        public CrashDumpState CrashDump { get; set; }
+        public CrashDumpState CrashDumpState { get; set; }
 
         public bool IsStateSame(SessionHostHeartbeatInfo other)
         {
@@ -177,6 +177,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string PlayerId { get; set; }
     }
 
+    [ProtoContract]
     public enum CrashDumpState
     {
         None,

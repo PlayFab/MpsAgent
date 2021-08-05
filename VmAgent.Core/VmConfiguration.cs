@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
 
 
-        public VmConfiguration(int listeningPort, string vmId, VmDirectories vmDirectories, bool runContainersInUserMode)
+        public VmConfiguration(int listeningPort, string vmId, VmDirectories vmDirectories, bool runContainersInUserMode = false)
         {
             ListeningPort = listeningPort;
             VmId = vmId;

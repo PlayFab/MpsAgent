@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public static SystemOperations Default = new SystemOperations();
         private VmConfiguration _vmConfiguration;
 
-        private SystemOperations(VmConfiguration vmConfiguration = null)
+        public SystemOperations(VmConfiguration vmConfiguration = null)
         {
             _vmConfiguration = vmConfiguration;
         }
@@ -37,6 +37,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             {
                 Directory.Delete(targetPath);
             }
+            DirectoryInfo dirInfo = new DirectoryInfo(targetPath);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(dirInfo.Parent.FullName);
 
             ZipFile.ExtractToDirectory(sourcePath, targetPath);
             SetUnixOwnerIfNeeded(targetPath);
@@ -94,7 +97,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void CreateDirectory(string fullPath)
         {
-            Directory.CreateDirectory(fullPath);
+            //Create all missing directories in the file tree explicitly to ensure proper ownership
+            DirectoryInfo directoryInfo = new DirectoryInfo(fullPath);
+            if (!directoryInfo.Parent.Exists)
+            {
+                CreateDirectory(directoryInfo.Parent.FullName);
+            }
+            directoryInfo.Create();
             SetUnixOwnerIfNeeded(fullPath);
         }
 
@@ -133,18 +142,30 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileAppendAllText(string path, string contents)
         {
+            FileInfo fileInfo = new FileInfo(path);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+
             File.AppendAllText(path, contents);
             SetUnixOwnerIfNeeded(path);
         }
         
         public void FileWriteAllText(string path, string contents)
         {
+            FileInfo fileInfo = new FileInfo(path);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+
             File.WriteAllText(path, contents);
             SetUnixOwnerIfNeeded(path);
         }
 
         public void FileCopy(string sourceFilePath, string destinationFilePath)
         {
+            FileInfo fileInfo = new FileInfo(destinationFilePath);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+
             File.Copy(sourceFilePath, destinationFilePath);
             SetUnixOwnerIfNeeded(destinationFilePath);
         }
@@ -302,6 +323,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
             {
+                SetUnixOwner(path, "glados");
+
                 FileAttributes attr = File.GetAttributes(path);
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                 {
@@ -318,9 +341,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     {
                         SetUnixOwner(directory.FullName, "glados");
                     }
-                }
-
-                SetUnixOwner(path, "glados");  
+                }  
             }
         }
     }

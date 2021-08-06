@@ -417,7 +417,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 {
                     string pathOnHost = request.UseReadOnlyAssets ? _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, i) :
                     _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(sessionHostInstance, i);
-                    _systemOperations.SetUnixOwnerIfNeeded(pathOnHost);
+                    _systemOperations.SetUnixOwnerIfNeeded(pathOnHost, true);
                     volumeBindings.Add($"{pathOnHost}:{request.AssetDetails[i].MountPath}");
                 }
             }
@@ -438,7 +438,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             volumeBindings.Add($"{logFolderPathOnVm}:{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}");
 
             // All containers will have the certificate folder mapped
-            _systemOperations.SetUnixOwnerIfNeeded(_vmConfiguration.VmDirectories.CertificateRootFolderVm);
+            _systemOperations.SetUnixOwnerIfNeeded(_vmConfiguration.VmDirectories.CertificateRootFolderVm, true);
             volumeBindings.Add($"{_vmConfiguration.VmDirectories.CertificateRootFolderVm}:{_vmConfiguration.VmDirectories.CertificateRootFolderContainer}");
 
             // All containers have the same shared content folder mapped.

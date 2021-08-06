@@ -22,10 +22,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     {
         public static SystemOperations Default = new SystemOperations();
         private VmConfiguration _vmConfiguration;
+        private MultiLogger _logger;
 
-        public SystemOperations(VmConfiguration vmConfiguration = null)
+        public SystemOperations(VmConfiguration vmConfiguration = null, MultiLogger logger = null)
         {
             _vmConfiguration = vmConfiguration;
+            _logger = logger;
         }
 
         public DateTime UtcNow => DateTime.UtcNow;
@@ -42,7 +44,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             CreateDirectory(dirInfo.Parent.FullName);
 
             ZipFile.ExtractToDirectory(sourcePath, targetPath);
-            SetUnixOwnerIfNeeded(targetPath);
+            SetUnixOwnerIfNeeded(targetPath, true);
 
         }
 
@@ -103,19 +105,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             {
                 CreateDirectory(directoryInfo.Parent.FullName);
             }
-            directoryInfo.Create();
-            SetUnixOwnerIfNeeded(fullPath);
-        }
-
-        
-        public void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo target)
-        {
-            CopyDirectoryContentsRecursive(source, target);
-            SetUnixOwnerIfNeeded(target.FullName);
+            // Do this check to prevent owning /mnt by accident
+            if(!directoryInfo.Exists)
+            {
+                directoryInfo.Create();
+                SetUnixOwnerIfNeeded(fullPath);
+            }
         }
 
         // From MSDN: https://msdn.microsoft.com/en-us/library/system.io.directoryinfo.aspx
-        private void CopyDirectoryContentsRecursive(DirectoryInfo source, DirectoryInfo target)
+        public void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo target)
         {
             if (string.Equals(source.FullName, target.FullName, StringComparison.Ordinal))
             {
@@ -123,12 +122,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
 
             // Note, if the directory already exists, it doesn't try to recreate it.
-            Directory.CreateDirectory(target.FullName);
+           CreateDirectory(target.FullName);
 
             // Copy each file into it's new directory.
             foreach (FileInfo fi in source.GetFiles())
             {
                 fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+                SetUnixOwnerIfNeeded(Path.Combine(target.ToString(), fi.Name));
             }
 
             // Copy each subdirectory using recursion.
@@ -172,18 +172,30 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileMoveWithOverwrite(string sourceFilePath, string destinationFilePath)
         {
+            FileInfo fileInfo = new FileInfo(destinationFilePath);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+
             File.Move(sourceFilePath, destinationFilePath, true);
             SetUnixOwnerIfNeeded(destinationFilePath);
         }
 
         public async Task FileWriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken = default(CancellationToken))
         {
+            FileInfo fileInfo = new FileInfo(path);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+
             await File.WriteAllBytesAsync(path, content, cancellationToken);
             SetUnixOwnerIfNeeded(path);
         }
 
         public async Task FileWriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default(CancellationToken))
         {
+            FileInfo fileInfo = new FileInfo(path);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+
             await File.WriteAllTextAsync(path, content, cancellationToken);
             SetUnixOwnerIfNeeded(path);
         }
@@ -319,14 +331,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
         }
 
-        public void SetUnixOwnerIfNeeded(string path)
+        public void SetUnixOwnerIfNeeded(string path, bool applyToAllContents = false)
         {
+
             if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
             {
+                _logger.LogInformation($"Setting unix owner for {path}");
                 SetUnixOwner(path, "glados");
 
                 FileAttributes attr = File.GetAttributes(path);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory && applyToAllContents)
                 {
                     DirectoryInfo dirInfo = new DirectoryInfo(path);
                     IEnumerable<FileInfo> files = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
@@ -341,7 +355,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     {
                         SetUnixOwner(directory.FullName, "glados");
                     }
-                }  
+                }
+            }
+            else
+            {
+                _logger.LogInformation("Unix file setting not needed");
             }
         }
     }

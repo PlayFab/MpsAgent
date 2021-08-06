@@ -75,6 +75,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         void SetUnixFilePermissions(string filePath, int permissions);
 
-        void SetUnixOwnerIfNeeded(string path);
+        void SetUnixOwnerIfNeeded(string path, bool applyToAllContents = false);
     }
 }

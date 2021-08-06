@@ -23,7 +23,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public static SystemOperations Default = new SystemOperations();
         private VmConfiguration _vmConfiguration;
         private MultiLogger _logger;
-
+        //This is also present on the VmAgent startup script, change it there as well
+        private readonly string _user = "glados";
         public SystemOperations(VmConfiguration vmConfiguration = null, MultiLogger logger = null)
         {
             _vmConfiguration = vmConfiguration;
@@ -337,7 +338,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
             {
                 _logger.LogInformation($"Setting unix owner for {path}");
-                SetUnixOwner(path, "glados");
+                SetUnixOwner(path, _user);
 
                 FileAttributes attr = File.GetAttributes(path);
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory && applyToAllContents)
@@ -347,7 +348,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
                     foreach (FileSystemInfo child in childItems)
                     {
-                        SetUnixOwner(child.FullName, "glados");
+                        SetUnixOwner(child.FullName, _user);
                     }
                 }
             }

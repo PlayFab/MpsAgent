@@ -41,8 +41,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 Directory.Delete(targetPath);
             }
             DirectoryInfo dirInfo = new DirectoryInfo(targetPath);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(dirInfo.Parent.FullName);
+
+            SetParentTreeOwnership(dirInfo.FullName);
 
             ZipFile.ExtractToDirectory(sourcePath, targetPath);
             SetUnixOwnerIfNeeded(targetPath, true);
@@ -143,9 +143,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileAppendAllText(string path, string contents)
         {
-            FileInfo fileInfo = new FileInfo(path);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(fileInfo.DirectoryName);
+            SetParentTreeOwnership(path);
 
             File.AppendAllText(path, contents);
             SetUnixOwnerIfNeeded(path);
@@ -153,9 +151,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         
         public void FileWriteAllText(string path, string contents)
         {
-            FileInfo fileInfo = new FileInfo(path);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(fileInfo.DirectoryName);
+            SetParentTreeOwnership(path);
 
             File.WriteAllText(path, contents);
             SetUnixOwnerIfNeeded(path);
@@ -163,9 +159,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileCopy(string sourceFilePath, string destinationFilePath)
         {
-            FileInfo fileInfo = new FileInfo(destinationFilePath);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(fileInfo.DirectoryName);
+            SetParentTreeOwnership(destinationFilePath);
 
             File.Copy(sourceFilePath, destinationFilePath);
             SetUnixOwnerIfNeeded(destinationFilePath);
@@ -173,9 +167,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileMoveWithOverwrite(string sourceFilePath, string destinationFilePath)
         {
-            FileInfo fileInfo = new FileInfo(destinationFilePath);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(fileInfo.DirectoryName);
+            SetParentTreeOwnership(destinationFilePath);
 
             File.Move(sourceFilePath, destinationFilePath, true);
             SetUnixOwnerIfNeeded(destinationFilePath);
@@ -183,9 +175,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public async Task FileWriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken = default(CancellationToken))
         {
-            FileInfo fileInfo = new FileInfo(path);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(fileInfo.DirectoryName);
+            SetParentTreeOwnership(path);
 
             await File.WriteAllBytesAsync(path, content, cancellationToken);
             SetUnixOwnerIfNeeded(path);
@@ -193,9 +183,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public async Task FileWriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default(CancellationToken))
         {
-            FileInfo fileInfo = new FileInfo(path);
-            //Create parent directories to ensure correct ownership
-            CreateDirectory(fileInfo.DirectoryName);
+            SetParentTreeOwnership(path);
 
             await File.WriteAllTextAsync(path, content, cancellationToken);
             SetUnixOwnerIfNeeded(path);
@@ -318,20 +306,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             unixFileInfo.FileAccessPermissions = (FileAccessPermissions)permissions;
         }
 
-        private void SetUnixOwner(string filePath, string owner)
-        {
-            var passwd = Syscall.getpwnam(owner);
-            if(passwd == null)
-            {
-                throw new ArgumentException($"The specified user {owner} could not be retrieved");
-            }
-            var result = Syscall.chown(filePath, passwd.pw_uid, passwd.pw_gid);
-            if(result != 0)
-            {
-                throw new ArgumentException($"Failed to give ownership of {filePath} to {owner}");
-            }
-        }
-
         public void SetUnixOwnerIfNeeded(string path, bool applyToAllContents = false)
         {
 
@@ -357,5 +331,26 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 _logger.LogInformation("Unix file setting not needed");
             }
         }
+
+        private void SetUnixOwner(string filePath, string owner)
+        {
+            var passwd = Syscall.getpwnam(owner);
+            if(passwd == null)
+            {
+                throw new ArgumentException($"The specified user {owner} could not be retrieved");
+            }
+            var result = Syscall.chown(filePath, passwd.pw_uid, passwd.pw_gid);
+            if(result != 0)
+            {
+                throw new ArgumentException($"Failed to give ownership of {filePath} to {owner}");
+            }
+        }
+
+        private void SetParentTreeOwnership(string filePath)
+        {
+            FileInfo fileInfo = new FileInfo(filePath);
+            //Create parent directories to ensure correct ownership
+            CreateDirectory(fileInfo.DirectoryName);
+        }        
     }
 }

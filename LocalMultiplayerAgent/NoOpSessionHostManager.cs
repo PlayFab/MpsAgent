@@ -154,11 +154,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             return true;
         }
 
-        public bool SignalDumpFoundAndCheckIfThrottled(string sessionHostId)
+        public void SetCrashDumpState(string sessionHostId, CrashDumpState crashDumpState)
         {
-            // don't do anything to signal that a dump was found,
-            // and don't throttle
-            return false;
+            if (!SessionHostsMap.TryGetValue(sessionHostId, out SessionHostInfo sessionHostInfo))
+            {
+                throw new InvalidOperationException($"Could not find Session Host with id {sessionHostId}");
+            }
+
+            sessionHostInfo.SessionHostHeartbeatRequest.CrashDumpState = crashDumpState;
         }
     }
 }

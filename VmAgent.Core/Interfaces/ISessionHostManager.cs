@@ -71,11 +71,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         bool IsUnassignable();
 
-        /// <summary>
-        /// Signals that a crash dump was found in the given SessionHost's logs folder, and checks
-        /// if the crash dump should be deleted due to throttling.
-        /// </summary>
-        /// <returns>True if the crash dump should be deleted, false otherwise</returns>
-        bool SignalDumpFoundAndCheckIfThrottled(string sessionHostId);
+        void SetCrashDumpState(string sessionHostId, CrashDumpState crashDumpState);
     }
 }

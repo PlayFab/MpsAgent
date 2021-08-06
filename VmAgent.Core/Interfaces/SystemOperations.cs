@@ -102,7 +102,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             //Create all missing directories in the file tree explicitly to ensure proper ownership
             DirectoryInfo directoryInfo = new DirectoryInfo(fullPath);
-            if (!directoryInfo.Parent.Exists)
+            if (directoryInfo.Parent != null && !directoryInfo.Parent.Exists)
             {
                 CreateDirectory(directoryInfo.Parent.FullName);
             }

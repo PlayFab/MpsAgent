@@ -7,6 +7,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using ProtoBuf;
 
     /// <summary>
@@ -177,11 +179,15 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string PlayerId { get; set; }
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     [ProtoContract]
     public enum CrashDumpState
     {
+        [ProtoEnum]
         None,
+        [ProtoEnum]
         Present,
+        [ProtoEnum]
         Throttled,
     }
 }

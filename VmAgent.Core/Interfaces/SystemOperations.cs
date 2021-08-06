@@ -343,17 +343,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory && applyToAllContents)
                 {
                     DirectoryInfo dirInfo = new DirectoryInfo(path);
-                    IEnumerable<FileInfo> files = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
-                    IEnumerable<DirectoryInfo> subDirectories = dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories);
+                    IEnumerable<FileSystemInfo> childItems = dirInfo.EnumerateFileSystemInfos("*", SearchOption.AllDirectories);
 
-                    foreach (FileInfo file in files)
+                    foreach (FileSystemInfo child in childItems)
                     {
-                        SetUnixOwner(file.FullName, "glados");
-                    }
-
-                    foreach (DirectoryInfo directory in subDirectories)
-                    {
-                        SetUnixOwner(directory.FullName, "glados");
+                        SetUnixOwner(child.FullName, "glados");
                     }
                 }
             }

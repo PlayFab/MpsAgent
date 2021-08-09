@@ -303,7 +303,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void SetUnixOwnerIfNeeded(string path, bool applyToAllContents = false)
         {
-
             if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
             {
                 _logger.LogInformation($"Setting unix owner for {path}");

@@ -60,19 +60,19 @@ namespace VmAgent.Core.Interfaces
             ZipFile.ExtractToDirectory(sourcePath, targetPath);
         }
 
-        public IEnumerable<DirectoryInfo> GetDirectories(DirectoryInfo directoryInfo)
+        public IEnumerable<DirectoryInfo> GetDirectories(DirectoryInfo directoryInfo, bool recursive = false)
         {
-            return directoryInfo.EnumerateDirectories("*", SearchOption.AllDirectories);
+            return directoryInfo.EnumerateDirectories("*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
-        public IEnumerable<FileInfo> GetFiles(DirectoryInfo directoryInfo)
+        public IEnumerable<FileInfo> GetFiles(DirectoryInfo directoryInfo, bool recursive = false)
         {
-            return directoryInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+            return directoryInfo.EnumerateFiles("*", recursive ?  SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
-        public IEnumerable<FileSystemInfo> GetFileSystemInfos(DirectoryInfo directoryInfo)
+        public IEnumerable<FileSystemInfo> GetFileSystemInfos(DirectoryInfo directoryInfo, bool recursive = false)
         {
-            return directoryInfo.EnumerateFileSystemInfos("*", SearchOption.AllDirectories);
+            return directoryInfo.EnumerateFileSystemInfos("*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
         public bool TryGetParentDirectory(FileSystemInfo fileSystemInfo, out DirectoryInfo parentDirectory)
@@ -133,6 +133,11 @@ namespace VmAgent.Core.Interfaces
         public Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken)
         {
             return File.WriteAllTextAsync(path, content, cancellationToken);
+        }
+
+        public DirectoryInfo CreateSubdirectory(DirectoryInfo parentDir, string subdirectoryName)
+        {
+            return parentDir.CreateSubdirectory(subdirectoryName);
         }
     }
 }

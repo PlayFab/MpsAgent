@@ -28,7 +28,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         private IFileSystemOperations _fileSystemOperations;
 
         //This is also present on the VmAgent startup script, change it there as well
-        private readonly string _user = "glados";
+        public readonly string User = "glados";
         public SystemOperations(VmConfiguration vmConfiguration = null, MultiLogger logger = null, IFileSystemOperations fileSystemOperations = null)
         {
             _vmConfiguration = vmConfiguration;
@@ -110,7 +110,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             CreateDirectoryAndParents(directoryInfo);
         }
 
-        // From MSDN: https://msdn.microsoft.com/en-us/library/system.io.directoryinfo.aspx
         public void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo target)
         {
             if (string.Equals(source.FullName, target.FullName, StringComparison.Ordinal))
@@ -118,20 +117,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 return;
             }
 
-            CreateDirectoryAndParents(target);
+            _fileSystemOperations.Create(target);
+            SetUnixOwnerIfNeeded(target.FullName);
 
             // Copy each file into it's new directory.
-            foreach (FileInfo fi in source.GetFiles())
+            foreach (FileInfo fi in _fileSystemOperations.GetFiles(source))
             {
                 _fileSystemOperations.CopyTo(fi, Path.Combine(target.ToString(), fi.Name), true);
                 SetUnixOwnerIfNeeded(Path.Combine(target.ToString(), fi.Name));
             }
 
             // Copy each subdirectory using recursion.
-            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            foreach (DirectoryInfo diSourceSubDir in _fileSystemOperations.GetDirectories(source))
             {
                 //It's ok to create the directory here, the recursion will set the permissions on the next call
-                DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                DirectoryInfo nextTargetSubDir = _fileSystemOperations.CreateSubdirectory(target, diSourceSubDir.Name);
                 CopyDirectoryContents(diSourceSubDir, nextTargetSubDir);
             }
         }
@@ -308,16 +308,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             {
                 _logger.LogInformation($"Setting unix owner for {path}");
 
-                _fileSystemOperations.SetUnixOwner(path, _user);
+                _fileSystemOperations.SetUnixOwner(path, User);
 
                 if (_fileSystemOperations.IsDirectory(path) && applyToAllContents)
                 {
                     DirectoryInfo dirInfo = new DirectoryInfo(path);
-                    IEnumerable<FileSystemInfo> childItems = _fileSystemOperations.GetFileSystemInfos(dirInfo);
+                    IEnumerable<FileSystemInfo> childItems = _fileSystemOperations.GetFileSystemInfos(dirInfo, true);
 
                     foreach (FileSystemInfo child in childItems)
                     {
-                        _fileSystemOperations.SetUnixOwner(child.FullName, _user);
+                        _fileSystemOperations.SetUnixOwner(child.FullName, User);
                     }
                 }
             }
@@ -327,7 +327,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
         }
 
-        private void CreateDirectoryAndParents(DirectoryInfo directory)
+        public void CreateDirectoryAndParents(DirectoryInfo directory)
         {
             //It's possible for the caller to unknowingly call with Director.Parent which can be null
             if(directory == null)
@@ -338,13 +338,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             DirectoryInfo parentDirectory;
             if (_fileSystemOperations.TryGetParentDirectory(directory, out parentDirectory))
             {
-                if(!parentDirectory.Exists)
+                if(!_fileSystemOperations.Exists(parentDirectory))
                 {
                     CreateDirectoryAndParents(parentDirectory);
-                } 
-            }
-            _fileSystemOperations.Create(directory);
-            _fileSystemOperations.SetUnixOwner(directory.FullName, _user);  
+                }
+                _fileSystemOperations.Create(directory);
+                _fileSystemOperations.SetUnixOwner(directory.FullName, User);
+            }  
         }        
     }
 }

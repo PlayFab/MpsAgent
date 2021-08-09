@@ -19,11 +19,11 @@ namespace VmAgent.Core.Interfaces
 
         void CreateZipFile(string sourceDirectory, string destinationFilename);
 
-        IEnumerable<FileInfo> GetFiles(DirectoryInfo directoryInfo);
+        IEnumerable<FileInfo> GetFiles(DirectoryInfo directoryInfo, bool recursive = false);
 
-        IEnumerable<DirectoryInfo> GetDirectories(DirectoryInfo directoryInfo);
+        IEnumerable<DirectoryInfo> GetDirectories(DirectoryInfo directoryInfo, bool recursive = false);
 
-        IEnumerable<FileSystemInfo> GetFileSystemInfos(DirectoryInfo directoryInfo);
+        IEnumerable<FileSystemInfo> GetFileSystemInfos(DirectoryInfo directoryInfo, bool recursive = false);
 
         void CopyTo(FileInfo toCopy, string targetPath, bool overwrite);
 
@@ -42,5 +42,7 @@ namespace VmAgent.Core.Interfaces
         bool IsDirectory(string path);
 
         void Delete(FileSystemInfo fileSystemInfo);
+
+        DirectoryInfo CreateSubdirectory(DirectoryInfo parentDir, string subdirectoryName);
     }
 }

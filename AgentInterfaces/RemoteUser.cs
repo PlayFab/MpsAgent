@@ -11,10 +11,6 @@
         [Required]
         public string Password { get; set; }
 
-        public DateTime? ExpirationTime { get; set; }
-        
-        public string IpV4Address { get; set; }
-
-        public int Port { get; set; }
+        public DateTime ExpirationTime { get; set; }
     }
 }

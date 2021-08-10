@@ -10,10 +10,10 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VmAgent.Core.UnitTets
+namespace VmAgent.Core.UnitTests
 {
     [TestClass]
-    public class SystemOperationUnitTest
+    public class SystemOperationUnitTests
     {
         private string _root = "C:\\";
         private string _directoryPath;
@@ -157,7 +157,8 @@ namespace VmAgent.Core.UnitTets
                     return toReturn;
                 });
 
-            _mockFileSystemOperations.Setup(x => x.CreateSubdirectory(It.IsAny<DirectoryInfo>(), It.IsAny<string>())).Returns<DirectoryInfo, string>((info, name) => new DirectoryInfo(Path.Combine(info.FullName, name + "\\")));
+            _mockFileSystemOperations.Setup(x => x.CreateSubdirectory(It.IsAny<DirectoryInfo>(), It.IsAny<string>()))
+                .Returns<DirectoryInfo, string>((info, name) => new DirectoryInfo(Path.Combine(info.FullName, name + "\\")));
 
             DirectoryInfo nullDirInfo = null;
             DirectoryInfo rootDirInfo = new DirectoryInfo(_root);
@@ -195,7 +196,7 @@ namespace VmAgent.Core.UnitTets
         [TestCategory("BVT")]
         public void TestSetUnixOwnerNonRecursive()
         {
-            List<string> unExpectedItemsToOwn = new List<string>()
+            List<string> unexpectedItemsToOwn = new List<string>()
             {
                 _subdirectoryPath,
                 _directoryFilePath,
@@ -204,7 +205,7 @@ namespace VmAgent.Core.UnitTets
 
             _systemOperations.SetUnixOwnerIfNeeded(_directoryPath, false);
 
-            unExpectedItemsToOwn.ForEach(
+            unexpectedItemsToOwn.ForEach(
                     (item) => _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == item), _systemOperations.User), Times.Never));
             _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path.EndsWith(_directoryPath)), _systemOperations.User), Times.Once);
         }
@@ -223,7 +224,6 @@ namespace VmAgent.Core.UnitTets
             VmConfiguration config = new VmConfiguration(56001, "vmid", new VmDirectories("root"), false);
             SystemOperations systemOperations = new SystemOperations(config, _logger, _mockFileSystemOperations.Object);
             systemOperations.SetUnixOwnerIfNeeded(_directoryPath, true);
-
             expectedItemsToOwn.ForEach(
                     (item) => _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.IsAny<string>(), It.IsAny<string>()), Times.Never));
         }

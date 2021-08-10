@@ -47,7 +47,6 @@ namespace VmAgent.Core.Interfaces
             {
                 throw new ArgumentException("This is not a file or a directory");
             }
-                
         }
 
         public bool Exists(FileSystemInfo fileSystemInfo)

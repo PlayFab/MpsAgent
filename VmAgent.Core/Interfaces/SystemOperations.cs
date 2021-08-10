@@ -328,12 +328,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void CreateDirectoryAndParents(DirectoryInfo directory)
         {
-            //It's possible for the caller to unknowingly call with Director.Parent which can be null
-            if(directory == null)
-            {
-                return;
-            }
-
             DirectoryInfo parentDirectory;
             if (_fileSystemOperations.TryGetParentDirectory(directory, out parentDirectory))
             {
@@ -342,7 +336,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     CreateDirectoryAndParents(parentDirectory);
                 }
                 _fileSystemOperations.Create(directory);
-                _fileSystemOperations.SetUnixOwner(directory.FullName, User);
+                SetUnixOwnerIfNeeded(directory.FullName);
             }  
         }        
     }

@@ -417,7 +417,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 {
                     string pathOnHost = request.UseReadOnlyAssets ? _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, i) :
                     _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(sessionHostInstance, i);
-
+                    //Set for when containers are run as non root
+                    _systemOperations.SetUnixOwnerIfNeeded(pathOnHost, true);
                     volumeBindings.Add($"{pathOnHost}:{request.AssetDetails[i].MountPath}");
                 }
             }
@@ -437,6 +438,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.
             volumeBindings.Add($"{logFolderPathOnVm}:{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}");
 
+            //Set for when containers are run as non root
+            _systemOperations.SetUnixOwnerIfNeeded(_vmConfiguration.VmDirectories.CertificateRootFolderVm, true);
             // All containers will have the certificate folder mapped
             volumeBindings.Add($"{_vmConfiguration.VmDirectories.CertificateRootFolderVm}:{_vmConfiguration.VmDirectories.CertificateRootFolderContainer}");
 

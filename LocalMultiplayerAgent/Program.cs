@@ -61,7 +61,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             VmDirectories vmDirectories = new VmDirectories(rootOutputFolder);
 
-            Globals.VmConfiguration = new VmConfiguration(settings.AgentListeningPort, vmId, vmDirectories);
+            Globals.VmConfiguration = new VmConfiguration(settings.AgentListeningPort, vmId, vmDirectories, false);
             if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Globals.AdaptFolderPathsForLinuxContainersOnWindows();  // Linux Containers on Windows requires special folder mapping

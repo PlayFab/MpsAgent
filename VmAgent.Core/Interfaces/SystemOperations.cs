@@ -305,7 +305,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
             {
-                _logger.LogInformation($"Setting unix owner for {path}");
+                _logger?.LogInformation($"Setting unix owner for {path}");
 
                 _fileSystemOperations.SetUnixOwner(path, User);
 
@@ -322,7 +322,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
             else
             {
-                _logger.LogInformation("Unix file setting not needed");
+                _logger?.LogInformation("Unix file setting not needed");
             }
         }
 

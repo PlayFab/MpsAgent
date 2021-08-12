@@ -9,6 +9,9 @@ using VmAgent.Core.Interfaces;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace VmAgent.Core.UnitTests
 {
@@ -20,10 +23,12 @@ namespace VmAgent.Core.UnitTests
         private string _subdirectoryPath;
         private string _directoryFilePath;
         private string _subdirectoryFilePath;
-        private string _subdirectoryName = "subdirectory\\";
-        private string _directoryName = "directory\\";
+        private string _subdirectoryName = "subdirectory";
+        private string _directoryName = "directory";
         private string _directoryFileName = "file";
         private string _subdirectoryFileName = "subfile";
+        private string _defaultFileContent = "This is not the file you are looking for";
+        private string _defaultSourceFile; 
         private DirectoryInfo _subDirectoryInfo;
         private DirectoryInfo _directoryInfo;
         private SystemOperations _systemOperations;
@@ -42,6 +47,7 @@ namespace VmAgent.Core.UnitTests
             FileInfo directoryFileInfo = new FileInfo(_directoryFilePath);
             _subdirectoryFilePath = Path.Combine(_subdirectoryPath, _subdirectoryFileName);
             FileInfo subDirectoryFileInfo = new FileInfo(_subdirectoryFilePath);
+            _defaultSourceFile = Path.Combine(_root, "Source");
 
             _mockFileSystemOperations = new Mock<IFileSystemOperations>();
             _vmConfiguration = new VmConfiguration(56001, "vmid", new VmDirectories("root"), true);
@@ -158,7 +164,7 @@ namespace VmAgent.Core.UnitTests
                 });
 
             _mockFileSystemOperations.Setup(x => x.CreateSubdirectory(It.IsAny<DirectoryInfo>(), It.IsAny<string>()))
-                .Returns<DirectoryInfo, string>((info, name) => new DirectoryInfo(Path.Combine(info.FullName, name + "\\")));
+                .Returns<DirectoryInfo, string>((info, name) => new DirectoryInfo(Path.Combine(info.FullName, name)));
 
             DirectoryInfo nullDirInfo = null;
             DirectoryInfo rootDirInfo = new DirectoryInfo(_root);
@@ -232,20 +238,8 @@ namespace VmAgent.Core.UnitTests
         [TestCategory("BVT")]
         public void TestCreateParentStructure()
         {
-            List<string> expectedDirectoriesToCreateOwn = new List<string>()
-            {
-                _subdirectoryPath,
-                _directoryPath
-            };
-
             _systemOperations.CreateDirectoryAndParents(_subDirectoryInfo);
-            expectedDirectoriesToCreateOwn.ForEach(
-                    (item) => {
-                        _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == item), _systemOperations.User), Times.Once);
-                        _mockFileSystemOperations.Verify(x => x.Create(It.Is<DirectoryInfo>((info) => IsFileSystemInfoEqual(info, item))), Times.Once);
-                    });
-            _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == _root), _systemOperations.User), Times.Never);
-            _mockFileSystemOperations.Verify(x => x.Create(It.Is<DirectoryInfo>((info) => IsFileSystemInfoEqual(info, _root))), Times.Never);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
         }
 
         [TestMethod]
@@ -294,9 +288,84 @@ namespace VmAgent.Core.UnitTests
         [TestCategory("BVT")]
         public void FileCopyTest()
         {
-            string targetFileName = Path.Combine(_root, "copy");
-            _systemOperations.FileCopy(_subdirectoryFilePath, targetFileName);
-            _mockFileSystemOperations.Verify(x => x.CopyTo(It.Is<FileInfo>((info) => IsFileSystemInfoEqual(info, _subdirectoryFilePath)), targetFileName, true), Times.Once);
+            _systemOperations.FileCopy(_defaultSourceFile, _subdirectoryFilePath);
+           
+            _mockFileSystemOperations.Verify(x => x.CopyTo(It.Is<FileInfo>((info) => IsFileSystemInfoEqual(info, _defaultSourceFile)), _subdirectoryFilePath, true), Times.Once);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void CreateDirectoryTest()
+        {
+            _systemOperations.CreateDirectory(_subdirectoryPath);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void FileWriteAllTextTest()
+        { 
+            _systemOperations.FileWriteAllText(_subdirectoryFilePath, _defaultFileContent);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            _mockFileSystemOperations.Verify(x => x.WriteAllText(_subdirectoryFilePath, _defaultFileContent), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void FileAppendAllTextTest()
+        {
+            _systemOperations.FileAppendAllText(_subdirectoryFilePath, _defaultFileContent);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            _mockFileSystemOperations.Verify(x => x.AppendAllText(_subdirectoryFilePath, _defaultFileContent), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void FileMoveWithOverwriteTest()
+        {
+            _systemOperations.FileMoveWithOverwrite(_defaultSourceFile, _subdirectoryFilePath);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            _mockFileSystemOperations.Verify(x => x.MoveWithOverwrite(_defaultSourceFile, _subdirectoryFilePath), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task FileWriteAllBytesAsyncTest()
+        {
+            await _systemOperations.FileWriteAllBytesAsync(_subdirectoryFilePath, new byte[10]);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            _mockFileSystemOperations.Verify(x => x.WriteAllBytesAsync(_subdirectoryFilePath, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task FileWriteAllTextAsyncTest()
+        {
+            await _systemOperations.FileWriteAllTextAsync(_subdirectoryFilePath, _defaultFileContent);
+            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            _mockFileSystemOperations.Verify(x => x.WriteAllTextAsync(_subdirectoryFilePath,_defaultFileContent, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        private void SubdirectoryVerifyDirectoryCreationAndOnwership()
+        {
+            List<string> expectedDirectoriesToCreateOwn = new List<string>()
+            {
+                _subdirectoryPath,
+                _directoryPath
+            };
+            VerifyDirectoryCreationAndOwnership(_subDirectoryInfo, expectedDirectoriesToCreateOwn);
+        }
+
+        private void VerifyDirectoryCreationAndOwnership(DirectoryInfo parentDirectory, List<string> expectedDirectoriesToCreateOwn)
+        {
+            expectedDirectoriesToCreateOwn.ForEach(
+                    (item) => {
+                        _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == item), _systemOperations.User), Times.Once);
+                        _mockFileSystemOperations.Verify(x => x.Create(It.Is<DirectoryInfo>((info) => IsFileSystemInfoEqual(info, item))), Times.Once);
+                    });
+            _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == _root), _systemOperations.User), Times.Never);
+            _mockFileSystemOperations.Verify(x => x.Create(It.Is<DirectoryInfo>((info) => IsFileSystemInfoEqual(info, _root))), Times.Never);
         }
     }
 }

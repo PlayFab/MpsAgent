@@ -154,9 +154,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileCopy(string sourceFilePath, string destinationFilePath)
         {
-            FileInfo fileInfo = new FileInfo(destinationFilePath);
-            CreateDirectoryAndParents(fileInfo.Directory);
-            _fileSystemOperations.CopyTo(fileInfo, destinationFilePath, true);
+            FileInfo destinationFileInfo = new FileInfo(destinationFilePath);
+            CreateDirectoryAndParents(destinationFileInfo.Directory);
+            _fileSystemOperations.CopyTo(new FileInfo(sourceFilePath), destinationFilePath, true);
             SetUnixOwnerIfNeeded(destinationFilePath);
         }
 
@@ -305,10 +305,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
             {
-                _logger?.LogInformation($"Setting unix owner for {path}");
-
+                _logger?.LogVerbose($"Setting unix owner for {path}");
                 _fileSystemOperations.SetUnixOwner(path, User);
-
                 if (_fileSystemOperations.IsDirectory(path) && applyToAllContents)
                 {
                     DirectoryInfo dirInfo = new DirectoryInfo(path);
@@ -322,7 +320,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
             else
             {
-                _logger?.LogInformation("Unix file setting not needed");
+                _logger?.LogVerbose("Unix file setting not needed");
             }
         }
 

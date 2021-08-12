@@ -239,7 +239,7 @@ namespace VmAgent.Core.UnitTests
         public void TestCreateParentStructure()
         {
             _systemOperations.CreateDirectoryAndParents(_subDirectoryInfo);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
         }
 
         [TestMethod]
@@ -291,7 +291,7 @@ namespace VmAgent.Core.UnitTests
             _systemOperations.FileCopy(_defaultSourceFile, _subdirectoryFilePath);
            
             _mockFileSystemOperations.Verify(x => x.CopyTo(It.Is<FileInfo>((info) => IsFileSystemInfoEqual(info, _defaultSourceFile)), _subdirectoryFilePath, true), Times.Once);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
         }
 
         [TestMethod]
@@ -299,7 +299,7 @@ namespace VmAgent.Core.UnitTests
         public void CreateDirectoryTest()
         {
             _systemOperations.CreateDirectory(_subdirectoryPath);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
         }
 
         [TestMethod]
@@ -307,7 +307,7 @@ namespace VmAgent.Core.UnitTests
         public void FileWriteAllTextTest()
         { 
             _systemOperations.FileWriteAllText(_subdirectoryFilePath, _defaultFileContent);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
             _mockFileSystemOperations.Verify(x => x.WriteAllText(_subdirectoryFilePath, _defaultFileContent), Times.Once);
         }
 
@@ -316,7 +316,7 @@ namespace VmAgent.Core.UnitTests
         public void FileAppendAllTextTest()
         {
             _systemOperations.FileAppendAllText(_subdirectoryFilePath, _defaultFileContent);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
             _mockFileSystemOperations.Verify(x => x.AppendAllText(_subdirectoryFilePath, _defaultFileContent), Times.Once);
         }
 
@@ -325,7 +325,7 @@ namespace VmAgent.Core.UnitTests
         public void FileMoveWithOverwriteTest()
         {
             _systemOperations.FileMoveWithOverwrite(_defaultSourceFile, _subdirectoryFilePath);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
             _mockFileSystemOperations.Verify(x => x.MoveWithOverwrite(_defaultSourceFile, _subdirectoryFilePath), Times.Once);
         }
 
@@ -334,7 +334,7 @@ namespace VmAgent.Core.UnitTests
         public async Task FileWriteAllBytesAsyncTest()
         {
             await _systemOperations.FileWriteAllBytesAsync(_subdirectoryFilePath, new byte[10]);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
             _mockFileSystemOperations.Verify(x => x.WriteAllBytesAsync(_subdirectoryFilePath, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -343,11 +343,11 @@ namespace VmAgent.Core.UnitTests
         public async Task FileWriteAllTextAsyncTest()
         {
             await _systemOperations.FileWriteAllTextAsync(_subdirectoryFilePath, _defaultFileContent);
-            SubdirectoryVerifyDirectoryCreationAndOnwership();
+            SubdirectoryVerifyDirectoryCreationAndOwnership();
             _mockFileSystemOperations.Verify(x => x.WriteAllTextAsync(_subdirectoryFilePath,_defaultFileContent, It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        private void SubdirectoryVerifyDirectoryCreationAndOnwership()
+        private void SubdirectoryVerifyDirectoryCreationAndOwnership()
         {
             List<string> expectedDirectoriesToCreateOwn = new List<string>()
             {

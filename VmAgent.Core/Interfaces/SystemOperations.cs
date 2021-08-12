@@ -154,7 +154,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void FileCopy(string sourceFilePath, string destinationFilePath)
         {
-            FileInfo fileInfo = new FileInfo(destinationFilePath);
+            FileInfo fileInfo = new FileInfo(sourceFilePath);
             CreateDirectoryAndParents(fileInfo.Directory);
             _fileSystemOperations.CopyTo(fileInfo, destinationFilePath, true);
             SetUnixOwnerIfNeeded(destinationFilePath);

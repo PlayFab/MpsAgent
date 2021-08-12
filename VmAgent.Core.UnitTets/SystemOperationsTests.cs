@@ -233,14 +233,14 @@ namespace VmAgent.Core.UnitTests
         public void TestCreateParentStructure()
         {
             List<string> expectedDirectoriesToCreateOwn = new List<string>()
-            { 
+            {
                 _subdirectoryPath,
                 _directoryPath
             };
 
             _systemOperations.CreateDirectoryAndParents(_subDirectoryInfo);
             expectedDirectoriesToCreateOwn.ForEach(
-                    (item) => { 
+                    (item) => {
                         _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == item), _systemOperations.User), Times.Once);
                         _mockFileSystemOperations.Verify(x => x.Create(It.Is<DirectoryInfo>((info) => IsFileSystemInfoEqual(info, item))), Times.Once);
                     });
@@ -288,6 +288,15 @@ namespace VmAgent.Core.UnitTests
                         _mockFileSystemOperations.Verify(x => x.SetUnixOwner(It.Is<string>((path) => path == item), _systemOperations.User), Times.Never);
                         _mockFileSystemOperations.Verify(x => x.Create(It.Is<DirectoryInfo>((info) => IsFileSystemInfoEqual(info, item))), Times.Never);
                     });
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void FileCopyTest()
+        {
+            string targetFileName = Path.Combine(_root, "copy");
+            _systemOperations.FileCopy(_subdirectoryFilePath, targetFileName);
+            _mockFileSystemOperations.Verify(x => x.CopyTo(It.Is<FileInfo>((info) => IsFileSystemInfoEqual(info, _subdirectoryFilePath)), targetFileName, true), Times.Once);
         }
     }
 }

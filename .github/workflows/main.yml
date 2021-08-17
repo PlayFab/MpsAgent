@@ -21,7 +21,7 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        dotnet-version: [ '5.0.x' ]
+        dotnet-version: [ '3.1.x' ]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

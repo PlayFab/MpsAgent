@@ -1,3 +1,6 @@
+![CI workflow](https://github.com/playfab/MpsAgent/actions/workflows/main.yml/badge.svg)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
+
 # MpsAgent
 
 ## Overview

@@ -115,6 +115,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public WindowsInstrumentationConfiguration WindowsInstrumentationConfiguration { get; set; }
 
         /// <summary>
+        /// Configuration for automatic crash dump capturing on a Windows VM.
+        /// Ignored on Linux VMs
+        /// </summary>
+        public WindowsCrashDumpConfiguration WindowsCrashDumpConfiguration { get; set; }
+
+        /// <summary>
         /// The working directory on Windows VM. If this is not provided
         /// we will do a best effort to retrieve it from the start game
         /// command.
@@ -160,6 +166,27 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Is Windows instrumentation enabled
         /// </summary>
         public bool IsEnabled { get; set; }
+    }
+
+    /// <summary>
+    /// Configuration for capturing crash dumps on the VM.
+    /// </summary>
+    public class WindowsCrashDumpConfiguration
+    {
+        /// <summary>
+        /// Is automatic crash dump capturing enabled
+        /// </summary>
+        public bool IsEnabled;
+
+        /// <summary>
+        /// See https://docs.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps for valid values.
+        /// </summary>
+        public int DumpType { get; set; }
+
+        /// <summary>
+        /// See https://docs.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps for valid values.
+        /// </summary>
+        public int CustomDumpFlags { get; set; }
     }
 
     public class MonitoringApplicationConfiguration

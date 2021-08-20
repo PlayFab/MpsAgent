@@ -603,7 +603,22 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
                 {
-                    return new List<string>() { $"cmd /c {request.StartGameCommand}" };
+                    var windowsStartCommand = new List<string>();
+                    
+                    if (request.WindowsCrashDumpConfiguration?.IsEnabled == true)
+                    {
+                        // set crash dump registry keys on startup
+                        windowsStartCommand.AddRange(new string[] {
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v DumpFolder /t REG_EXPAND_SZ /d %PF_SERVER_DUMP_DIRECTORY% /f ;",
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v DumpCount /t REG_DWORD /d 10 /f ;",
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v DumpType /t REG_DWORD /d {request.WindowsCrashDumpConfiguration.DumpType} /f ;",
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v CustomDumpFlags /t REG_DWORD /d {request.WindowsCrashDumpConfiguration.CustomDumpFlags} /f ;",
+                        });
+                    }
+
+                    windowsStartCommand.Add($"cmd /c {request.StartGameCommand}");
+
+                    return windowsStartCommand;
                 }
 
                 return new List<string>() { request.StartGameCommand };

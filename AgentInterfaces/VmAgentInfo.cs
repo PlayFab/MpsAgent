@@ -47,6 +47,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         [ProtoMember(8)]
         public VmNetworkConfiguration NetworkConfiguration { get; set; }
 
+        /// <summary>
+        /// Monitoring work product for this VM
+        /// </summary>
+        [ProtoMember(9)]
+        public string VmMonitoringOutput { get; set; }
+
         public string ToLogString()
         {
             if (SessionHostHeartbeatMap?.Count > 10)
@@ -55,7 +61,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
                 string networkConfiguration = NetworkConfiguration?.ToJsonString() ?? string.Empty;
                 string sessionHostSummary = SessionHostHeartbeatMap.Values.GroupBy(x => x.CurrentGameState).ToDictionary(y => y.Key, y => y.Count()).ToJsonString();
                 return
-                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}";
+                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutput}";
             }
 
             return this.ToJsonString();

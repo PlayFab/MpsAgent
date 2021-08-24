@@ -3,8 +3,11 @@
 
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
+    using global::VmAgent.Core.Interfaces;
     using Mono.Unix;
+    using Mono.Unix.Native;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.IO.Compression;
@@ -12,33 +15,49 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Net;
     using System.Runtime.InteropServices;
     using System.Security.Cryptography.X509Certificates;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using OpenFlags = System.Security.Cryptography.X509Certificates.OpenFlags;
 
     public class SystemOperations : ISystemOperations
     {
-        public static readonly SystemOperations Default = new SystemOperations();
+        public static SystemOperations Default = new SystemOperations();
+        private VmConfiguration _vmConfiguration;
+        private MultiLogger _logger;
+        private IFileSystemOperations _fileSystemOperations;
 
-        private SystemOperations()
+        //This is also present on the VmAgent startup script, change it there as well
+        public readonly string User = "glados";
+        public SystemOperations(VmConfiguration vmConfiguration = null, MultiLogger logger = null, IFileSystemOperations fileSystemOperations = null)
         {
+            _vmConfiguration = vmConfiguration;
+            _logger = logger;
+            _fileSystemOperations = fileSystemOperations ?? new FileSystemOperations();
         }
 
         public DateTime UtcNow => DateTime.UtcNow;
         public void ExtractToDirectory(string sourcePath, string targetPath)
         {
+            DirectoryInfo directoryInfo = new DirectoryInfo(targetPath);
             // Clean up the directory if it's already there before extracting,
             // otherwise we'll get an exception
-            if (Directory.Exists(targetPath))
-            {
-                Directory.Delete(targetPath);
-            }
+            DeleteDirectoryIfExists(directoryInfo.FullName);
 
-            ZipFile.ExtractToDirectory(sourcePath, targetPath);
+
+            CreateDirectoryAndParents(directoryInfo.Parent);
+            
+            _fileSystemOperations.ExtractToDirectory(sourcePath, targetPath);
+            
+            SetUnixOwnerIfNeeded(targetPath, true);
+
         }
 
         public void CreateZipFile(string sourceDirectory, string destinationFilename)
         {
-            ZipFile.CreateFromDirectory(sourceDirectory, destinationFilename);
+            _fileSystemOperations.CreateZipFile(sourceDirectory, destinationFilename);
+
+            SetUnixOwnerIfNeeded(destinationFilename);
         }
 
         public Task Delay(int milliseconds)
@@ -63,9 +82,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void DeleteDirectoryIfExists(string pathToDirectory)
         {
-            if (Directory.Exists(pathToDirectory))
+            DirectoryInfo directoryInfo = new DirectoryInfo(pathToDirectory);
+            if ( _fileSystemOperations.Exists(directoryInfo))
             {
-                Directory.Delete(pathToDirectory, true);
+                _fileSystemOperations.Delete(directoryInfo);
             }
         }
 
@@ -86,10 +106,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public void CreateDirectory(string fullPath)
         {
-            Directory.CreateDirectory(fullPath);
+            DirectoryInfo directoryInfo = new DirectoryInfo(fullPath);
+            CreateDirectoryAndParents(directoryInfo);
         }
 
-        // From MSDN: https://msdn.microsoft.com/en-us/library/system.io.directoryinfo.aspx
         public void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo target)
         {
             if (string.Equals(source.FullName, target.FullName, StringComparison.Ordinal))
@@ -97,52 +117,71 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 return;
             }
 
-            // Note, if the directory already exists, it doesn't try to recreate it.
-            Directory.CreateDirectory(target.FullName);
+            _fileSystemOperations.Create(target);
+            SetUnixOwnerIfNeeded(target.FullName);
 
             // Copy each file into it's new directory.
-            foreach (FileInfo fi in source.GetFiles())
+            foreach (FileInfo fi in _fileSystemOperations.GetFiles(source))
             {
-                fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+                _fileSystemOperations.CopyTo(fi, Path.Combine(target.ToString(), fi.Name), true);
+                SetUnixOwnerIfNeeded(Path.Combine(target.ToString(), fi.Name));
             }
 
             // Copy each subdirectory using recursion.
-            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            foreach (DirectoryInfo diSourceSubDir in _fileSystemOperations.GetDirectories(source))
             {
-                DirectoryInfo nextTargetSubDir =
-                    target.CreateSubdirectory(diSourceSubDir.Name);
-                this.CopyDirectoryContents(diSourceSubDir, nextTargetSubDir);
+                //It's ok to create the directory here, the recursion will set the permissions on the next call
+                DirectoryInfo nextTargetSubDir = _fileSystemOperations.CreateSubdirectory(target, diSourceSubDir.Name);
+                CopyDirectoryContents(diSourceSubDir, nextTargetSubDir);
             }
         }
 
         public void FileAppendAllText(string path, string contents)
         {
-            File.AppendAllText(path, contents);
+            FileInfo fileInfo = new FileInfo(path);
+            CreateDirectoryAndParents(fileInfo.Directory);
+            _fileSystemOperations.AppendAllText(path, contents);
+            SetUnixOwnerIfNeeded(path);
         }
         
         public void FileWriteAllText(string path, string contents)
         {
-            File.WriteAllText(path, contents);
+            FileInfo fileInfo = new FileInfo(path);
+            CreateDirectoryAndParents(fileInfo.Directory);
+            _fileSystemOperations.WriteAllText(path, contents);
+            SetUnixOwnerIfNeeded(path);
         }
 
         public void FileCopy(string sourceFilePath, string destinationFilePath)
         {
-            File.Copy(sourceFilePath, destinationFilePath);
+            FileInfo destinationFileInfo = new FileInfo(destinationFilePath);
+            CreateDirectoryAndParents(destinationFileInfo.Directory);
+            _fileSystemOperations.CopyTo(new FileInfo(sourceFilePath), destinationFilePath, true);
+            SetUnixOwnerIfNeeded(destinationFilePath);
         }
 
         public void FileMoveWithOverwrite(string sourceFilePath, string destinationFilePath)
         {
-            File.Move(sourceFilePath, destinationFilePath, true);
+            FileInfo fileInfo = new FileInfo(destinationFilePath);
+            CreateDirectoryAndParents(fileInfo.Directory);
+            _fileSystemOperations.MoveWithOverwrite(sourceFilePath, destinationFilePath);
+            SetUnixOwnerIfNeeded(destinationFilePath);
         }
 
-        public Task FileWriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task FileWriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return File.WriteAllBytesAsync(path, content, cancellationToken);
+            FileInfo fileInfo = new FileInfo(path);
+            CreateDirectoryAndParents(fileInfo.Directory);
+            await _fileSystemOperations.WriteAllBytesAsync(path, content, cancellationToken);
+            SetUnixOwnerIfNeeded(path);
         }
 
-        public Task FileWriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task FileWriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return File.WriteAllTextAsync(path, content, cancellationToken);
+            FileInfo fileInfo = new FileInfo(path);
+            CreateDirectoryAndParents(fileInfo.Directory);
+            await _fileSystemOperations.WriteAllTextAsync(path, content, cancellationToken);
+            SetUnixOwnerIfNeeded(path);
         }
 
         public long FileInfoLength(string path)
@@ -261,5 +300,42 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             var unixFileInfo = new UnixFileInfo(filePath);
             unixFileInfo.FileAccessPermissions = (FileAccessPermissions)permissions;
         }
+
+        public void SetUnixOwnerIfNeeded(string path, bool applyToAllContents = false)
+        {
+            if (_vmConfiguration != null && _vmConfiguration.RunContainersInUsermode)
+            {
+                _logger?.LogVerbose($"Setting unix owner for {path}");
+                _fileSystemOperations.SetUnixOwner(path, User);
+                if (_fileSystemOperations.IsDirectory(path) && applyToAllContents)
+                {
+                    DirectoryInfo dirInfo = new DirectoryInfo(path);
+                    IEnumerable<FileSystemInfo> childItems = _fileSystemOperations.GetFileSystemInfos(dirInfo, true);
+
+                    foreach (FileSystemInfo child in childItems)
+                    {
+                        _fileSystemOperations.SetUnixOwner(child.FullName, User);
+                    }
+                }
+            }
+            else
+            {
+                _logger?.LogVerbose("Unix file setting not needed");
+            }
+        }
+
+        public void CreateDirectoryAndParents(DirectoryInfo directory)
+        {
+            DirectoryInfo parentDirectory;
+            if (_fileSystemOperations.TryGetParentDirectory(directory, out parentDirectory))
+            {
+                if(!_fileSystemOperations.Exists(parentDirectory))
+                {
+                    CreateDirectoryAndParents(parentDirectory);
+                }
+                _fileSystemOperations.Create(directory);
+                SetUnixOwnerIfNeeded(directory.FullName);
+            }  
+        }        
     }
 }

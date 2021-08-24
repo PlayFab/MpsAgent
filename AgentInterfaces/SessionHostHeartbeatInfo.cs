@@ -7,6 +7,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using ProtoBuf;
 
     /// <summary>
@@ -83,6 +85,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// </summary>
         [ProtoMember(11)]
         public string AssignmentId { get; set; }
+
+        /// <summary>
+        /// The state of the crash dump (if any) on this session host.
+        /// </summary>
+        [ProtoMember(12)]
+        public CrashDumpState CrashDumpState { get; set; }
 
         public bool IsStateSame(SessionHostHeartbeatInfo other)
         {
@@ -169,5 +177,17 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// </summary>
         [ProtoMember(1)]
         public string PlayerId { get; set; }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    [ProtoContract]
+    public enum CrashDumpState
+    {
+        [ProtoEnum]
+        None,
+        [ProtoEnum]
+        Present,
+        [ProtoEnum]
+        Throttled,
     }
 }

@@ -66,7 +66,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 PublicIpV4Address = "127.0.0.1",
                 FQDN = "localhost",
                 HostConfigOverrides = GetHostConfig(),
-                ImageDetails = ContainerStartParameters.ImageDetails,
+                ImageDetails = RunContainer ? ContainerStartParameters.ImageDetails : null,
                 AssetDetails = assetDetails,
                 StartGameCommand = RunContainer ? ContainerStartParameters.StartGameCommand : ProcessStartParameters.StartGameCommand,
                 PortMappingsList = PortMappingsList

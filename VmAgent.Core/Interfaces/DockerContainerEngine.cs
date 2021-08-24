@@ -417,7 +417,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 {
                     string pathOnHost = request.UseReadOnlyAssets ? _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, i) :
                     _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(sessionHostInstance, i);
-
+                    //Set for when containers are run as non root
+                    _systemOperations.SetUnixOwnerIfNeeded(pathOnHost, true);
                     volumeBindings.Add($"{pathOnHost}:{request.AssetDetails[i].MountPath}");
                 }
             }
@@ -437,6 +438,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.
             volumeBindings.Add($"{logFolderPathOnVm}:{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}");
 
+            //Set for when containers are run as non root
+            _systemOperations.SetUnixOwnerIfNeeded(_vmConfiguration.VmDirectories.CertificateRootFolderVm, true);
             // All containers will have the certificate folder mapped
             volumeBindings.Add($"{_vmConfiguration.VmDirectories.CertificateRootFolderVm}:{_vmConfiguration.VmDirectories.CertificateRootFolderContainer}");
 
@@ -497,8 +500,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 _logger.LogInformation($"Docker container {id} not found.");
             }
-
-            ProcessDumps(id, logsFolder, sessionHostManager);
         }
 
         public override async Task<bool> TryDelete(string id)
@@ -602,7 +603,22 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
                 {
-                    return new List<string>() { $"cmd /c {request.StartGameCommand}" };
+                    var windowsStartCommand = new List<string>();
+                    
+                    if (request.WindowsCrashDumpConfiguration?.IsEnabled == true)
+                    {
+                        // set crash dump registry keys on startup
+                        windowsStartCommand.AddRange(new string[] {
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v DumpFolder /t REG_EXPAND_SZ /d %PF_SERVER_DUMP_DIRECTORY% /f ;",
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v DumpCount /t REG_DWORD /d 10 /f ;",
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v DumpType /t REG_DWORD /d {request.WindowsCrashDumpConfiguration.DumpType} /f ;",
+                            $"cmd /c reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\" /v CustomDumpFlags /t REG_DWORD /d {request.WindowsCrashDumpConfiguration.CustomDumpFlags} /f ;",
+                        });
+                    }
+
+                    windowsStartCommand.Add($"cmd /c {request.StartGameCommand}");
+
+                    return windowsStartCommand;
                 }
 
                 return new List<string>() { request.StartGameCommand };

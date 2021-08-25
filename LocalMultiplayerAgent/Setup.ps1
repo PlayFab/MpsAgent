@@ -6,7 +6,7 @@
 This script sets up your computer to run the Playfab Multiplayer Server LocalMultiplayerAgent
 
 .PARAMETER AgentPort
-When specified, override the port that will be usef by the agent.
+When specified, override the port that will be used by the agent.
 
 #>
 param

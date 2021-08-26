@@ -18,6 +18,7 @@
     "LocalMultiplayerAgent": {
       "commandName": "Project",
       "launchBrowser": true,
+      "commandLineArgs": "-lcow",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

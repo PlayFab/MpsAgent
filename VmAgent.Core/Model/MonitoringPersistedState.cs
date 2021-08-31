@@ -4,9 +4,6 @@
     public enum MonitoringApplicationState
     {
         Initializing,
-        Downloading,
-        DownloadFailure,
-        Downloaded,
         Installing,
         InstallationFailure,
         Installed,

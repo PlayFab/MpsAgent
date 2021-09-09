@@ -46,11 +46,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             // The VM host folder corresponding to the logFolderId gets mounted under this path for each container.
             // So the logFolderId itself isn't of much significance within the container.
-
-            string vmDirGameLogPath = vmConfiguration.VmDirectories.GameLogsRootFolderContainer;
-            char pathSeperator = vmDirGameLogPath.StartsWith("/data/") ? Path.AltDirectorySeparatorChar : Path.DirectorySeparatorChar;
-
-            return vmDirGameLogPath + pathSeperator;
+            return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.AltDirectorySeparatorChar;
         }
 
         protected override string GetSharedContentFolder(VmConfiguration vmConfiguration)

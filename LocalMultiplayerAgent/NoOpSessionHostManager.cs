@@ -168,5 +168,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         {
             return "";
         }
+
+        public string GetTypeSpecificIdForSessionHost(string sessionHostId)
+        {
+            return "";
+        }
     }
 }

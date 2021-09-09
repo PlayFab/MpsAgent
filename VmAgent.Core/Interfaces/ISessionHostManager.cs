@@ -76,5 +76,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         void SetProfilingOutputFlag(string sessionHostId);
 
         string GetLogFolderForSessionHostId(string sessionHostId);
+
+        string GetTypeSpecificIdForSessionHost(string sessionHostId);
     }
 }

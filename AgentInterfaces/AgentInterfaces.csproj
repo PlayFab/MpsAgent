@@ -9,7 +9,7 @@
     -->
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>PlayFab.MultiplayerServers.AgentInterfaces</PackageId>
-    <PackageVersion>5.3.2</PackageVersion>
+    <PackageVersion>5.3.1</PackageVersion>
     <PackageDescription>Helper library for LocalMultiplayerAgent, part of Azure PlayFab Multiplayer Servers </PackageDescription>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

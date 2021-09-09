@@ -92,6 +92,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         [ProtoMember(12)]
         public CrashDumpState CrashDumpState { get; set; }
 
+        /// <summary>
+        /// The state of the crash dump (if any) on this session host.
+        /// </summary>
+        [ProtoMember(13)]
+        public bool ContainsProfilingOutput { get; set; }
+
         public bool IsStateSame(SessionHostHeartbeatInfo other)
         {
             // TODO : Consider adding a check for the current players elements as well. 

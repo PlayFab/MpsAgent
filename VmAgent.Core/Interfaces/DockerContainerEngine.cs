@@ -366,6 +366,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId, sessionHostManager.VmAgentSettings)
                 .Select(x => $"{x.Key}={x.Value}").ToList();
 
+            if (sessionHostManager.LinuxContainersOnWindows)
+            {
+                environmentValues = environmentValues
+                        .Select(env => env.Replace($"{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}\\",
+                                    $"{_vmConfiguration.VmDirectories.GameLogsRootFolderContainer}" + Path.AltDirectorySeparatorChar))
+                        .ToList();
+            }
+
             string dockerId = await CreateContainer(
                 imageName,
                 environmentValues,

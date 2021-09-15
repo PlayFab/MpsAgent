@@ -68,6 +68,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         private readonly ISystemOperations _systemOperations;
 
+        protected readonly ISessionHostManager _sessionHostManager;
+
         protected readonly SessionHostsStartInfo _sessionHostsStartInfo;
 
         protected abstract string GetGsdkConfigFilePath(string assignmentId, int instanceNumber);
@@ -82,6 +84,15 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             VmConfiguration = vmConfiguration;
             _systemOperations = systemOperations;
             _sessionHostsStartInfo = sessionHostsStartInfo;
+        }
+
+        protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo, ISessionHostManager sessionHostManager)
+        {
+            _logger = logger;
+            VmConfiguration = vmConfiguration;
+            _systemOperations = systemOperations;
+            _sessionHostsStartInfo = sessionHostsStartInfo;
+            _sessionHostManager = sessionHostManager;
         }
 
         public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId, VmAgentSettings agentSettings)

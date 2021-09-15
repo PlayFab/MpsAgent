@@ -250,5 +250,20 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
             new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
 
         }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void IncorrectContainerStartGameCommandShouldFail()
+        {
+            dynamic config = GetValidConfig();            
+            config.RunContainer = true;
+            config.AssetDetails[0].MountPath = "C:\\Assets";
+            config.ContainerStartParameters.StartGameCommand = "E:\\MyGameRocks\\GameServer.exe";
+            MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+
+            settings.SetDefaultsIfNotSpecified();
+            new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+
+        }
     }
 }

@@ -77,13 +77,15 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                     isSuccess = false;
                 }
             }
-            else
+            else if (startGameCommand.Contains("<your_game_server_exe>"))
             {
-                if (startGameCommand.Contains("<your_game_server_exe>"))
-                {
-                    Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid");
-                    isSuccess = false;
-                }
+                 Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid");
+                 isSuccess = false;
+            }
+            else if (!_settings.AssetDetails.IsNullOrEmpty() && !string.IsNullOrEmpty(startGameCommand) && (!_settings.AssetDetails.Any(x => startGameCommand.Contains(x.MountPath, StringComparison.InvariantCultureIgnoreCase))))
+            {
+                 Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid and does not contain the mount path. This should look like: C:\\Assets\\GameServer.exe for example.");
+                 isSuccess = false;
             }
 
             if (_settings.GameCertificateDetails?.Length > 0)
@@ -156,20 +158,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
             if (_settings.AgentListeningPort != 56001)
             {
                 Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running setup.ps1 with the agent port specified.");
-            }
-
-            if (_settings.RunContainer) {
-                foreach (var portList in _settings.PortMappingsList)
-                {
-                    foreach (var portInfo in portList)
-                    {
-                        if (portInfo.NodePort == 0)
-                        {
-                            Console.WriteLine("No NodePort was specified (and RunContainer is true).");
-                            isSuccess = false;
-                        }
-                    }
-                }
             }
 
             return isSuccess;

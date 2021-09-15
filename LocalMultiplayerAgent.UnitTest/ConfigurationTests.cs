@@ -253,7 +253,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void IncorrectContainerStartGameCommandShouldFail()
+        public void InvalidContainerStartGameCommandShouldFail()
         {
             dynamic config = GetValidConfig();            
             config.RunContainer = true;

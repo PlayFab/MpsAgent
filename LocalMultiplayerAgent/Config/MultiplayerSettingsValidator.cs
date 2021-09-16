@@ -164,6 +164,21 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running setup.ps1 with the agent port specified.");
             }
 
+            if (_settings.RunContainer)
+            {
+                foreach (var portList in _settings.PortMappingsList)
+                {
+                    foreach (var portInfo in portList)
+                    {
+                        if (portInfo.NodePort == 0)
+                        {
+                            Console.WriteLine("No NodePort was specified (and RunContainer is true).");
+                            isSuccess = false;
+                        }
+                    }
+                }
+            }
+
             return isSuccess;
 
         }

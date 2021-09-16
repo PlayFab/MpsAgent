@@ -83,10 +83,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                  Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid");
                  isSuccess = false;
             }
-            else if (_settings.AssetDetails != null && !string.IsNullOrEmpty(startGameCommand) && (!_settings.AssetDetails.Any(x => startGameCommand.Contains(x.MountPath, StringComparison.InvariantCultureIgnoreCase))))
+            else if (_settings.AssetDetails != null && _settings.RunContainer && (Globals.GameServerEnvironment == GameServerEnvironment.Windows))
             {
-                 Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid and does not contain the mount path. This should look like: C:\\Assets\\GameServer.exe for example.");
-                 isSuccess = false;
+                if ((!_settings.AssetDetails.Any(x => startGameCommand.Contains(x.MountPath, StringComparison.InvariantCultureIgnoreCase))))
+                {
+                    Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid and does not contain the mount path. This should look like: C:\\Assets\\GameServer.exe for example.");
+                    isSuccess = false;
+                }
             }
 
             if (_settings.GameCertificateDetails?.Length > 0)

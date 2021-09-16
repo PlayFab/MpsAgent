@@ -32,11 +32,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             string debuggingUrl = "https://github.com/PlayFab/gsdkSamples/blob/master/Debugging.md";
             Console.WriteLine($"Check this page for debugging tips: {debuggingUrl}");
-            
+
             // lcow stands for Linux Containers On Windows => https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
-            Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? GameServerEnvironment.Linux : GameServerEnvironment.Windows; // LocalMultiplayerAgent is running only on Windows for the time being
-            MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(File.ReadAllText("MultiplayerSettings.json"));
+            //Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            //    ? GameServerEnvironment.Linux : GameServerEnvironment.Windows; // LocalMultiplayerAgent is running only on Windows for the time being
+
+            Globals.GameServerEnvironment = GameServerEnvironment.Linux;
+            string settingFile = Globals.GameServerEnvironment == GameServerEnvironment.Linux ?
+                "MultiplayerSettings_Linux.json" : "MultiplayerSettings.json";
+
+            MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(File.ReadAllText(settingFile));
 
             settings.SetDefaultsIfNotSpecified();
 

@@ -10,6 +10,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
     using AgentInterfaces;
     using VmAgent.Core.Interfaces;
     using System.Linq;
+    using System.IO;
 
     public class MultiplayerSettingsValidator
     {
@@ -89,7 +90,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 {
                     Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid and does not contain the mount path. This should look like: C:\\Assets\\GameServer.exe for example.");
                     isSuccess = false;
-                }
+                } 
             }
 
             if (_settings.GameCertificateDetails?.Length > 0)

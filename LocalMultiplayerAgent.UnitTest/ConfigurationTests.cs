@@ -253,16 +253,39 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void InvalidContainerStartGameCommandShouldFail()
+        [DataRow("powershell.exe D:\\Assets\\GameServer.ps1")]
+        [DataRow("powershell.exe E:\\Assets\\GameServer.exe")]
+        [DataRow("E:\\MyGameRocks\\GameServer.exe")]
+        [DataRow("C:\\Asset\\GameServer.bat")]
+        public void StartGameCommandThatDoesNotContainMountPathShouldFail(string startGameCommand)
         {
             dynamic config = GetValidConfig();            
             config.RunContainer = true;
             config.AssetDetails[0].MountPath = "C:\\Assets";
-            config.ContainerStartParameters.StartGameCommand = "E:\\MyGameRocks\\GameServer.exe";
+            config.ContainerStartParameters.StartGameCommand = startGameCommand;
             MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
 
             settings.SetDefaultsIfNotSpecified();
             new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        [DataRow("powershell.exe C:\\Assets\\GameServer.ps1")]
+        [DataRow("powershell.exe C:\\Assets\\GameServer.exe")]
+        [DataRow("C:\\Assets\\MyGameRocks\\GameServer.exe")]
+        [DataRow("C:\\Assets\\GameServer.bat")]
+        public void StartGameCommandThatContainsMountPathShouldSucceed(string startGameCommand)
+        {
+            dynamic config = GetValidConfig();
+            config.RunContainer = true;
+            config.AssetDetails[0].MountPath = "C:\\Assets";
+            config.ContainerStartParameters.StartGameCommand = startGameCommand;
+            MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+
+            settings.SetDefaultsIfNotSpecified();
+            new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
 
         }
     }

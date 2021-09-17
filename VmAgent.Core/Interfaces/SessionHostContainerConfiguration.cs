@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             // The VM host folder corresponding to the logFolderId gets mounted under this path for each container.
             // So the logFolderId itself isn't of much significance within the container.
-            if (_sessionHostManager.LinuxContainersOnWindows)
+            if (_sessionHostManager != null && _sessionHostManager.LinuxContainersOnWindows)
             {
                 return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.AltDirectorySeparatorChar;
             }

@@ -26,12 +26,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             _dockerClient = dockerClient;
         }
-        /// <summary>
-        /// /
-        /// </summary>
-        /// <param name="assignmentId"></param>
-        /// <param name="instanceNumber"></param>
-        /// <returns></returns>
+        
         public SessionHostContainerConfiguration(
             VmConfiguration vmConfiguration,
             MultiLogger logger,

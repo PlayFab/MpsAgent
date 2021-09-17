@@ -336,6 +336,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 _fileSystemOperations.Create(directory);
                 SetUnixOwnerIfNeeded(directory.FullName);
             }  
-        }        
+        }
+
+        public bool DirectoryExists(string directoryPath)
+        {
+            DirectoryInfo info = new DirectoryInfo(directoryPath);
+            return _fileSystemOperations.Exists(info);
+        }
     }
 }

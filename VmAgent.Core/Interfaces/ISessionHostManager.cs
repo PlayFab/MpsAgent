@@ -72,5 +72,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         bool IsUnassignable();
 
         void SetCrashDumpState(string sessionHostId, CrashDumpState crashDumpState);
+
+        void SetProfilingOutputFlag(string sessionHostId);
+
+        string GetLogFolderForSessionHostId(string sessionHostId);
+
+        string GetTypeSpecificIdForSessionHost(string sessionHostId);
     }
 }

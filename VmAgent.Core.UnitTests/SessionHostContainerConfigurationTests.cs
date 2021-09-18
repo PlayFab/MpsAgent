@@ -71,8 +71,8 @@ namespace VmAgent.Core.UnitTests
                 new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _sessionHostsStartInfo);
             IDictionary<string, string> envVariables =
                 sessionHostProcessConfiguration.GetEnvironmentVariablesForSessionHost(0, TestLogFolderId, _sessionHostManager.Object.VmAgentSettings);
-            
-            VerifyGetLogPath(envVariables[LogsDirectoryEnvVariable], _sessionHostsStartInfo.SessionHostType);
+
+            Assert.AreEqual(envVariables[LogsDirectoryEnvVariable], Path.Combine(_VmDirectoryRoot, "GameLogs", TestLogFolderId));
         }
 
         [TestMethod]
@@ -81,48 +81,18 @@ namespace VmAgent.Core.UnitTests
         {
             _sessionHostManager.Setup(x => x.LinuxContainersOnWindows).Returns(true);
 
-            AdaptFolderPathsForLinuxContainersOnWindows(_vmConfiguration);
-            
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(_vmConfiguration);
+
             _sessionHostsStartInfo.SessionHostType = SessionHostType.Container;
- 
+
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
                 new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _dockerClient.Object, _sessionHostsStartInfo, _sessionHostManager.Object);
- 
+
             IDictionary<string, string> envVariables =
                 sessionHostContainerConfiguration.GetEnvironmentVariablesForSessionHost(0, TestLogFolderId, _sessionHostManager.Object.VmAgentSettings);
 
-            VerifyGetLogPath(envVariables[LogsDirectoryEnvVariable], _sessionHostsStartInfo.SessionHostType);
-        }
-
-        public void VerifyGetLogPath(string logDirectory, SessionHostType LogsDirectoryEnvVariable)
-        {
-            if (LogsDirectoryEnvVariable == SessionHostType.Process)
-            {
-                Assert.AreEqual(logDirectory, Path.Combine(_VmDirectoryRoot, "GameLogs", TestLogFolderId));
-            }
-            else
-            {
-                string vmContainerPath = _VmDirectoryContainerRoot + "/GameLogs" + "/";
-                Assert.AreEqual(logDirectory, vmContainerPath);
-            }
-        }
-
-        public static void AdaptFolderPathsForLinuxContainersOnWindows(VmConfiguration vmConfiguration)
-        {
-            // running Linux containers with Docker for Windows requires some "weird" path mapping
-            // in the sense that we want to map Linux paths on the container to Windows paths on the host
-            // following method call makes sure of that
-            VmDirectories vmd = vmConfiguration.VmDirectories;
-            vmd.GameSharedContentFolderContainer = replacePathForLinuxContainersOnWindows(vmd.GameSharedContentFolderContainer);
-            vmd.GameLogsRootFolderContainer = replacePathForLinuxContainersOnWindows(vmd.GameLogsRootFolderContainer);
-            vmd.CertificateRootFolderContainer = replacePathForLinuxContainersOnWindows(vmd.CertificateRootFolderContainer);
-            vmd.GsdkConfigRootFolderContainer = replacePathForLinuxContainersOnWindows(vmd.GsdkConfigRootFolderContainer);
-            vmd.GsdkConfigFilePathContainer = replacePathForLinuxContainersOnWindows(vmd.GsdkConfigFilePathContainer);
-        }
-
-        private static string replacePathForLinuxContainersOnWindows(string windowspath)
-        {
-            return windowspath.Replace("\\", "/").Replace("C:/", "/data/");
+            string vmContainerPath = _VmDirectoryContainerRoot + "/GameLogs" + "/";
+            Assert.AreEqual(envVariables[LogsDirectoryEnvVariable], vmContainerPath);
         }
     }
 }

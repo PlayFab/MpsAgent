@@ -72,27 +72,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         protected readonly SessionHostsStartInfo _sessionHostsStartInfo;
 
+        protected readonly bool _isRunningLinuxContainersOnWindows;
+
         protected abstract string GetGsdkConfigFilePath(string assignmentId, int instanceNumber);
 
         protected abstract string GetCertificatesPath(string assignmentId);
 
         protected abstract string GetSharedContentFolderPath();
 
-        protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo)
+        protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo, bool isRunningLinuxContainersOnWindows)
         {
             _logger = logger;
             VmConfiguration = vmConfiguration;
             _systemOperations = systemOperations;
             _sessionHostsStartInfo = sessionHostsStartInfo;
-        }
-
-        protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo, ISessionHostManager sessionHostManager)
-        {
-            _logger = logger;
-            VmConfiguration = vmConfiguration;
-            _systemOperations = systemOperations;
-            _sessionHostsStartInfo = sessionHostsStartInfo;
-            _sessionHostManager = sessionHostManager;
+            _isRunningLinuxContainersOnWindows = isRunningLinuxContainersOnWindows;
         }
 
         public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId, VmAgentSettings agentSettings)

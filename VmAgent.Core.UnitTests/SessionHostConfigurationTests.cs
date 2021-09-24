@@ -41,10 +41,8 @@ namespace VmAgent.Core.UnitTests
         private static string TestAgentIPaddress = "host.docker.internal";
         private static string TestVmId = "vmid";
 
-
         private VmConfiguration _vmConfiguration;
         private MultiLogger _logger;
-        //private Mock<VmAgentCoreInterface.ISystemOperations> _systemOperations;
         private SystemOperations _systemOperations;
         private Mock<ISessionHostManager> _sessionHostManager;
         private Mock<IDockerClient> _dockerClient;
@@ -87,7 +85,7 @@ namespace VmAgent.Core.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void TestEnvVariablesWithSessionContainerOnWindow()
+        public void TestEnvVariablesWithSessionLinuxContainerOnWindow()
         {
             _sessionHostManager.Setup(x => x.LinuxContainersOnWindows).Returns(true);
 
@@ -96,7 +94,7 @@ namespace VmAgent.Core.UnitTests
             _sessionHostsStartInfo.SessionHostType = SessionHostType.Container;
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
-                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, _sessionHostManager.Object);
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, isRunningLinuxContainersOnWindows: true);
 
             IDictionary<string, string> envVariables =
                 sessionHostContainerConfiguration.GetEnvironmentVariablesForSessionHost(0, TestLogFolderId, _sessionHostManager.Object.VmAgentSettings);
@@ -114,7 +112,7 @@ namespace VmAgent.Core.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void TestCreateLegacyGSDKConfigFileWithSessionContainer()
+        public void TestCreateLegacyGSDKConfigFileWithSessionLinuxContainer()
         {
             _vmConfiguration = new VmConfiguration(56001, TestVmId, new VmDirectories(_root), true);
 
@@ -142,7 +140,7 @@ namespace VmAgent.Core.UnitTests
             List<PortMapping> mockPortmapping = _sessionHostsStartInfo.PortMappingsList[0];
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
-                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, _sessionHostManager.Object);
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, true);
 
             sessionHostContainerConfiguration.Create(0, TestdDockerId, TestAgentIPaddress, _vmConfiguration, TestLogFolderId);
 

@@ -12,7 +12,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     public class SessionHostProcessConfiguration : SessionHostConfigurationBase
     {
         public SessionHostProcessConfiguration(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo)
-            : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo)
+            : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo, isRunningLinuxContainersOnWindows: false)
         {
         }
 

@@ -12,9 +12,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
     {
         public const string NullStringValue = "NULL";
 
-        public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings
+        public static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            ContractResolver = new CamelCasePropertyNamesContractResolver() { NamingStrategy = new CamelCaseNamingStrategy(processDictionaryKeys: false, overrideSpecifiedNames: false) },
             Converters = new List<JsonConverter> { new StringEnumConverter() },
             DefaultValueHandling = DefaultValueHandling.Ignore,
             NullValueHandling = NullValueHandling.Ignore

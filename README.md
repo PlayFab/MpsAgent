@@ -17,6 +17,8 @@ An executable that mimics PlayFab Multiplayer Servers (MPS) operations to aid in
 
 These two helper libraries are used by LocalMultiplayerAgent and the production [Azure PlayFab Multiplayer Servers service](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/).
 
+> If you want to test your Linux game servers on Kubernetes, check out [our new developer tool, thundernetes](https://github.com/PlayFab/thundernetes).
+
 ## Building
 
 You need to have [.NET Core](https://dotnet.microsoft.com/download) installed and then just run ...

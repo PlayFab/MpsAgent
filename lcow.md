@@ -4,7 +4,7 @@ You can use LocalMultiplayerAgent to debug your Linux game server by running it 
 
 To run your containerized Linux game servers on Windows, you'll need to perform the following steps:
 
-- Download latest version of LocalMultiplayerAgent from the [Releases](https://github.com/PlayFab/LocalMultiplayerAgent/releases) page on GitHub
+- Download latest version of LocalMultiplayerAgent from the [Releases](https://github.com/PlayFab/MpsAgent/releases/) page on GitHub
 - [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/)
 - Make sure it's running [Linux Containers](https://docs.docker.com/docker-for-windows/#switch-between-windows-and-linux-containers)
 - You should mount one of your hard drives, instructions [here](https://docs.docker.com/docker-for-windows/#file-sharing)

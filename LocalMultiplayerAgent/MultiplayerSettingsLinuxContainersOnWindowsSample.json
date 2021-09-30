@@ -1,6 +1,6 @@
 ﻿{
   "RunContainer": true,
-  "forcePullFromAcrOnLinuxContainersOnWindows": true,
+  "ForcePullFromAcrOnLinuxContainersOnWindows": true,
   "OutputFolder": "C:\\output\\UnityServerLinux",
   "NumHeartBeatsForActivateResponse": 10,
   "NumHeartBeatsForTerminateResponse": 60,

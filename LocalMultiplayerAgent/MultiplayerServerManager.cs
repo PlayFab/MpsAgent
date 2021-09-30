@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             // so if this image is not locally built, docker create will do a docker pull first
             // In another case, we might have built the image locally but tagged with a fake registry name (e.g. myacr.io/mygame:0.1),
             // Then make sure to change the value to false if you want to use the image from local.
-            if (Globals.GameServerEnvironment == GameServerEnvironment.Windows || Globals.Settings.forcePullFromAcrOnLinuxContainersOnWindows)
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Windows || Globals.Settings.ForcePullFromAcrOnLinuxContainersOnWindows)
             {
                 await sessionHostRunner.RetrieveResources(startParameters);
             }

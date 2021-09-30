@@ -17,6 +17,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         private readonly IDockerClient _dockerClient;
 
+        protected readonly bool _isRunningLinuxContainersOnWindows;
         public SessionHostContainerConfiguration(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
@@ -26,6 +27,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             bool isRunningLinuxContainersOnWindows = false) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo, isRunningLinuxContainersOnWindows)
         {
             _dockerClient = dockerClient;
+            _isRunningLinuxContainersOnWindows = isRunningLinuxContainersOnWindows;
         }
         
         protected override string GetGsdkConfigFilePath(string assignmentId, int instanceNumber)

@@ -46,8 +46,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
         public ProcessStartParameters ProcessStartParameters { get; set; }
 
         public SessionConfig SessionConfig { get; set; }
-        
-       
+
+        public bool ForcePullFromAcrOnLinuxContainersOnWindows { get; set; }
 
         public SessionHostsStartInfo ToSessionHostsStartInfo()
         {

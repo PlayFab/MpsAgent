@@ -9,9 +9,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
     using Microsoft.Extensions.Logging;
     using VmAgent.Core;
 
-    /// <summary>
-    ///     Simple class to keep track of global values for the agent
-    /// </summary>
     public static class VmPathHelper
     {
         public static void AdaptFolderPathsForLinuxContainersOnWindows(VmConfiguration VmConfiguration)

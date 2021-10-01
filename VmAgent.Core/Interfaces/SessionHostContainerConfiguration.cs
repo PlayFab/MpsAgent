@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             Interfaces.ISystemOperations systemOperations,
             IDockerClient dockerClient,
             SessionHostsStartInfo sessionHostsStartInfo,
-            bool isRunningLinuxContainersOnWindows = false) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo, isRunningLinuxContainersOnWindows)
+            bool isRunningLinuxContainersOnWindows = false) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo)
         {
             _dockerClient = dockerClient;
             _isRunningLinuxContainersOnWindows = isRunningLinuxContainersOnWindows;

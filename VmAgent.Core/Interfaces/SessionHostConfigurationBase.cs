@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         protected abstract string GetSharedContentFolderPath();
 
-        protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo, bool isRunningLinuxContainersOnWindows = false)
+        protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo)
         {
             _logger = logger;
             VmConfiguration = vmConfiguration;

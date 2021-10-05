@@ -8,9 +8,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Extensions
 
     public static class TaskExtensions
     {
-        public static void Ignore(this Task task, Action<Exception> loggingAction)
+        public static Task Ignore(this Task task, Action<Exception> loggingAction)
         {
-            task.ContinueWith(c => { loggingAction(task.Exception); },
+            return task.ContinueWith(c => { loggingAction(task.Exception); },
                 TaskContinuationOptions.OnlyOnFaulted |
                 TaskContinuationOptions.ExecuteSynchronously);
         }

@@ -7,6 +7,6 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     {
         public bool EnableCrashDumpProcessing { get; set; }
 
-        public bool EnableTelemetry { get; set; }
+        public int MaxLogUploadTimeInSeconds { get; set; }
     }
 }

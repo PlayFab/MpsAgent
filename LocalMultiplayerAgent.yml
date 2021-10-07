@@ -92,4 +92,4 @@ steps:
     tagSource: 'userSpecifiedTag'
     tag: '$(release_version)'
     assets: '$(projectName).publish.zip'
-    addChangeLog: false
+    addChangeLog: true

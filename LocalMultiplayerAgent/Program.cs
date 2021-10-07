@@ -20,10 +20,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     {
         public static async Task Main(string[] args)
         {
-            
+
             string[] salutations =
             {
-                "Have a nice day!", 
+                "Have a nice day!",
                 "Thank you for using PlayFab Multiplayer Servers",
                 "Check out our docs at aka.ms/playfabdocs!",
                 "Have a question? Check our community at community.playfab.com"
@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             string debuggingUrl = "https://github.com/PlayFab/gsdkSamples/blob/master/Debugging.md";
             Console.WriteLine($"Check this page for debugging tips: {debuggingUrl}");
-            
+
             // lcow stands for Linux Containers On Windows => https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
             Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? GameServerEnvironment.Linux : GameServerEnvironment.Windows; // LocalMultiplayerAgent is running only on Windows for the time being
@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             settings.SetDefaultsIfNotSpecified();
 
             MultiplayerSettingsValidator validator = new MultiplayerSettingsValidator(settings);
-            
+
             if (!validator.IsValid())
             {
                 Console.WriteLine("The specified settings are invalid. Please correct them and re-run the agent.");
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             Globals.VmConfiguration = new VmConfiguration(settings.AgentListeningPort, vmId, vmDirectories, false);
             if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Globals.AdaptFolderPathsForLinuxContainersOnWindows();  // Linux Containers on Windows requires special folder mapping
+                VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(Globals.VmConfiguration);  // Linux Containers on Windows requires special folder mapping
             }
 
             Directory.CreateDirectory(rootOutputFolder);

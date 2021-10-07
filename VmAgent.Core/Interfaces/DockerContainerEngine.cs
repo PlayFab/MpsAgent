@@ -361,7 +361,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // specify volume bindings before docker gives us the container id, so using
             // a random guid here instead
             string logFolderId = _systemOperations.NewGuid().ToString("D");
-            ISessionHostConfiguration sessionHostConfiguration = new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient, sessionHostStartInfo);
+            ISessionHostConfiguration sessionHostConfiguration = new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient, sessionHostStartInfo, isRunningLinuxContainersOnWindows: sessionHostManager.LinuxContainersOnWindows);
             IList<PortMapping> portMappings = sessionHostConfiguration.GetPortMappings(instanceNumber);
             List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId, sessionHostManager.VmAgentSettings)
                 .Select(x => $"{x.Key}={x.Value}").ToList();

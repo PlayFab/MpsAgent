@@ -17,16 +17,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         private readonly IDockerClient _dockerClient;
 
+        protected readonly bool _isRunningLinuxContainersOnWindows;
         public SessionHostContainerConfiguration(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
             Interfaces.ISystemOperations systemOperations,
             IDockerClient dockerClient,
-            SessionHostsStartInfo sessionHostsStartInfo) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo)
+            SessionHostsStartInfo sessionHostsStartInfo,
+            bool isRunningLinuxContainersOnWindows = false) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo)
         {
             _dockerClient = dockerClient;
+            _isRunningLinuxContainersOnWindows = isRunningLinuxContainersOnWindows;
         }
-
+        
         protected override string GetGsdkConfigFilePath(string assignmentId, int instanceNumber)
         {
             return VmConfiguration.VmDirectories.GsdkConfigFilePathContainer;
@@ -46,7 +49,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             // The VM host folder corresponding to the logFolderId gets mounted under this path for each container.
             // So the logFolderId itself isn't of much significance within the container.
-            return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.DirectorySeparatorChar;
+            if (_isRunningLinuxContainersOnWindows)
+            {
+                return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.AltDirectorySeparatorChar;
+            }
+            else
+            {
+                return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.DirectorySeparatorChar;
+            }
         }
 
         protected override string GetSharedContentFolder(VmConfiguration vmConfiguration)

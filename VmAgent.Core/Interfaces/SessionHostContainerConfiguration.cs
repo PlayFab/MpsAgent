@@ -103,7 +103,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             if (_sessionHostsStartInfo.PortMappingsList != null && _sessionHostsStartInfo.PortMappingsList.Count > 0)
             {
-                List<PortMapping> result = _sessionHostsStartInfo.PortMappingsList[instanceNumber];
+                List<PortMapping> result = _sessionHostsStartInfo.PortMappingsList[instanceNumber].Select(portMapping => new PortMapping(portMapping)).ToList();
                 if (_shouldPublicPortMatchGamePort)
                 {
                     result.ForEach(portMapping => portMapping.GamePort.Number = portMapping.PublicPort);

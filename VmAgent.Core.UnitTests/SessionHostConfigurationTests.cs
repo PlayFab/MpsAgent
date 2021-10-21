@@ -137,7 +137,7 @@ namespace VmAgent.Core.UnitTests
                 }
             };
 
-            List<PortMapping> mockPortmapping = _sessionHostsStartInfo.PortMappingsList[0];
+            List<PortMapping> mockPortMapping = _sessionHostsStartInfo.PortMappingsList[0];
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
                 new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, true);
@@ -154,7 +154,7 @@ namespace VmAgent.Core.UnitTests
                 LogFolder = "/data/GameLogs/",
                 CertificateFolder = "/data/GameCertificates",
                 SharedContentFolder = "/data/GameSharedContent",
-                GamePorts = mockPortmapping?.ToDictionary(x => x.GamePort.Name, x => x.GamePort.Number.ToString()),
+                GamePorts = mockPortMapping?.ToDictionary(x => x.GamePort.Name, x => x.GamePort.Number.ToString()),
                 PublicIpV4Address = TestPublicIpV4Address,
                 GameServerConnectionInfo = new GameServerConnectionInfo
                 {
@@ -163,9 +163,9 @@ namespace VmAgent.Core.UnitTests
                     {
                         new GamePort()
                         {
-                            Name = mockPortmapping[0].GamePort.Name,
-                            ServerListeningPort = mockPortmapping[0].GamePort.Number,
-                            ClientConnectionPort = mockPortmapping[0].PublicPort
+                            Name = mockPortMapping[0].GamePort.Name,
+                            ServerListeningPort = mockPortMapping[0].GamePort.Number,
+                            ClientConnectionPort = mockPortMapping[0].PublicPort
                         }
                     }
                 }

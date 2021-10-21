@@ -155,6 +155,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
             Protocol = protocol;
         }
 
+        public Port (Port source)
+        {
+            Number = source.Number;
+            Name = source.Name;
+            Protocol = source.Protocol;
+        }
+
         public Port() { }
     }
 
@@ -173,6 +180,18 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         [Required]
         [ProtoMember(3)]
         public Port GamePort { get; set; }
+
+
+        public PortMapping()
+        {
+        }
+
+        public PortMapping(PortMapping source)
+        {
+            PublicPort = source.PublicPort;
+            NodePort = source.NodePort;
+            GamePort = new Port(source.GamePort);
+        }
     }
 
     [ProtoContract]

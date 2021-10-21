@@ -175,5 +175,43 @@ namespace VmAgent.Core.UnitTests
 
             gsdkConfig.Should().BeEquivalentTo(gsdkConfigExpected);
         }
+
+        /// <summary>
+        /// Tests the case that the container port matches the public port when explicitly specified to be so.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void PublicPortMatchesContainerPort()
+        {
+            _vmConfiguration = new VmConfiguration(56001, TestVmId, new VmDirectories(_root), true);
+
+            _sessionHostManager.Setup(x => x.LinuxContainersOnWindows).Returns(true);
+
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(_vmConfiguration);
+
+            _sessionHostsStartInfo.SessionHostType = SessionHostType.Container;
+            _sessionHostsStartInfo.PortMappingsList = new List<List<PortMapping>>() {
+                new List<PortMapping>()
+                {
+                    new PortMapping()
+                    {
+                        GamePort= new Port() {
+                            Name="port",
+                            Number=80,
+                            Protocol= "TCP"
+                        },
+                        PublicPort= 1234,
+                        NodePort = 56001
+                    }
+                }
+            };
+
+            SessionHostContainerConfiguration sessionHostContainerConfiguration =
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, shouldPublicPortMatchGamePort: true);
+
+            IList<PortMapping> result = sessionHostContainerConfiguration.GetPortMappings(0);
+            result[0].PublicPort.Should().Be(_sessionHostsStartInfo.PortMappingsList[0][0].PublicPort);
+            result[0].GamePort.Number.Should().Be(result[0].PublicPort);
+        }
     }
 }

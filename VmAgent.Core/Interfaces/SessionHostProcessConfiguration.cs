@@ -73,21 +73,17 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return portMapping.NodePort;
         }
 
-        /// <inheritdoc/>
-        protected override IEnumerable<GamePort> GetGamePortConfiguration(int instanceNumber)
-        {
-            IList<PortMapping> portMappings = GetPortMappings(instanceNumber);
-            return portMappings.Select(port => new GamePort()
-            {
-                Name = port.GamePort.Name,
-                ServerListeningPort = port.NodePort,
-                ClientConnectionPort = port.PublicPort
-            });
-        }
 
-        protected override IDictionary<string, string> GetPortMappingsInternal(List<PortMapping> portMappings)
+        public override IList<PortMapping> GetPortMappings(int instanceNumber)
         {
-            return portMappings?.ToDictionary(x => x.GamePort.Name, x => x.NodePort.ToString());
+            if (_sessionHostsStartInfo.PortMappingsList != null && _sessionHostsStartInfo.PortMappingsList.Count > 0)
+            {
+                List<PortMapping> result = _sessionHostsStartInfo.PortMappingsList[instanceNumber];
+                result.ForEach(portMapping => portMapping.GamePort.Number = portMapping.NodePort);
+                return result;
+            }
+
+            return null;
         }
 
         protected override string GetVmAgentIpAddressInternal()

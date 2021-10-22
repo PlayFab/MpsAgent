@@ -137,7 +137,7 @@ namespace VmAgent.Core.UnitTests
                 }
             };
 
-            List<PortMapping> mockPortmapping = _sessionHostsStartInfo.PortMappingsList[0];
+            List<PortMapping> mockPortMapping = _sessionHostsStartInfo.PortMappingsList[0];
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
                 new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, true);
@@ -154,7 +154,7 @@ namespace VmAgent.Core.UnitTests
                 LogFolder = "/data/GameLogs/",
                 CertificateFolder = "/data/GameCertificates",
                 SharedContentFolder = "/data/GameSharedContent",
-                GamePorts = mockPortmapping?.ToDictionary(x => x.GamePort.Name, x => x.GamePort.Number.ToString()),
+                GamePorts = mockPortMapping?.ToDictionary(x => x.GamePort.Name, x => x.GamePort.Number.ToString()),
                 PublicIpV4Address = TestPublicIpV4Address,
                 GameServerConnectionInfo = new GameServerConnectionInfo
                 {
@@ -163,9 +163,9 @@ namespace VmAgent.Core.UnitTests
                     {
                         new GamePort()
                         {
-                            Name = mockPortmapping[0].GamePort.Name,
-                            ServerListeningPort = mockPortmapping[0].GamePort.Number,
-                            ClientConnectionPort = mockPortmapping[0].PublicPort
+                            Name = mockPortMapping[0].GamePort.Name,
+                            ServerListeningPort = mockPortMapping[0].GamePort.Number,
+                            ClientConnectionPort = mockPortMapping[0].PublicPort
                         }
                     }
                 }
@@ -174,6 +174,44 @@ namespace VmAgent.Core.UnitTests
             GsdkConfiguration gsdkConfig = JsonConvert.DeserializeObject<GsdkConfiguration>(File.ReadAllText(gsdkConfigFilePath));
 
             gsdkConfig.Should().BeEquivalentTo(gsdkConfigExpected);
+        }
+
+        /// <summary>
+        /// Tests the case that the container port matches the public port when explicitly specified to be so.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void PublicPortMatchesContainerPort()
+        {
+            _vmConfiguration = new VmConfiguration(56001, TestVmId, new VmDirectories(_root), true);
+
+            _sessionHostManager.Setup(x => x.LinuxContainersOnWindows).Returns(true);
+
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(_vmConfiguration);
+
+            _sessionHostsStartInfo.SessionHostType = SessionHostType.Container;
+            _sessionHostsStartInfo.PortMappingsList = new List<List<PortMapping>>() {
+                new List<PortMapping>()
+                {
+                    new PortMapping()
+                    {
+                        GamePort= new Port() {
+                            Name="port",
+                            Number=80,
+                            Protocol= "TCP"
+                        },
+                        PublicPort= 1234,
+                        NodePort = 56001
+                    }
+                }
+            };
+
+            SessionHostContainerConfiguration sessionHostContainerConfiguration =
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, shouldPublicPortMatchGamePort: true);
+
+            IList<PortMapping> result = sessionHostContainerConfiguration.GetPortMappings(0);
+            result[0].PublicPort.Should().Be(_sessionHostsStartInfo.PortMappingsList[0][0].PublicPort);
+            result[0].GamePort.Number.Should().Be(result[0].PublicPort);
         }
     }
 }

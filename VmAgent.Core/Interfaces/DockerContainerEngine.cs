@@ -36,6 +36,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         private readonly int _maxRetryAttempts = 30;
 
+        private readonly bool _shouldPublicPortMatchGamePort;
+
         /// <summary>
         /// The name of the file where the console logs for the server are captured.
         /// </summary>
@@ -50,10 +52,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             VmConfiguration vmConfiguration,
             MultiLogger logger,
             Core.Interfaces.ISystemOperations systemOperations,
-            IDockerClient dockerClient = null)
+            IDockerClient dockerClient = null,
+            bool shouldPublicPortMatchGamePort = false)
             : base (vmConfiguration, logger, systemOperations)
         {
             _dockerClient = dockerClient ?? CreateDockerClient();
+            _shouldPublicPortMatchGamePort = shouldPublicPortMatchGamePort;
         }
 
         private IDockerClient CreateDockerClient()
@@ -351,7 +355,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             string imageName = $"{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
             
             // Support running local images with no explicit registry in the name.
-            if (imageDetails.Registry.Length > 0)
+            if (!string.IsNullOrEmpty(imageDetails.Registry))
             {
                 imageName = $"{imageDetails.Registry}/{imageName}";
             }
@@ -361,7 +365,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // specify volume bindings before docker gives us the container id, so using
             // a random guid here instead
             string logFolderId = _systemOperations.NewGuid().ToString("D");
-            ISessionHostConfiguration sessionHostConfiguration = new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient, sessionHostStartInfo, isRunningLinuxContainersOnWindows: sessionHostManager.LinuxContainersOnWindows);
+            ISessionHostConfiguration sessionHostConfiguration = new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations,
+                _dockerClient, sessionHostStartInfo, isRunningLinuxContainersOnWindows: sessionHostManager.LinuxContainersOnWindows,
+                shouldPublicPortMatchGamePort: _shouldPublicPortMatchGamePort);
             IList<PortMapping> portMappings = sessionHostConfiguration.GetPortMappings(instanceNumber);
             List<string> environmentValues = sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, logFolderId, sessionHostManager.VmAgentSettings)
                 .Select(x => $"{x.Key}={x.Value}").ToList();

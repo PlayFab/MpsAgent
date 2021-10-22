@@ -135,7 +135,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             Dictionary<string, string> certThumbprints =
                 _sessionHostsStartInfo.GameCertificates?.Where(x => x.Thumbprint != null).ToDictionary(x => x.Name, x => x.Thumbprint);
-            IDictionary<string, string> portMappings = GetPortMappingsDict(_sessionHostsStartInfo, instanceNumber);
+            IDictionary<string, string> portMappings = GetPortMappingsDict(instanceNumber);
             if (_sessionHostsStartInfo.IsLegacy)
             {
                 CreateLegacyGSDKConfigFile(instanceNumber, sessionHostUniqueId, certThumbprints, portMappings);
@@ -400,15 +400,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         /// <returns></returns>
         protected abstract int GetLegacyServerListeningPort(PortMapping portMapping);
 
-        public IList<PortMapping> GetPortMappings(int instanceNumber)
-        {
-            if (_sessionHostsStartInfo.PortMappingsList != null && _sessionHostsStartInfo.PortMappingsList.Count > 0)
-            {
-                return _sessionHostsStartInfo.PortMappingsList[instanceNumber];
-            }
-
-            return null;
-        }
+        public abstract IList<PortMapping> GetPortMappings(int instanceNumber);
 
         /// <summary>
         /// Gets the game server connection information (IP Address and ports of the server).
@@ -429,21 +421,22 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         /// The ports include both, the port at which the game server listens on,
         /// and the port to which the clients connect to (which internally maps to the server listening port). 
         /// </summary>
-        /// <param name="instanceNumber"></param>
-        /// <returns></returns>
-        protected abstract IEnumerable<GamePort> GetGamePortConfiguration(int instanceNumber);
-
-        private IDictionary<string, string> GetPortMappingsDict(SessionHostsStartInfo sessionHostsStartInfo, int instanceNumber)
+        /// <param name="instanceNumber">The instance number of the game server on the VM</param>
+        private IEnumerable<GamePort> GetGamePortConfiguration(int instanceNumber)
         {
-            if (sessionHostsStartInfo.PortMappingsList != null && sessionHostsStartInfo.PortMappingsList.Count > 0)
+            IList<PortMapping> portMappings = GetPortMappings(instanceNumber);
+            return portMappings.Select(port => new GamePort()
             {
-                return GetPortMappingsInternal(sessionHostsStartInfo.PortMappingsList[instanceNumber]);
-            }
-
-            return null;
+                Name = port.GamePort.Name,
+                ServerListeningPort = port.GamePort.Number,
+                ClientConnectionPort = port.PublicPort
+            });
         }
 
-        protected abstract IDictionary<string, string> GetPortMappingsInternal(List<PortMapping> portMappings);
+        private IDictionary<string, string> GetPortMappingsDict(int instanceNumber)
+        {
+            return GetPortMappings(instanceNumber)?.ToDictionary(x => x.GamePort.Name, x => x.GamePort.Number.ToString());
+        }
 
         private string GetVmAgentIpAddress()
         {

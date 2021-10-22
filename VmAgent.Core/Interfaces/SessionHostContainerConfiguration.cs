@@ -17,17 +17,22 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         private readonly IDockerClient _dockerClient;
 
-        protected readonly bool _isRunningLinuxContainersOnWindows;
+        private readonly bool _isRunningLinuxContainersOnWindows;
+
+        private readonly bool _shouldPublicPortMatchGamePort;
+
         public SessionHostContainerConfiguration(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
             Interfaces.ISystemOperations systemOperations,
             IDockerClient dockerClient,
             SessionHostsStartInfo sessionHostsStartInfo,
-            bool isRunningLinuxContainersOnWindows = false) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo)
+            bool isRunningLinuxContainersOnWindows = false,
+            bool shouldPublicPortMatchGamePort = false) : base(vmConfiguration, logger, systemOperations, sessionHostsStartInfo)
         {
             _dockerClient = dockerClient;
             _isRunningLinuxContainersOnWindows = isRunningLinuxContainersOnWindows;
+            _shouldPublicPortMatchGamePort = shouldPublicPortMatchGamePort;
         }
         
         protected override string GetGsdkConfigFilePath(string assignmentId, int instanceNumber)
@@ -94,21 +99,20 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return portMapping.GamePort.Number;
         }
 
-        /// <inheritdoc/>
-        protected override IEnumerable<GamePort> GetGamePortConfiguration(int instanceNumber)
+        public override IList<PortMapping> GetPortMappings(int instanceNumber)
         {
-            IList<PortMapping> portMappings = GetPortMappings(instanceNumber);
-            return portMappings.Select(port => new GamePort()
+            if (_sessionHostsStartInfo.PortMappingsList != null && _sessionHostsStartInfo.PortMappingsList.Count > 0)
             {
-                Name = port.GamePort.Name,
-                ServerListeningPort = port.GamePort.Number,
-                ClientConnectionPort = port.PublicPort
-            });
-        }
+                List<PortMapping> result = _sessionHostsStartInfo.PortMappingsList[instanceNumber].Select(portMapping => new PortMapping(portMapping)).ToList();
+                if (_shouldPublicPortMatchGamePort)
+                {
+                    result.ForEach(portMapping => portMapping.GamePort.Number = portMapping.PublicPort);
+                }
 
-        protected override IDictionary<string, string> GetPortMappingsInternal(List<PortMapping> portMappings)
-        {
-            return portMappings?.ToDictionary(x => x.GamePort.Name, x => x.GamePort.Number.ToString());
+                return result;
+            }
+
+            return null;
         }
 
         protected override string GetVmAgentIpAddressInternal()

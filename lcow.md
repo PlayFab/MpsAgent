@@ -43,6 +43,10 @@ To run your containerized Linux game servers on Windows, you'll need to perform 
             }
         ]
     ],
+    "DeploymentMetadata": {
+        "Environment": "LOCAL",
+        "FeaturesEnabled": "List,Of,Features,Enabled"
+    },
     "SessionConfig": {
         "SessionId": "ba67d671-512a-4e7d-a38c-2329ce181946",
         "SessionCookie": null,
@@ -54,7 +58,7 @@ To run your containerized Linux game servers on Windows, you'll need to perform 
 > This file is also included in the latest LocalMultiplayerAgent zip package. Some notes:
 > 1. You must set `RunContainer` to true. This is required for Linux game servers.
 > 2. Modify `imageDetails` with your game server docker image details. Image may be built locally (using [docker build](https://docs.docker.com/engine/reference/commandline/build/) command) or be hosted in a remote container registry.
-> 3. `StartGameCommand` and `AssetDetails` are optional. You don't normally use them when you use a Docker container since all game assets + start game server command can be packaged in the corresponding [Dockerfile](https://docs.docker.com/engine/reference/builder/)
+> 3. `StartGameCommand` and `AssetDetails` are optional. You don't normally use them when you use a Docker container since all game assets + start game server command can be packaged in the corresponding [Dockerfile](https://docs.docker.com/engine/reference/builder/). `DeploymentMetadata` is also optional and can contain up to 30 dictonary mappings of custom metadata to be passed to the container as the `buildMetadata` field.
 > 4. Last, but definitely not least, pay attention to the casing on your `OutputFolder` variable, since Linux containers are case sensitive. If casing is wrong, you might see a Docker exception similar to *error while creating mount source path '/host_mnt/c/output/UnityServerLinux/PlayFabVmAgentOutput/2020-01-30T12-47-09/GameLogs/a94cfbb5-95a4-480f-a4af-749c2d9cf04b': mkdir /host_mnt/c/output: file exists*
 
 - After you perform all the previous steps, you can then run the LocalMultiPlayerAgent with the command `LocalMultiplayerAgent.exe -lcow` (lcow stands for *Linux Containers On Windows*)

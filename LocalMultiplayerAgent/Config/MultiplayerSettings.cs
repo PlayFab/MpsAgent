@@ -49,6 +49,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
         public bool ForcePullFromAcrOnLinuxContainersOnWindows { get; set; }
 
+        public IDictionary<string, string> DeploymentMetadata { get; set; }
+
         public SessionHostsStartInfo ToSessionHostsStartInfo()
         {
             // Clear mount path in process based, otherwise, agent will kick into back-compat mode and try to strip the
@@ -69,7 +71,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 ImageDetails = RunContainer ? ContainerStartParameters.ImageDetails : null,
                 AssetDetails = assetDetails,
                 StartGameCommand = RunContainer ? ContainerStartParameters.StartGameCommand : ProcessStartParameters.StartGameCommand,
-                PortMappingsList = PortMappingsList
+                PortMappingsList = PortMappingsList,
+                DeploymentMetadata = DeploymentMetadata
             };
 
             return startInfo;

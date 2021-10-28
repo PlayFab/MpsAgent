@@ -10,6 +10,10 @@
       "LocalFilePath": "<path_to_game_server_package>"
     }
   ],
+  "DeploymentMetadata": {
+    "Environment": "LOCAL",
+    "FeaturesEnabled": "List,Of,Features,Enabled"
+  },
   "GameCertificateDetails": [],
   "PortMappingsList": [
     [

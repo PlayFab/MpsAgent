@@ -17,6 +17,10 @@
       "Password": ""
     }
   },
+  "DeploymentMetadata": {
+    "Environment": "LOCAL",
+    "FeaturesEnabled": "List,Of,Features,Enabled"
+  },
   "PortMappingsList": [
     [
       {

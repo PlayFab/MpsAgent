@@ -151,6 +151,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             hostConfig.Binds = volumeBindings;
             hostConfig.PortBindings = portMappings?.ToDictionary(p => $"{p.GamePort.Number}/{p.GamePort.Protocol}",
                 p => (IList<PortBinding>)(new List<PortBinding>() { new PortBinding() { HostPort = $"{p.NodePort}/{p.GamePort.Protocol}" } }));
+            hostConfig.CapAdd ??= new List<string>();
+
+            if (_systemOperations.IsOSPlatform(OSPlatform.Linux))
+            {
+                hostConfig.CapAdd.Add("SYS_PTRACE");
+            }
+            
 
             if(hostConfig.LogConfig == null)
             {

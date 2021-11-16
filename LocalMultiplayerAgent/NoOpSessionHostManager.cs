@@ -29,7 +29,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
         public VmAgentSettings VmAgentSettings { get; } = new VmAgentSettings() 
         { 
-            EnableCrashDumpProcessing = false,
             MaxLogUploadTimeInSeconds = 300,
         };
 

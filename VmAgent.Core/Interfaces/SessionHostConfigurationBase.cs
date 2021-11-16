@@ -123,10 +123,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 }
             };
 
-            if (agentSettings.EnableCrashDumpProcessing)
-            {
-                environmentVariables.Add(DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration));
-            }
+            environmentVariables.Add(DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration));
 
             return environmentVariables;
         }

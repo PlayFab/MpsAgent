@@ -32,6 +32,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         // environment variable.
         public const string PublicIPv4AddressEnvVariable = "PUBLIC_IPV4_ADDRESS";
 
+        // This is same as PublicIPv4AddressEnvVariable but with a prefix to standardize env variables.
+        public const string PublicIPv4AddressEnvVariableV2 = "PF_PUBLIC_IPV4_ADDRESS";
+
         public const string FqdnEnvVariable = "PF_FQDN";
 
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
@@ -80,6 +83,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
                 },
                 {
                     PublicIPv4AddressEnvVariable, sessionHostsStartInfo.PublicIpV4Address
+                },
+                {
+                    PublicIPv4AddressEnvVariableV2, sessionHostsStartInfo.PublicIpV4Address
                 },
                 {
                     FqdnEnvVariable, sessionHostsStartInfo.FQDN

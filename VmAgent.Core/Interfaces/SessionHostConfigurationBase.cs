@@ -18,9 +18,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     {
         // The server instance number (1 to NumSessionsPerVm) for this session host.
         private const string ServerInstanceNumberEnvVariable = "PF_SERVER_INSTANCE_NUMBER";
-
         
-
         // Used by the games to share  user generated content (and other files that are downloaded once, used multiple times).
         private const string SharedContentFolderEnvVariable = "PF_SHARED_CONTENT_FOLDER";
 
@@ -74,6 +72,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             {
                 {
                     ConfigFileEnvVariable, GetGsdkConfigFilePath(_sessionHostsStartInfo.AssignmentId, instanceNumber)
+                },
+                {
+                    ServerInstanceNumberEnvVariable, instanceNumber.ToString()
                 },
                 {
                     LogsDirectoryEnvVariable, GetLogFolder(logFolderId, VmConfiguration)

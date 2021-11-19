@@ -52,6 +52,7 @@ namespace VmAgent.Core.UnitTests
         private void ValidateEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo)
         {
             envVariables.Should().Contain(VmConfiguration.PublicIPv4AddressEnvVariable, sessionHostsStartInfo.PublicIpV4Address);
+            envVariables.Should().Contain(VmConfiguration.PublicIPv4AddressEnvVariableV2, sessionHostsStartInfo.PublicIpV4Address);
             envVariables.Should().Contain(VmConfiguration.FqdnEnvVariable, sessionHostsStartInfo.FQDN);
             envVariables.Should().Contain(VmConfiguration.TitleIdEnvVariable, PlayFabTitleId);
             envVariables.Should().Contain(VmConfiguration.BuildIdEnvVariable, DeploymentId.ToString());

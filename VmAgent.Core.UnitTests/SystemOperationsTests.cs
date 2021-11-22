@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace VmAgent.Core.UnitTests
 {
     [TestClass]
-    public class SystemOperationUnitTests
+    public class SystemOperationTests
     {
         private string _root = "C:\\";
         private string _directoryPath;

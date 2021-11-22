@@ -4,12 +4,38 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using AgentInterfaces;
+    using VmAgent.Extensions;
 
 
     public class VmConfiguration
     {
+        // The values prefixed with "PF" can potentially be used by game server.
+        // The values that are not prefixed with PF are used by GSDK and container startup script.
+        // Used by the GSDK and game start scripts to get the Title Id for this session host
+        public const string TitleIdEnvVariable = "PF_TITLE_ID";
+
+        // Used by the GSDK and game start scripts to get the Build Id for this session host
+        public const string BuildIdEnvVariable = "PF_BUILD_ID";
+
+        // Used by the GSDK and game start scripts to get the Azure Region for this session host
+        public const string RegionEnvVariable = "PF_REGION";
+
+        // The VmId of the VM that the session host is running on.
+        public const string VmIdEnvVariable = "PF_VM_ID";
+
+        // Some legacy games ping themselves over the internet for health monitoring.
+        // In order to set up etc\hosts file for those games, we provide the public IP via an
+        // environment variable.
+        public const string PublicIPv4AddressEnvVariable = "PUBLIC_IPV4_ADDRESS";
+
+        // This is same as PublicIPv4AddressEnvVariable but with a prefix to standardize env variables.
+        public const string PublicIPv4AddressEnvVariableV2 = "PF_PUBLIC_IPV4_ADDRESS";
+
+        public const string FqdnEnvVariable = "PF_FQDN";
 
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
 
@@ -19,19 +45,58 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         public VmDirectories VmDirectories { get; }
 
-        public bool RunContainersInUsermode { get; }
-
-
+        public bool RunContainersInUserMode { get; }
 
         public VmConfiguration(int listeningPort, string vmId, VmDirectories vmDirectories, bool runContainersInUserMode = false)
         {
             ListeningPort = listeningPort;
             VmId = vmId;
             VmDirectories = vmDirectories;
-            RunContainersInUsermode = runContainersInUserMode;
+            RunContainersInUserMode = runContainersInUserMode;
         }
 
         public const string AssignmentIdSeparator = ":";
+
+        /// <summary>
+        /// Gets the set of environment variables that's common to scripts running at the VM level and for game servers.
+        /// </summary>
+        /// <param name="sessionHostsStartInfo">The details for starting the game servers.</param>
+        /// <param name="vmConfiguration">The details for the VM.</param>
+        /// <returns>A dictionary of environment variables</returns>
+        /// <remarks>This method is expected to be called only after the VM is assigned (i.e sessionHostsStartInfo is not null).</remarks>
+        public static IDictionary<string, string> GetCommonEnvironmentVariables(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
+        {
+            ArgumentValidator.ThrowIfNull(sessionHostsStartInfo, nameof(sessionHostsStartInfo));
+            VmConfiguration.ParseAssignmentId(sessionHostsStartInfo.AssignmentId, out Guid titleId, out Guid deploymentId, out string region);
+            var environmentVariables = new Dictionary<string, string>()
+            {
+                {
+                    TitleIdEnvVariable, VmConfiguration.GetPlayFabTitleId(titleId)
+                },
+                {
+                    BuildIdEnvVariable, deploymentId.ToString()
+                },
+                {
+                    RegionEnvVariable, region
+                },
+                {
+                    VmIdEnvVariable, vmConfiguration.VmId
+                },
+                {
+                    PublicIPv4AddressEnvVariable, sessionHostsStartInfo.PublicIpV4Address
+                },
+                {
+                    PublicIPv4AddressEnvVariableV2, sessionHostsStartInfo.PublicIpV4Address
+                },
+                {
+                    FqdnEnvVariable, sessionHostsStartInfo.FQDN
+                }
+            };
+
+            sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => environmentVariables.Add(x.Key, x.Value));
+
+            return environmentVariables;
+        }
 
         public static void ParseAssignmentId(string assignmentId, out Guid titleId, out Guid deploymentId, out string region)
         {

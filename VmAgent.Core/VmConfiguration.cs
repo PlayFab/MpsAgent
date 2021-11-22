@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public const string AssignmentIdSeparator = ":";
 
         /// <summary>
-        /// Gets the set of environment variables that's common to scripts running at the VM level and for game servers,
+        /// Gets the set of environment variables that's common to scripts running at the VM level and for game servers.
         /// </summary>
         /// <param name="sessionHostsStartInfo">The details for starting the game servers.</param>
         /// <param name="vmConfiguration">The details for the VM.</param>
@@ -66,6 +66,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         /// <remarks>This method is expected to be called only after the VM is assigned (i.e sessionHostsStartInfo is not null).</remarks>
         public static IDictionary<string, string> GetCommonEnvironmentVariables(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
         {
+            ArgumentValidator.ThrowIfNull(sessionHostsStartInfo, nameof(sessionHostsStartInfo));
             VmConfiguration.ParseAssignmentId(sessionHostsStartInfo.AssignmentId, out Guid titleId, out Guid deploymentId, out string region);
             var environmentVariables = new Dictionary<string, string>()
             {

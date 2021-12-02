@@ -30,6 +30,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
         public static GameServerEnvironment GameServerEnvironment { get; set; }
 
+        public const string ZipExtension = ".zip";
+
+        public const string TarExtension = ".tar";
+
+        public const string TarGZipExtension = ".tar.gz";
     }
 
     public enum GameServerEnvironment

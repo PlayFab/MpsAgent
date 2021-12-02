@@ -147,6 +147,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         private void ExtractAndCopyAsset((int assetNumber, string assetPath) assetDetail)
         {
             string assetFileName = _vmConfiguration.GetAssetDownloadFileName(assetDetail.assetPath);
+
             ExtractAssets(assetFileName,
                 _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, assetDetail.assetNumber));
         }
@@ -163,6 +164,72 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
                 _systemOperations.ExtractToDirectory(assetFileName, targetFolder);
             }
+            else
+            {
+                _systemOperations.CreateDirectory(targetFolder);
+
+                ProcessStartInfo processStartInfo = Path.GetExtension(assetFileName).ToLowerInvariant() == Globals.ZipExtension
+                   ? GetProcessStartInfoForZip(assetFileName, targetFolder)
+                   : GetProcessStartInfoForTarOrGZip(assetFileName, targetFolder);
+
+                _logger.LogInformation($"Starting asset extraction with command arguments: {processStartInfo.Arguments}");
+
+                using (Process process = new Process())
+                {
+                    process.StartInfo = processStartInfo;
+                    (int exitCode, string stdOut, string stdErr) = _systemOperations.RunProcessWithStdCapture(process);
+
+                    if (!string.IsNullOrEmpty(stdOut))
+                    {
+                        _logger.LogVerbose(stdOut);
+                    }
+
+                    if (!string.IsNullOrEmpty(stdErr))
+                    {
+                        _logger.LogError(stdErr);
+                    }
+
+                    if (exitCode != 0)
+                    {
+                        throw new Exception($"Asset extraction for file {assetFileName} failed. Errors: {stdErr ?? string.Empty}");
+                    }
+
+                    _systemOperations.SetUnixOwnerIfNeeded(targetFolder, true);
+                }
+            }
+        }
+
+        private ProcessStartInfo GetProcessStartInfoForZip(string assetFileName, string targetFolder)
+        {
+            return new ProcessStartInfo()
+            {
+                FileName = "/bin/bash",
+
+                // o - overwrite, q - quiet, d - targetDirectory
+                Arguments = $"-c \"unzip -oq {assetFileName} -d {targetFolder}\"",
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+        }
+
+        private ProcessStartInfo GetProcessStartInfoForTarOrGZip(string assetFileName, string targetFolder)
+        {
+            // x - extract, z - decompress, f - filename (needs to be last argument)
+            string tarArguments = Path.GetExtension(assetFileName).ToLowerInvariant() == Globals.TarExtension ? "-xf" : "-xzf";
+            return new ProcessStartInfo()
+            {
+                FileName = "/bin/bash",
+
+                // Tar extraction by default creates a new top level directory. Strip component allows to override that
+                // and extract files directly in to the targetFolder.
+                Arguments = $"-c \"tar {tarArguments} {assetFileName} -C {targetFolder} --strip-components 1\"",
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
         }
     }
 }

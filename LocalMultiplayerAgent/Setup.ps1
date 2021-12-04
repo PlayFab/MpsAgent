@@ -71,7 +71,7 @@ function AddFirewallRules
 $ErrorActionPreference = "Stop"
 
 # Start-Service is idempotent. If the service is already running, it is ignored without error.
-Start-Service docker
+Start-Service com.docker.service
 CreateDockerNetwork;
 
 Write-Host "Verifying firewall rules."

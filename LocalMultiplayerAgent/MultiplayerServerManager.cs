@@ -14,6 +14,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using System.Threading.Tasks;
     using AgentInterfaces;
     using Config;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
     using VmAgent.Model;
@@ -24,17 +25,20 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         private readonly ISessionHostRunnerFactory _sessionHostRunnerFactory;
         private readonly MultiLogger _logger;
         private readonly VmConfiguration _vmConfiguration;
+        private readonly BasicAssetExtractor _basicAssetExtractor;
 
         public MultiplayerServerManager(
             ISystemOperations systemOperations,
             VmConfiguration vmConfiguration,
             MultiLogger logger,
-            ISessionHostRunnerFactory sessionHostRunnerFactory)
+            ISessionHostRunnerFactory sessionHostRunnerFactory,
+            BasicAssetExtractor basicAssetExtractor)
         {
             _sessionHostRunnerFactory = sessionHostRunnerFactory;
             _systemOperations = systemOperations;
             _logger = logger;
             _vmConfiguration = vmConfiguration;
+            _basicAssetExtractor = basicAssetExtractor;
         }
 
         public async Task CreateAndStartContainerWaitForExit(SessionHostsStartInfo startParameters)
@@ -49,6 +53,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                         $"{mapping.GamePort.Name} ({mapping.GamePort.Protocol}): Local port {mapping.NodePort} mapped to container port {mapping.GamePort.Number} ");
                 }
             }
+
+            BasicAssetExtractor.Instance = new BasicAssetExtractor(_systemOperations, _logger, Globals.ZipExtension, Globals.TarExtension);
 
             DownloadAndExtractAllAssets(startParameters);
             DownloadGameCertificates(startParameters);
@@ -75,7 +81,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             _logger.LogInformation("Waiting for heartbeats from the game server.....");
 
             await sessionHostRunner.WaitOnServerExit(containerId).ConfigureAwait(false);
-            
             string logFolder = Path.Combine(Globals.VmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostInfo.LogFolderId);
             await sessionHostRunner.CollectLogs(containerId, logFolder, sessionHostManager);
             await sessionHostRunner.TryDelete(containerId);
@@ -148,88 +153,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         {
             string assetFileName = _vmConfiguration.GetAssetDownloadFileName(assetDetail.assetPath);
 
-            ExtractAssets(assetFileName,
+            BasicAssetExtractor.Instance.ExtractAssets(assetFileName,
                 _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, assetDetail.assetNumber));
-        }
-
-        private void ExtractAssets(string assetFileName, string targetFolder)
-        {
-            // If the OS is windows use the native .NET zip extraction (we only support .zip for Windows).
-            if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (Directory.Exists(targetFolder))
-                {
-                    Directory.Delete(targetFolder, true);
-                }
-
-                _systemOperations.ExtractToDirectory(assetFileName, targetFolder);
-            }
-            else
-            {
-                _systemOperations.CreateDirectory(targetFolder);
-
-                ProcessStartInfo processStartInfo = Path.GetExtension(assetFileName).ToLowerInvariant() == Globals.ZipExtension
-                   ? GetProcessStartInfoForZip(assetFileName, targetFolder)
-                   : GetProcessStartInfoForTarOrGZip(assetFileName, targetFolder);
-
-                _logger.LogInformation($"Starting asset extraction with command arguments: {processStartInfo.Arguments}");
-
-                using (Process process = new Process())
-                {
-                    process.StartInfo = processStartInfo;
-                    (int exitCode, string stdOut, string stdErr) = _systemOperations.RunProcessWithStdCapture(process);
-
-                    if (!string.IsNullOrEmpty(stdOut))
-                    {
-                        _logger.LogVerbose(stdOut);
-                    }
-
-                    if (!string.IsNullOrEmpty(stdErr))
-                    {
-                        _logger.LogError(stdErr);
-                    }
-
-                    if (exitCode != 0)
-                    {
-                        throw new Exception($"Asset extraction for file {assetFileName} failed. Errors: {stdErr ?? string.Empty}");
-                    }
-
-                    _systemOperations.SetUnixOwnerIfNeeded(targetFolder, true);
-                }
-            }
-        }
-
-        private ProcessStartInfo GetProcessStartInfoForZip(string assetFileName, string targetFolder)
-        {
-            return new ProcessStartInfo()
-            {
-                FileName = "/bin/bash",
-
-                // o - overwrite, q - quiet, d - targetDirectory
-                Arguments = $"-c \"unzip -oq {assetFileName} -d {targetFolder}\"",
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
-        }
-
-        private ProcessStartInfo GetProcessStartInfoForTarOrGZip(string assetFileName, string targetFolder)
-        {
-            // x - extract, z - decompress, f - filename (needs to be last argument)
-            string tarArguments = Path.GetExtension(assetFileName).ToLowerInvariant() == Globals.TarExtension ? "-xf" : "-xzf";
-            return new ProcessStartInfo()
-            {
-                FileName = "/bin/bash",
-
-                // Tar extraction by default creates a new top level directory. Strip component allows to override that
-                // and extract files directly in to the targetFolder.
-                Arguments = $"-c \"tar {tarArguments} {assetFileName} -C {targetFolder} --strip-components 1\"",
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
         }
     }
 }

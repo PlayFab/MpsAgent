@@ -15,6 +15,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using Newtonsoft.Json;
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
 
     public class Program
     {
@@ -83,7 +84,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             Globals.SessionConfig = settings.SessionConfig ?? new SessionConfig() { SessionId = Guid.NewGuid() };
             Console.WriteLine($"{string.Join(", ", Globals.SessionConfig.InitialPlayers)}");
-            await new MultiplayerServerManager(SystemOperations.Default, Globals.VmConfiguration, Globals.MultiLogger, SessionHostRunnerFactory.Instance)
+            await new MultiplayerServerManager(SystemOperations.Default, Globals.VmConfiguration, Globals.MultiLogger, SessionHostRunnerFactory.Instance, BasicAssetExtractor.Instance)
                 .CreateAndStartContainerWaitForExit(settings.ToSessionHostsStartInfo());
 
             await host.StopAsync();

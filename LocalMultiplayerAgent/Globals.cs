@@ -29,12 +29,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             new MultiLogger(Logger, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
 
         public static GameServerEnvironment GameServerEnvironment { get; set; }
-
-        public const string ZipExtension = ".zip";
-
-        public const string TarExtension = ".tar";
-
-        public const string TarGZipExtension = ".tar.gz";
     }
 
     public enum GameServerEnvironment

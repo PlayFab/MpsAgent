@@ -12,6 +12,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Microsoft.Azure.Gaming.VmAgent.Core;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Interfaces;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
 
     public class Startup
     {
@@ -36,10 +39,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                     options.SerializerSettings.Converters.Add(new StringEnumConverter());
                 });
+            
+            BasicAssetExtractor.Instance = new BasicAssetExtractor(SystemOperations.Default, Globals.MultiLogger);
 
             services.AddLogging(builder => builder
                 .AddConsole()
                 .AddDebug());
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

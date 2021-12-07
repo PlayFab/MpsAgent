@@ -54,8 +54,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                 }
             }
 
-            BasicAssetExtractor.Instance = new BasicAssetExtractor(_systemOperations, _logger, Globals.ZipExtension, Globals.TarExtension);
-
             DownloadAndExtractAllAssets(startParameters);
             DownloadGameCertificates(startParameters);
 
@@ -153,7 +151,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         {
             string assetFileName = _vmConfiguration.GetAssetDownloadFileName(assetDetail.assetPath);
 
-            BasicAssetExtractor.Instance.ExtractAssets(assetFileName,
+            _basicAssetExtractor.ExtractAssets(assetFileName,
                 _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, assetDetail.assetNumber));
         }
     }

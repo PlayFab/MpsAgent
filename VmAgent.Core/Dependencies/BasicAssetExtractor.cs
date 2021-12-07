@@ -14,15 +14,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
 
         private readonly ISystemOperations _systemOperations;
         private readonly MultiLogger _logger;
-        private string _zipExtension;
-        private string _tarExtension;
 
-        public BasicAssetExtractor(ISystemOperations systemOperations = null, MultiLogger logger = null, string zipExtension = null, string tarExtension = null)
+        public BasicAssetExtractor(ISystemOperations systemOperations = null, MultiLogger logger = null)
         { 
             _systemOperations = systemOperations;
             _logger = logger;
-            _zipExtension = zipExtension;
-            _tarExtension = tarExtension;
         }
 
         public void ExtractAssets(string assetFileName, string targetFolder)
@@ -41,7 +37,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
             {
                 _systemOperations.CreateDirectory(targetFolder);
 
-                ProcessStartInfo processStartInfo = Path.GetExtension(assetFileName).ToLowerInvariant() == _zipExtension
+                ProcessStartInfo processStartInfo = Path.GetExtension(assetFileName).ToLowerInvariant() == Constants.ZipExtension
                    ? GetProcessStartInfoForZip(assetFileName, targetFolder)
                    : GetProcessStartInfoForTarOrGZip(assetFileName, targetFolder);
 
@@ -90,7 +86,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
         private ProcessStartInfo GetProcessStartInfoForTarOrGZip(string assetFileName, string targetFolder)
         {
             // x - extract, z - decompress, f - filename (needs to be last argument)
-            string tarArguments = Path.GetExtension(assetFileName).ToLowerInvariant() == _tarExtension ? "-xf" : "-xzf";
+            string tarArguments = Path.GetExtension(assetFileName).ToLowerInvariant() == Constants.TarExtension ? "-xf" : "-xzf";
             return new ProcessStartInfo()
             {
                 FileName = "/bin/bash",

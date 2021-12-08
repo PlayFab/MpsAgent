@@ -1,14 +1,16 @@
-﻿using Microsoft.Azure.Gaming.VmAgent.Core.Interfaces;
+﻿using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies.Interfaces;
+using Microsoft.Azure.Gaming.VmAgent.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using VmAgent.Core.Interfaces;
 
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
 {
-    public class BasicAssetExtractor
+    public class BasicAssetExtractor: IBasicAssetExtractor
     {
         public static BasicAssetExtractor Instance = new BasicAssetExtractor();
 
@@ -68,7 +70,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
             }
         }
 
-        private ProcessStartInfo GetProcessStartInfoForZip(string assetFileName, string targetFolder)
+
+        public ProcessStartInfo GetProcessStartInfoForZip(string assetFileName, string targetFolder)
         {
             return new ProcessStartInfo()
             {
@@ -83,7 +86,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
             };
         }
 
-        private ProcessStartInfo GetProcessStartInfoForTarOrGZip(string assetFileName, string targetFolder)
+        public ProcessStartInfo GetProcessStartInfoForTarOrGZip(string assetFileName, string targetFolder)
         {
             // x - extract, z - decompress, f - filename (needs to be last argument)
             string tarArguments = Path.GetExtension(assetFileName).ToLowerInvariant() == Constants.TarExtension ? "-xf" : "-xzf";

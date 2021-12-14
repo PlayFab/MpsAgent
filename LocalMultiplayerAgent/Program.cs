@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             Globals.SessionConfig = settings.SessionConfig ?? new SessionConfig() { SessionId = Guid.NewGuid() };
             Console.WriteLine($"{string.Join(", ", Globals.SessionConfig.InitialPlayers)}");
-            await new MultiplayerServerManager(SystemOperations.Default, Globals.VmConfiguration, Globals.MultiLogger, SessionHostRunnerFactory.Instance, BasicAssetExtractor.Instance)
+            await new MultiplayerServerManager(SystemOperations.Default, Globals.VmConfiguration, Globals.MultiLogger, SessionHostRunnerFactory.Instance)
                 .CreateAndStartContainerWaitForExit(settings.ToSessionHostsStartInfo());
 
             await host.StopAsync();

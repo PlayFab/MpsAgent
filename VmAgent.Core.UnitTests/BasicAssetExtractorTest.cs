@@ -18,6 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using VmAgent.Core.Dependencies.Interfaces.Exceptions;
 
 namespace VmAgent.Core.UnitTests
 {
@@ -29,62 +30,69 @@ namespace VmAgent.Core.UnitTests
         private MultiLogger _multiLogger;
         private Mock<ISystemOperations> _mockSystemOperations;
 
-        private readonly string[] LinuxSupportedFileExtensions = 
+        private readonly string[] LinuxSupportedFileExtensions =
             { Constants.ZipExtension, Constants.TarExtension, Constants.TarGZipExtension };
 
-        private readonly string _TarAssetFileName = "testAsset.tar";
-        private readonly string _TarGzAssetFileName = "testAsset.tar.gz";
-        private readonly string _ZipAssetFileName = "testAsset.zip";
         private readonly string _targetFolder = @"/data/targetPath";
 
         [TestInitialize]
         public void BeforeEachTest()
         {
-            _multiLogger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
+            _multiLogger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));      
             _mockSystemOperations = new Mock<ISystemOperations>();
             _basicAssetExtractor = new BasicAssetExtractor(_mockSystemOperations.Object, _multiLogger);
-            
-            _mockSystemOperations.Setup(x => x.IsOSPlatform(OSPlatform.Windows)).Returns(false);
         }
 
-
         [TestMethod, TestCategory("BVT")]
-        public void AssetExtractionFailedOnLinux()
+        [DataRow("testAsset.tar")]
+        public void AssetExtractionFailedOnLinux(string asset)
         {
+            SetUpMockOperationForTest(IsSetUpForWindows: false);
+
             _mockSystemOperations.Setup(x => x.RunProcessWithStdCapture(It.IsAny<Process>())).Returns((1, "stdOut", "stdErr"));
 
-            ExceptionAssert.Throws<Exception>(() => _basicAssetExtractor.ExtractAssets(_TarAssetFileName, _targetFolder));
+            ExceptionAssert.Throws<AssetExtractionFailedException>(() => _basicAssetExtractor.ExtractAssets(asset, _targetFolder));
         }
 
         [TestMethod, TestCategory("BVT")]
-        public void VerifyProcessStartInfoForTar()
+        [DataRow("")]
+        [DataRow("testAsset")]
+        [DataRow("testAsset.7z")]
+        [DataRow("testAsset.rar")]
+        [DataRow("testAsset.tar.gz")]
+        [DataRow("testAsset.tar")]
+        public void ExtractAssetsFailedNonSupportedExtensionsWindows(string archiveFileName)
         {
-            ProcessStartInfo testProcessInfo = 
-                _basicAssetExtractor.GetProcessStartInfoForTarOrGZip(_TarAssetFileName, _targetFolder);
+            SetUpMockOperationForTest(IsSetUpForWindows: true);
 
-            ProcessStartInfo expectedProcessInfo = GetExpectedProcessInfoOnLinux(_TarAssetFileName, _targetFolder);
-
-            VerifyValidProcessStartInfo(testProcessInfo, expectedProcessInfo);
+            ExceptionAssert.Throws<AssetExtractionFailedException>(() => _basicAssetExtractor.ExtractAssets(archiveFileName, _targetFolder));
         }
 
         [TestMethod, TestCategory("BVT")]
-        public void VerifyProcessStartInfoForTarGZ()
+        [DataRow("")]
+        [DataRow("testAsset")]
+        [DataRow("testAsset.7z")]
+        public void ExtractAssetsFailedNonSupportedExtensionsLinux(string archiveFileName)
         {
+            SetUpMockOperationForTest(IsSetUpForWindows: false);
+
+            ExceptionAssert.Throws<AssetExtractionFailedException>(() => _basicAssetExtractor.ExtractAssets(archiveFileName, _targetFolder));
+        }
+
+        [TestMethod, TestCategory("BVT")]
+        [DataRow("testAsset.tar.gz")]
+        [DataRow("testAsset.tar")]
+        [DataRow("testAsset.zip")]
+        public void VerifyProcessStartInfoForArchive(string archiveAssetFileName)
+        {
+            SetUpMockOperationForTest(IsSetUpForWindows: false);
+
             ProcessStartInfo testProcessInfo =
-                _basicAssetExtractor.GetProcessStartInfoForTarOrGZip(_TarGzAssetFileName, _targetFolder);
+             Path.GetExtension(archiveAssetFileName).ToLowerInvariant() == Constants.ZipExtension
+                  ? _basicAssetExtractor.GetProcessStartInfoForZip(archiveAssetFileName, _targetFolder)
+                  : _basicAssetExtractor.GetProcessStartInfoForTarOrGZip(archiveAssetFileName, _targetFolder);
 
-            ProcessStartInfo expectedProcessInfo = GetExpectedProcessInfoOnLinux(_TarGzAssetFileName, _targetFolder);
-
-            VerifyValidProcessStartInfo(testProcessInfo, expectedProcessInfo);
-        }
-
-        [TestMethod, TestCategory("BVT")]
-        public void VerifyProcessStartInfoForZipOnLinux()
-        {
-            ProcessStartInfo testProcessInfo =
-                _basicAssetExtractor.GetProcessStartInfoForZip(_ZipAssetFileName, _targetFolder);
-
-            ProcessStartInfo expectedProcessInfo = GetExpectedProcessInfoOnLinux(_ZipAssetFileName, _targetFolder);
+            ProcessStartInfo expectedProcessInfo = GetExpectedProcessInfoOnLinux(archiveAssetFileName, _targetFolder);
 
             VerifyValidProcessStartInfo(testProcessInfo, expectedProcessInfo);
         }
@@ -99,15 +107,8 @@ namespace VmAgent.Core.UnitTests
             Assert.AreEqual(expectedProcessInfo.CreateNoWindow, testProcessInfo.CreateNoWindow);
         }
 
-        public bool ValidateAssetFileName(string assetFileName)
-        {
-            return LinuxSupportedFileExtensions.Any(extension => assetFileName.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase));
-        }
-
         public ProcessStartInfo GetExpectedProcessInfoOnLinux(string assetFileName, string targetFolder)
-        {
-            Assert.IsTrue(ValidateAssetFileName(assetFileName));
-            
+        {        
             string fileExtension = Path.GetExtension(assetFileName).ToLowerInvariant();
 
             string argumentForExtraction = "";
@@ -130,5 +131,11 @@ namespace VmAgent.Core.UnitTests
                 CreateNoWindow = true
             };
         }
+
+        public void SetUpMockOperationForTest(bool IsSetUpForWindows)
+        {
+            _mockSystemOperations.Setup(x => x.IsOSPlatform(OSPlatform.Windows)).Returns(IsSetUpForWindows);
+        }
+
     }
 }

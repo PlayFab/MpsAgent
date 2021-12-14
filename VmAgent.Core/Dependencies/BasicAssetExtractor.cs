@@ -4,30 +4,40 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using VmAgent.Core.Dependencies.Interfaces.Exceptions;
 using VmAgent.Core.Interfaces;
 
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
 {
-    public class BasicAssetExtractor: IBasicAssetExtractor
+    public class BasicAssetExtractor : IBasicAssetExtractor
     {
-        public static BasicAssetExtractor Instance = new BasicAssetExtractor();
-
         private readonly ISystemOperations _systemOperations;
         private readonly MultiLogger _logger;
 
+        private readonly string[] LinuxSupportedFileExtensions =
+            { Constants.ZipExtension, Constants.TarExtension, Constants.TarGZipExtension };
+
         public BasicAssetExtractor(ISystemOperations systemOperations = null, MultiLogger logger = null)
-        { 
+        {
             _systemOperations = systemOperations;
             _logger = logger;
         }
 
         public void ExtractAssets(string assetFileName, string targetFolder)
         {
+            string fileExtension = Path.GetExtension(assetFileName).ToLowerInvariant();
+
             // If the OS is windows use the native .NET zip extraction (we only support .zip for Windows).
             if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
             {
+                if (fileExtension != Constants.ZipExtension)
+                {
+                    throw new AssetExtractionFailedException($"Only Zip format is supported in Windows. Unable to extract {assetFileName}.");
+                }
+
                 if (Directory.Exists(targetFolder))
                 {
                     Directory.Delete(targetFolder, true);
@@ -37,6 +47,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
             }
             else
             {
+                if (!LinuxSupportedFileExtensions.Any(extension => assetFileName.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    throw new AssetExtractionFailedException($"Only Tar, Tar.gz and Zip formats are supported in Linux. Unable to extract {assetFileName}.");
+                }
+
                 _systemOperations.CreateDirectory(targetFolder);
 
                 ProcessStartInfo processStartInfo = Path.GetExtension(assetFileName).ToLowerInvariant() == Constants.ZipExtension
@@ -62,7 +77,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
 
                     if (exitCode != 0)
                     {
-                        throw new Exception($"Asset extraction for file {assetFileName} failed. Errors: {stdErr ?? string.Empty}");
+                        throw new AssetExtractionFailedException($"Asset extraction for file {assetFileName} failed. Errors: {stdErr ?? string.Empty}");
                     }
 
                     _systemOperations.SetUnixOwnerIfNeeded(targetFolder, true);

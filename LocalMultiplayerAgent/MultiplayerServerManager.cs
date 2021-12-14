@@ -32,13 +32,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             VmConfiguration vmConfiguration,
             MultiLogger logger,
             ISessionHostRunnerFactory sessionHostRunnerFactory,
-            BasicAssetExtractor basicAssetExtractor)
+            BasicAssetExtractor basicAssetExtractor = null)
         {
             _sessionHostRunnerFactory = sessionHostRunnerFactory;
             _systemOperations = systemOperations;
             _logger = logger;
             _vmConfiguration = vmConfiguration;
-            _basicAssetExtractor = basicAssetExtractor;
+            _basicAssetExtractor = new BasicAssetExtractor(_systemOperations, _logger);
         }
 
         public async Task CreateAndStartContainerWaitForExit(SessionHostsStartInfo startParameters)

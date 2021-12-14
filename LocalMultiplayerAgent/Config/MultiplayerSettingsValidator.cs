@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS.");
+                Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");
                 return false;
             }
 

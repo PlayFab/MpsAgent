@@ -16,23 +16,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
     public abstract class SessionHostConfigurationBase : ISessionHostConfiguration
     {
-        // The values prefixed with "PF" can potentially be used by game server.
-        // The values that are not prefixed with PF are used by GSDK and container startup script.
-        // Used by the GSDK and game start scripts to get the Title Id for this session host
-        public const string TitleIdEnvVariable = "PF_TITLE_ID";
-
-        // Used by the GSDK and game start scripts to get the Build Id for this session host
-        public const string BuildIdEnvVariable = "PF_BUILD_ID";
-
-        // Used by the GSDK and game start scripts to get the Azure Region for this session host
-        public const string RegionEnvVariable = "PF_REGION";
-
         // The server instance number (1 to NumSessionsPerVm) for this session host.
         private const string ServerInstanceNumberEnvVariable = "PF_SERVER_INSTANCE_NUMBER";
-
-        // The VmId of the VM that the session host is running on.
-        public const string VmIdEnvVariable = "PF_VM_ID";
-
+        
         // Used by the games to share  user generated content (and other files that are downloaded once, used multiple times).
         private const string SharedContentFolderEnvVariable = "PF_SHARED_CONTENT_FOLDER";
 
@@ -41,11 +27,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         // Used by the startup script to install Game Certificates
         private const string CertificateFolderEnvVariable = "CERTIFICATE_FOLDER";
-
-        // Some legacy games ping themselves over the internet for health monitoring.
-        // In order to set up etc\hosts file for those games, we provide the public IP via an
-        // environment variable.
-        private const string PublicIPv4AddressEnvVariable = "PUBLIC_IPV4_ADDRESS";
 
         /// <summary>
         /// An environment variable capturing the logs folder for a game server.
@@ -86,13 +67,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public IDictionary<string, string> GetEnvironmentVariablesForSessionHost(int instanceNumber, string logFolderId, VmAgentSettings agentSettings)
         {
-            VmConfiguration.ParseAssignmentId(_sessionHostsStartInfo.AssignmentId, out Guid titleId, out Guid deploymentId, out string region);
-
             // Note that most of these are being provided based on customer request
             var environmentVariables = new Dictionary<string, string>()
             {
                 {
                     ConfigFileEnvVariable, GetGsdkConfigFilePath(_sessionHostsStartInfo.AssignmentId, instanceNumber)
+                },
+                {
+                    ServerInstanceNumberEnvVariable, instanceNumber.ToString()
                 },
                 {
                     LogsDirectoryEnvVariable, GetLogFolder(logFolderId, VmConfiguration)
@@ -104,27 +86,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     CertificateFolderEnvVariable, GetCertificatesPath(_sessionHostsStartInfo.AssignmentId)
                 },
                 {
-                    TitleIdEnvVariable, VmConfiguration.GetPlayFabTitleId(titleId)
-                },
-                {
-                    BuildIdEnvVariable, deploymentId.ToString()
-                },
-                {
-                    RegionEnvVariable, region
-                },
-                {
-                    ServerInstanceNumberEnvVariable, instanceNumber.ToString()
-                },
-                {
-                    VmIdEnvVariable, VmConfiguration.VmId
-                },
-                {
-                    PublicIPv4AddressEnvVariable, _sessionHostsStartInfo.PublicIpV4Address
-                },
-                {
                     DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration)
                 }
             };
+
+            environmentVariables.AddRange(VmConfiguration.GetCommonEnvironmentVariables(_sessionHostsStartInfo, VmConfiguration));
 
             return environmentVariables;
         }

@@ -84,15 +84,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 },
                 {
                     CertificateFolderEnvVariable, GetCertificatesPath(_sessionHostsStartInfo.AssignmentId)
+                },
+                {
+                    DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration)
                 }
             };
 
             environmentVariables.AddRange(VmConfiguration.GetCommonEnvironmentVariables(_sessionHostsStartInfo, VmConfiguration));
-
-            if (agentSettings.EnableCrashDumpProcessing)
-            {
-                environmentVariables.Add(DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration));
-            }
 
             return environmentVariables;
         }

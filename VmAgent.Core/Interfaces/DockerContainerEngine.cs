@@ -440,12 +440,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
 
-            if (agentSettings.EnableCrashDumpProcessing)
-            {
-                // Create the dumps folder as a subfolder of the logs folder
-                string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
-                _systemOperations.CreateDirectory(dumpFolderPathOnVm);
-            }
+            // Create the dumps folder as a subfolder of the logs folder
+            string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+            _systemOperations.CreateDirectory(dumpFolderPathOnVm);
 
             // Set up the log folder. Maps D:\GameLogs\{logFolderId} on the container host to C:\GameLogs on the container.
             // TODO: TBD whether the log folder should be taken as input from developer during ingestion.

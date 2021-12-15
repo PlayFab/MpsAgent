@@ -63,7 +63,7 @@ namespace VmAgent.Core.UnitTests
             _sessionHostsStartInfo.AssignmentId = AssignmentId;
             _sessionHostsStartInfo.PublicIpV4Address = TestPublicIpV4Address;
 
-            _sessionHostManager.Setup(x => x.VmAgentSettings).Returns(new VmAgentSettings() { EnableCrashDumpProcessing = false });
+            _sessionHostManager.Setup(x => x.VmAgentSettings).Returns(new VmAgentSettings());
         }
 
         [TestMethod]

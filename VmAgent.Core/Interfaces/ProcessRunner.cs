@@ -35,12 +35,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             string logFolderPathOnVm = Path.Combine(_vmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostUniqueId);
             _systemOperations.CreateDirectory(logFolderPathOnVm);
 
-            if (sessionHostManager.VmAgentSettings.EnableCrashDumpProcessing)
-            {
-                // Create the dumps folder as a subfolder of the logs folder
-                string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
-                _systemOperations.CreateDirectory(dumpFolderPathOnVm);
-            }
+            // Create the dumps folder as a subfolder of the logs folder
+            string dumpFolderPathOnVm = Path.Combine(logFolderPathOnVm, VmDirectories.GameDumpsFolderName);
+            _systemOperations.CreateDirectory(dumpFolderPathOnVm);
 
             ISessionHostConfiguration sessionHostConfiguration = new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations, sessionHostStartInfo);
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber);

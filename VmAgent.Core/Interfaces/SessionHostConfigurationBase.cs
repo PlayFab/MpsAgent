@@ -120,13 +120,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 },
                 {
                     PublicIPv4AddressEnvVariable, _sessionHostsStartInfo.PublicIpV4Address
+                },
+                {
+                    DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration)
                 }
             };
-
-            if (agentSettings.EnableCrashDumpProcessing)
-            {
-                environmentVariables.Add(DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration));
-            }
 
             return environmentVariables;
         }

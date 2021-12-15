@@ -7,8 +7,6 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
     public class VmAgentSettings
     {
-        public bool EnableCrashDumpProcessing { get; set; }
-
         public int MaxLogUploadTimeInSeconds { get; set; }
 
         /// <summary>

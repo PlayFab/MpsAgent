@@ -29,7 +29,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             new MultiLogger(Logger, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
 
         public static GameServerEnvironment GameServerEnvironment { get; set; }
-
     }
 
     public enum GameServerEnvironment

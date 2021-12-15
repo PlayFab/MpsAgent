@@ -35,9 +35,15 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 throw new Exception("OutputFolder or TitleId not found. Call SetDefaultsIfNotSpecified() before this method");
             }
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Console.WriteLine("Running LocalMultiplayerAgent on Linux is not supported yet.");
+                Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");
+                return false;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && _settings.RunContainer)
+            {
+                Console.WriteLine("Running LocalMultiplayerAgent as container mode is not yet supported on Linux. Please set RunContainer to false in MultiplayerSettings.json");
                 return false;
             }
 

@@ -15,6 +15,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using Newtonsoft.Json;
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
 
     public class Program
     {

@@ -14,6 +14,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using System.Threading.Tasks;
     using AgentInterfaces;
     using Config;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
     using VmAgent.Model;
@@ -24,17 +25,20 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         private readonly ISessionHostRunnerFactory _sessionHostRunnerFactory;
         private readonly MultiLogger _logger;
         private readonly VmConfiguration _vmConfiguration;
+        private readonly BasicAssetExtractor _basicAssetExtractor;
 
         public MultiplayerServerManager(
             ISystemOperations systemOperations,
             VmConfiguration vmConfiguration,
             MultiLogger logger,
-            ISessionHostRunnerFactory sessionHostRunnerFactory)
+            ISessionHostRunnerFactory sessionHostRunnerFactory,
+            BasicAssetExtractor basicAssetExtractor = null)
         {
             _sessionHostRunnerFactory = sessionHostRunnerFactory;
             _systemOperations = systemOperations;
             _logger = logger;
             _vmConfiguration = vmConfiguration;
+            _basicAssetExtractor = new BasicAssetExtractor(_systemOperations, _logger);
         }
 
         public async Task CreateAndStartContainerWaitForExit(SessionHostsStartInfo startParameters)
@@ -75,7 +79,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             _logger.LogInformation("Waiting for heartbeats from the game server.....");
 
             await sessionHostRunner.WaitOnServerExit(containerId).ConfigureAwait(false);
-            
             string logFolder = Path.Combine(Globals.VmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostInfo.LogFolderId);
             await sessionHostRunner.CollectLogs(containerId, logFolder, sessionHostManager);
             await sessionHostRunner.TryDelete(containerId);
@@ -147,22 +150,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         private void ExtractAndCopyAsset((int assetNumber, string assetPath) assetDetail)
         {
             string assetFileName = _vmConfiguration.GetAssetDownloadFileName(assetDetail.assetPath);
-            ExtractAssets(assetFileName,
+
+            _basicAssetExtractor.ExtractAssets(assetFileName,
                 _vmConfiguration.GetAssetExtractionFolderPathForSessionHost(0, assetDetail.assetNumber));
-        }
-
-        private void ExtractAssets(string assetFileName, string targetFolder)
-        {
-            // If the OS is windows use the native .NET zip extraction (we only support .zip for Windows).
-            if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (Directory.Exists(targetFolder))
-                {
-                    Directory.Delete(targetFolder, true);
-                }
-
-                _systemOperations.ExtractToDirectory(assetFileName, targetFolder);
-            }
         }
     }
 }

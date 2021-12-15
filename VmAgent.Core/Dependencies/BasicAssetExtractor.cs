@@ -47,6 +47,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
             }
             else
             {
+                // If the OS is Linux, we need to extract files using Linux Command Line.
                 if (!LinuxSupportedFileExtensions.Any(extension => assetFileName.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     throw new AssetExtractionFailedException($"Only Tar, Tar.gz and Zip formats are supported in Linux. Unable to extract {assetFileName}.");

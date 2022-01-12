@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             _systemOperations = systemOperations;
         }
 
-        abstract public Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager);
+        abstract public Task CollectLogs(string id, string logsFolder, string dumpsFolderVm, ISessionHostManager sessionHostManager);
 
         abstract public Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager);
 

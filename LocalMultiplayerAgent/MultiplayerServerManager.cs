@@ -74,14 +74,19 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             NoOpSessionHostManager sessionHostManager = new NoOpSessionHostManager();
             SessionHostInfo sessionHostInfo =
                 await sessionHostRunner.CreateAndStart(0, new GameResourceDetails { SessionHostsStartInfo = startParameters }, sessionHostManager);
-            string containerId = sessionHostInfo.TypeSpecificId;
+            if (sessionHostInfo == null)
+            {
+                return;
+            }
+
+            string typeSpecificId = sessionHostInfo.TypeSpecificId;
             
             _logger.LogInformation("Waiting for heartbeats from the game server.....");
 
-            await sessionHostRunner.WaitOnServerExit(containerId).ConfigureAwait(false);
+            await sessionHostRunner.WaitOnServerExit(typeSpecificId).ConfigureAwait(false);
             string logFolder = Path.Combine(Globals.VmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostInfo.LogFolderId);
-            await sessionHostRunner.CollectLogs(containerId, logFolder, sessionHostManager);
-            await sessionHostRunner.TryDelete(containerId);
+            await sessionHostRunner.CollectLogs(typeSpecificId, logFolder, Globals.VmConfiguration.VmDirectories.DumpsRootFolderVm, sessionHostManager);
+            await sessionHostRunner.TryDelete(typeSpecificId);
         }
 
         private void DownloadAndExtractAllAssets(SessionHostsStartInfo gameResourceDetails)

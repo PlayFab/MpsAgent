@@ -71,11 +71,27 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(sessionHost);
         }
 
-        public override Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override Task CollectLogs(string processId, string logsFolder, string dumpsFolderVm, ISessionHostManager sessionHostManager)
         {
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
-            // For now we don't do anything here. If required, we can add action handlers (see SystemOperations.RunProcess for example).
+            // If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
+            DirectoryInfo dumpsDirectory = new DirectoryInfo(dumpsFolderVm);
+            string dmpFileEnding = $".{processId}.dmp";
+
+            try
+            {
+                foreach (FileInfo dumpFile in dumpsDirectory.EnumerateFiles())
+                {
+                    if (dumpFile.Name.EndsWith(dmpFileEnding))
+                    {
+                        string destination = Path.Combine(logsFolder, VmDirectories.GameDumpsFolderName, dumpFile.Name);
+                        _logger.LogVerbose($"Moving dump file {dumpFile.Name} to {destination}.");
+                        _systemOperations.FileMoveWithOverwrite(dumpFile.FullName, destination);
+                    }
+                }
+            }
+            catch (DirectoryNotFoundException) { }
 
             return Task.CompletedTask;
         }

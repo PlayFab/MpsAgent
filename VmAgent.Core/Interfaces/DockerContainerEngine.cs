@@ -465,11 +465,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return volumeBindings;
         }
 
-        public override async Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override async Task CollectLogs(string containerId, string logsFolder, string _dumpsFolderVm, ISessionHostManager sessionHostManager)
         {
             try
             {
-                _logger.LogVerbose($"Collecting logs for container {id}.");
+                _logger.LogVerbose($"Collecting logs for container {containerId}.");
                 string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
 
                 if (sessionHostManager.LinuxContainersOnWindows)
@@ -478,7 +478,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     // which the host Windows machine does not have "copy" access to, to get the logs with a FileCopy
                     // this is only supposed to run on LocalMultiplayerAgent running on lcow
                     StringBuilder sb = new StringBuilder();
-                    Stream logsStream = await _dockerClient.Containers.GetContainerLogsAsync(id,
+                    Stream logsStream = await _dockerClient.Containers.GetContainerLogsAsync(containerId,
                         new ContainerLogsParameters() {ShowStdout = true, ShowStderr = true});
                     using (StreamReader sr = new StreamReader(logsStream))
                     {
@@ -487,28 +487,28 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                         {
                             if (sw.Elapsed.Seconds > 3) // don't flood STDOUT with messages, output one every 3 seconds if logs are too many
                             {
-                                _logger.LogVerbose($"Gathering logs for container {id}, please wait...");
+                                _logger.LogVerbose($"Gathering logs for container {containerId}, please wait...");
                                 sw.Restart();
                             }
                             _systemOperations.FileAppendAllText(destinationFileName, sr.ReadLine() + Environment.NewLine);
                         }
                     }
-                    _logger.LogVerbose($"Written logs for container {id} to {destinationFileName}.");
+                    _logger.LogVerbose($"Written logs for container {containerId} to {destinationFileName}.");
                 }
                 else
                 {
-                    ContainerInspectResponse containerInspectResponse = await _dockerClient.Containers.InspectContainerAsync(id);
+                    ContainerInspectResponse containerInspectResponse = await _dockerClient.Containers.InspectContainerAsync(containerId);
                     string dockerLogsPath = containerInspectResponse?.LogPath;
                     if (!string.IsNullOrEmpty(dockerLogsPath) && _systemOperations.FileExists(dockerLogsPath))
                     {
-                        _logger.LogVerbose($"Copying log file {dockerLogsPath} for container {id} to {destinationFileName}.");
+                        _logger.LogVerbose($"Copying log file {dockerLogsPath} for container {containerId} to {destinationFileName}.");
                         _systemOperations.FileCopy(dockerLogsPath, destinationFileName);
                     }
                 }
             }
             catch (DockerContainerNotFoundException)
             {
-                _logger.LogInformation($"Docker container {id} not found.");
+                _logger.LogInformation($"Docker container {containerId} not found.");
             }
         }
 

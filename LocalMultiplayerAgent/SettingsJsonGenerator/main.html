@@ -42,12 +42,16 @@ Initial Players: <input onchange="onInputChange()" type="text" size="100%" id="I
 <input onchange="onInputChange()" type="checkbox" id="OutputPlaceholders"> Add advanced config json options
 
 <hr />
-<h4>Docker Container Configuration:</h4>
-<input onchange="onInputChange()" type="checkbox" id="RunContainer"> Use Docker Container
+<h4>OS/Container Configuration:</h4>
+<select onchange="onInputChange()" name="RunContainer" id="RunContainer">
+	<option value="WinProcess">Windows Process</option>
+	<option value="WinContainer">Windows Docker Container</option>
+	<option value="LinuxContainer">Linux Docker Container</option>
+</select>
 
 <hr />
 <h4>Asset Configuration (This tool only supports 1 asset currently):</h4>
-Asset Input Zip <input onchange="onInputChange()" type="file" size="100%" id="LocalFilePath" value="">
+Asset Input Zip <span id="LocalFilePathValidate" style="color:red"></span><input onchange="onInputChange()" type="file" size="100%" id="LocalFilePath" value="">
 <br />
 Asset Extract Path: <input onchange="onInputChange()" type="text" size="100%" id="MountPath" value="C:\Assets">
 <br />
@@ -59,10 +63,10 @@ Output Log Folder: <input onchange="onInputChange()" type="text" size="100%" id=
 Start Command: <span id="StartCommandValidate" style="color:red"></span><input onchange="onInputChange()" type="text" size="100%" id="StartCommand" value="MyGameServer.exe -log">
 <br />
 <!-- 1800 ticks is 15 minutes -->
-Activate after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForActivateResponse" min="1" max="1800" value="10"><span id="NumHeartBeatsForActivateResponseOutput"></span>
+Transition from Standby->Active after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForActivateResponse" min="1" max="1800" value="10"><span id="NumHeartBeatsForActivateResponseOutput"></span>
 <br />
 <!-- 172800 ticks is 24 hours -->
-Terminate after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForTerminateResponse" min="2" max="172800" value="172800"><span id="NumHeartBeatsForTerminateResponseOutput"></span>
+Set Terminate status after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForTerminateResponse" min="2" max="172800" value="172800"><span id="NumHeartBeatsForTerminateResponseOutput"></span>
 <br />
 Agent Port <input onchange="onInputChange()" type="range" id="AgentListeningPort" min="1024" max="65535" value="56001"><span id="AgentListeningPortOutput"></span>
 

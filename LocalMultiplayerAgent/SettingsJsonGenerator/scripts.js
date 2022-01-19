@@ -25,31 +25,47 @@ function readWriteValue(value, valueName, lmaConfig){
 }
 
 function RunAllValidations(){
-    StartCommandValidate();
+    ValidateStartCommand();
+    ValidateAssetZip();
 }
 
-function StartCommandValidate(){
-    let runContainer = document.getElementById("RunContainer").checked;
+function ValidateStartCommand(){
+    let runMode = document.getElementById("RunContainer").value;
     let startCommand = document.getElementById("StartCommand").value;
 
     let validationMessage = "";
-    if (runContainer){
+    if (runMode == "WinProcess"){
+        // Very lousy first-attempt at identifying an apparent absolute path
+        let isValid = (startCommand.search(":") == -1);
+        if (!isValid){
+            validationMessage = "The Start Command should be a relative path into the zip file, not an absolute path.";
+        }
+    }else if(runMode == "WinContainer"){
         let mountPath = document.getElementById("MountPath").value;
         // Verify that the mountPath is at index zero, and thus startCommand starts with mountPath
         let isValid = (startCommand.search(mountPath) == 0);
         if (!isValid){
             validationMessage = "The Start Command should be an absolute path that starts with the Asset Mount Path";
         }
-    }else{
-        // Very lousy first-attempt at identifying an apparent absolute path
-        let isValid = (startCommand.search(":") == -1);
-        if (!isValid){
-            validationMessage = "The Start Command should be a relative path into the zip file, not an absolute path.";
+    }else if(runMode == "LinuxContainer"){
+        let mountPath = document.getElementById("MountPath").value;
+        if (startCommand){
+            validationMessage = "The Start Command should be empty (The container should launch the GSDK and Game Server)";
         }
     }
 
     // TODO: This could instead be a little red exclamation mark, with the validationMessage as hovertext
     document.getElementById("StartCommandValidate").innerHTML = validationMessage;
+}
+
+function ValidateAssetZip(){
+    let validationMessage = "";
+    let fakepathIndex = document.getElementById("LocalFilePath").value.search("fakepath");
+    if (fakepathIndex != -1){
+        validationMessage = "Warning: This browser obscures the actual path of files. You will need to manually fix the LocalFilePath in the json"
+    }
+        
+    document.getElementById("LocalFilePathValidate").innerHTML = validationMessage;
 }
 
 function onInputChange(){
@@ -76,18 +92,21 @@ function onInputChange(){
     }
 
     let startCommand = document.getElementById("StartCommand").value;
+    let runMode = document.getElementById("RunContainer").value;
 
-    readWriteValue(document.getElementById("RunContainer").checked, "RunContainer", lmaConfig);
-    if(lmaConfig.RunContainer){
+    readWriteValue(runMode != "WinProcess", "RunContainer", lmaConfig);
+    if(runMode == "WinProcess")
+    {
+        lmaConfig.ProcessStartParameters = {"StartGameCommand": startCommand};
+    }else{
         lmaConfig.ContainerStartParameters =
         {
             "StartGameCommand": startCommand,
             "resourcelimits": { "cpus": 1, "memorygib": 16 },
             "imagedetails": { "registry": "mcr.microsoft.com", "imagename": "playfab/multiplayer", "imagetag": "wsc-10.0.17763.973.1", "username": "", "password": "" }
         };
-        readWriteValue(document.getElementById("MountPath").value, "MountPath", lmaConfig.AssetDetails[0]); // REVIEWER QUESTION: Container only?
-    }else{
-        lmaConfig.ProcessStartParameters = {"StartGameCommand": startCommand};
+        readWriteValue(document.getElementById("MountPath").value, "MountPath", lmaConfig.AssetDetails[0]);
+        readWriteValue(document.getElementById("GamePortNumber").value, "Number", lmaConfig.PortMappingsList[0][0].GamePort);
     }
 
 
@@ -99,7 +118,6 @@ function onInputChange(){
 
     readWriteValue(document.getElementById("AgentListeningPort").value, "AgentListeningPort", lmaConfig);
     readWriteValue(document.getElementById("NodePort").value, "NodePort", lmaConfig.PortMappingsList[0][0]);
-    readWriteValue(document.getElementById("GamePortNumber").value, "Number", lmaConfig.PortMappingsList[0][0].GamePort);
     readWriteValue(document.getElementById("GamePortName").value, "Name", lmaConfig.PortMappingsList[0][0].GamePort);
     readWriteValue(document.getElementById("GamePortProtocol").checked ? "TCP" : "UDP", "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
 

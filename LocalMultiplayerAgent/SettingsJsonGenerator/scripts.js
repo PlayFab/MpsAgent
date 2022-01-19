@@ -11,7 +11,7 @@ function popAlert(){
 }
 
 function setText(newText){
-  document.getElementById("outputText").value = newText;
+    document.getElementById("outputText").value = newText;
 }
 
 function readWriteValue(value, valueName, lmaConfig){

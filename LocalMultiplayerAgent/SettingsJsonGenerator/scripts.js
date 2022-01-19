@@ -1,18 +1,6 @@
+// Set these exactly once on page load, so they are consistent for a single session, but still random across multiple sessions
 let BuildGuId = crypto.randomUUID();
 let SessionGuId = crypto.randomUUID()
-
-/// DO NOT CHECK IN:
-/// https://playfab.visualstudio.com/PlayFab/_wiki/wikis/Thunderhead/1299/Run-LocalMultiplayerAgent
-/// Deep details about how each field works
-/// DO NOT CHECK IN
-
-function popAlert(){
-    alert("Hello! I am an alert box!");
-}
-
-function setText(newText){
-    document.getElementById("outputText").value = newText;
-}
 
 function readWriteValue(value, valueName, lmaConfig){
     if(lmaConfig){
@@ -121,7 +109,7 @@ function onInputChange(){
     readWriteValue(document.getElementById("GamePortName").value, "Name", lmaConfig.PortMappingsList[0][0].GamePort);
     readWriteValue(document.getElementById("GamePortProtocol").value, "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
 
-    setText(JSON.stringify(lmaConfig, null, 2));
+    document.getElementById("outputText").value = JSON.stringify(lmaConfig, null, 2);
     
     RunAllValidations();
 }

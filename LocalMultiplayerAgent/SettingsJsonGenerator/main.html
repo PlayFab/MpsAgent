@@ -74,7 +74,12 @@ Agent Port <input onchange="onInputChange()" type="range" id="AgentListeningPort
 <h4>Server Port Configuration:</h4>
 GamePort Name <input onchange="onInputChange()" type="text" id="GamePortName" value="UnrealServerGsdkHostPort">
 <br />
-GamePort Protocol <input onchange="onInputChange()" type="checkbox" id="GamePortProtocol"><span id="ProtocolOutput"></span>
+GamePort Protocol
+<select onchange="onInputChange()" name="GamePortProtocol" id="GamePortProtocol">
+	<option value="UDP">UDP</option>
+	<option value="TCP">TCP</option>
+</select>
+
 <br />
 <!-- TODO: Hide container only input when RunContainer==false -->
 Container External Port <input onchange="onInputChange()" type="range" id="NodePort" min="1024" max="65535" value="56100"><span id="NodePortOutput"></span>

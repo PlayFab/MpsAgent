@@ -119,7 +119,7 @@ function onInputChange(){
     readWriteValue(document.getElementById("AgentListeningPort").value, "AgentListeningPort", lmaConfig);
     readWriteValue(document.getElementById("NodePort").value, "NodePort", lmaConfig.PortMappingsList[0][0]);
     readWriteValue(document.getElementById("GamePortName").value, "Name", lmaConfig.PortMappingsList[0][0].GamePort);
-    readWriteValue(document.getElementById("GamePortProtocol").checked ? "TCP" : "UDP", "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
+    readWriteValue(document.getElementById("GamePortProtocol").value, "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
 
     setText(JSON.stringify(lmaConfig, null, 2));
     

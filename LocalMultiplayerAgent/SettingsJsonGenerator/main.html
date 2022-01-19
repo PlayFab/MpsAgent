@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<body onload="onInputChange()">
+<script id="myScript" src="scripts.js"></script>
+
+<table><tr><td>
+	
+<p>
+<h1>LocalMultiplayerAgent Json inputs</h1>
+<h4>PlayFab Configuration</h4>
+TitleId: <input onchange="onInputChange()" type="text" id="TitleId" value="">
+<br />
+Region: <!--input type="text" id="Region" value="WestUs"-->
+<select onchange="onInputChange()" name="Region" id="Region">
+	<option value="EastUs">EastUs</option>
+	<option value="EastUs2">EastUs2</option>
+	<option value="WestUs">WestUs</option>
+	<option value="WestUs2">WestUs2</option>
+	<option value="NorthCentralUs">NorthCentralUs</option>
+	<option value="SouthCentralUs">SouthCentralUs</option>
+	<option value="CentralUs">CentralUs</option>
+	<option value="WestCentralUs">WestCentralUs</option>
+	<option value="JapanEast">JapanEast</option>
+	<option value="JapanWest">JapanWest</option>
+	<option value="WestEurope">WestEurope</option>
+	<option value="NorthEurope">NorthEurope</option>
+	<option value="BrazilSouth">BrazilSouth</option>
+	<option value="AustrailiaEast">AustrailiaEast</option>
+	<option value="AustrailiaSoutheast">AustrailiaSoutheast</option>
+	<option value="EastAsia">EastAsia</option>
+	<option value="SoutheastAsia">SoutheastAsia</option>
+	<option value="SouthAfricaNorth">SouthAfricaNorth</option>
+	<option value="UAENorth">UAENorth</option>
+	<option value="CentralIndia">CentralIndia</option>
+	<option value="FranceCentral">FranceCentral</option>
+	<option value="KoreaCentral">KoreaCentral</option>
+</select>
+
+<br />
+Initial Players: <input onchange="onInputChange()" type="text" size="100%" id="InitialPlayers" value="Player1, Player2">
+<br />
+<input onchange="onInputChange()" type="checkbox" id="OutputPlaceholders"> Display less common configs
+
+<hr />
+<h4>Docker Container Configuration:</h4>
+<input onchange="onInputChange()" type="checkbox" id="RunContainer"> Use Docker Container
+
+<hr />
+<h4>Asset Configuration (This tool only supports 1 asset currently):</h4>
+Asset Input Zip <input onchange="onInputChange()" type="text" size="100%" id="LocalFilePath" value="C:\depot\ThirdPersonMPServer.zip">
+<br />
+Asset Extract Path: <input onchange="onInputChange()" type="text" size="100%" id="MountPath" value="C:\Assets">
+<br />
+
+<hr />
+<h4>General Configuration:</h4>
+Output Log Folder: <input onchange="onInputChange()" type="text" size="100%" id="OutputFolder" value="C:\Assets\WindowsContainerLogOutput">
+<br />
+<!-- 1800 ticks is 15 minutes -->
+Activate after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForActivateResponse" min="1" max="1800" value="10"><span id="NumHeartBeatsForActivateResponseOutput"></span>
+<br />
+<!-- 172800 ticks is 24 hours -->
+Terminate after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForTerminateResponse" min="2" max="172800" value="172800"><span id="NumHeartBeatsForTerminateResponseOutput"></span>
+<br />
+Agent Port <input onchange="onInputChange()" type="range" id="AgentListeningPort" min="1024" max="65535" value="56001"><span id="AgentListeningPortOutput"></span>
+
+<hr />
+<h4>Server Port Configuration:</h4>
+GamePort Name <input onchange="onInputChange()" type="text" id="GamePortName" value="UnrealServerGsdkHostPort">
+<br />
+GamePort Protocol <input onchange="onInputChange()" type="checkbox" id="GamePortProtocol"><span id="ProtocolOutput"></span>
+<br />
+<!-- TODO: Hide container only input when RunContainer==false -->
+Container External Port <input onchange="onInputChange()" type="range" id="NodePort" min="1024" max="65535" value="56100"><span id="NodePortOutput"></span>
+<br />
+<!-- TODO: Hide container only input when RunContainer==false -->
+Container Internal Port <input onchange="onInputChange()" type="range" id="GamePortNumber" min="1024" max="65535" value="30000"><span id="NumberOutput"></span>
+</p>	
+<!-- TODO: Add new/appropriate port input when RunContainer==true -->
+
+</td><td>
+
+<textarea id="outputText" rows="50" cols="150" value="Sample json will populate here"></textarea>
+
+</td></tr><table>
+
+</body>
+</html>

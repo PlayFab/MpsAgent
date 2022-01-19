@@ -1,13 +1,13 @@
-var BuildGuId = crypto.randomUUID();
-var SessionGuId = crypto.randomUUID()
+let BuildGuId = crypto.randomUUID();
+let SessionGuId = crypto.randomUUID()
 
 /// DO NOT CHECK IN:
 /// https://playfab.visualstudio.com/PlayFab/_wiki/wikis/Thunderhead/1299/Run-LocalMultiplayerAgent
 /// Deep details about how each field works
 /// DO NOT CHECK IN
 
-function popAlert() {
-	alert("Hello! I am an alert box!");
+function popAlert(){
+    alert("Hello! I am an alert box!");
 }
 
 function setText(newText){
@@ -15,53 +15,95 @@ function setText(newText){
 }
 
 function readWriteValue(value, valueName, lmaConfig){
-	if(lmaConfig) {
-		lmaConfig[valueName] = value;
-	}
-	mirrorElement = document.getElementById(valueName + "Output");
-	if(mirrorElement) {
-		mirrorElement.innerHTML = value;
-	}
+    if(lmaConfig){
+        lmaConfig[valueName] = value;
+    }
+    let mirrorElement = document.getElementById(valueName + "Output");
+    if(mirrorElement){
+        mirrorElement.innerHTML = value;
+    }
+}
+
+function RunAllValidations(){
+    StartCommandValidate();
+}
+
+function StartCommandValidate(){
+    let runContainer = document.getElementById("RunContainer").checked;
+    let startCommand = document.getElementById("StartCommand").value;
+
+    let validationMessage = "";
+    if (runContainer){
+        let mountPath = document.getElementById("MountPath").value;
+        // Verify that the mountPath is at index zero, and thus startCommand starts with mountPath
+        let isValid = (startCommand.search(mountPath) == 0);
+        if (!isValid){
+            validationMessage = "The Start Command should be an absolute path that starts with the Asset Mount Path";
+        }
+    }else{
+        // Very lousy first-attempt at identifying an apparent absolute path
+        let isValid = (startCommand.search(":") == -1);
+        if (!isValid){
+            validationMessage = "The Start Command should be a relative path into the zip file, not an absolute path.";
+        }
+    }
+
+    // TODO: This could instead be a little red exclamation mark, with the validationMessage as hovertext
+    document.getElementById("StartCommandValidate").innerHTML = validationMessage;
 }
 
 function onInputChange(){
-	lmaConfig = {
-		// Empty containers that will hold stuff that must exist
-		"AssetDetails": [{}],
-		"PortMappingsList": [[{"GamePort": {}}]]
-	};
-	
-	if(document.getElementById("OutputPlaceholders").checked) {
-		lmaConfig.GameCertificateDetails = [];
-		lmaConfig.SessionConfig = { "SessionCookie": null, };
-		readWriteValue(SessionGuId, "SessionId", lmaConfig.SessionConfig);
-		readWriteValue(BuildGuId, "BuildId", lmaConfig);
-	}
+    let lmaConfig = {
+        // Empty containers that will hold stuff that must exist
+        "AssetDetails": [{}],
+        "PortMappingsList": [[{"GamePort": {}}]]
+    };
 
-	readWriteValue(document.getElementById("RunContainer").checked, "RunContainer", lmaConfig);
-	if(lmaConfig.RunContainer){
-		lmaConfig.ContainerStartParameters = 
-		{
-			"StartGameCommand": "",
-			"resourcelimits": { "cpus": 1, "memorygib": 16 },
-			"imagedetails": { "registry": "mcr.microsoft.com", "imagename": "playfab/multiplayer", "imagetag": "wsc-10.0.17763.973.1", "username": "", "password": "" }
-		};
-		readWriteValue(document.getElementById("MountPath").value, "MountPath", lmaConfig.AssetDetails[0]); // REVIEWER QUESTION: Container only?
-	} else {
-		lmaConfig.ProcessStartParameters = {"StartGameCommand": ""};
-	}
+    if(document.getElementById("OutputPlaceholders").checked){
+        lmaConfig.GameCertificateDetails = [];
+        lmaConfig.SessionConfig = { "SessionCookie": null, };
+        lmaConfig.DeploymentMetadata = { "Environment": "LOCAL", "FeaturesEnabled": "List,Of,Features,Enabled" };
+        let initialPlayersArray = document.getElementById("InitialPlayers").value.split(',');
+        for (let i = 0; i < initialPlayersArray.length; i++){
+            initialPlayersArray[i]=initialPlayersArray[i].trim();
+        }
 
-	readWriteValue(document.getElementById("OutputFolder").value, "OutputFolder", lmaConfig);
-	readWriteValue(document.getElementById("LocalFilePath").value, "LocalFilePath", lmaConfig.AssetDetails[0]);
+        readWriteValue(SessionGuId, "SessionId", lmaConfig.SessionConfig);
+        readWriteValue(initialPlayersArray, "InitialPlayers", lmaConfig.SessionConfig);
+        readWriteValue(document.getElementById("TitleId").value, "TitleId", lmaConfig);
+        readWriteValue(document.getElementById("Region").value, "Region", lmaConfig);
+        readWriteValue(BuildGuId, "BuildId", lmaConfig);
+    }
 
-	readWriteValue(document.getElementById("NumHeartBeatsForActivateResponse").value, "NumHeartBeatsForActivateResponse", lmaConfig);
-	readWriteValue(document.getElementById("NumHeartBeatsForTerminateResponse").value, "NumHeartBeatsForTerminateResponse", lmaConfig);
+    let startCommand = document.getElementById("StartCommand").value;
 
-	readWriteValue(document.getElementById("AgentListeningPort").value, "AgentListeningPort", lmaConfig);
-	readWriteValue(document.getElementById("NodePort").value, "NodePort", lmaConfig.PortMappingsList[0][0]);
-	readWriteValue(document.getElementById("GamePortNumber").value, "Number", lmaConfig.PortMappingsList[0][0].GamePort);
-	readWriteValue(document.getElementById("GamePortName").value, "Name", lmaConfig.PortMappingsList[0][0].GamePort);
-	readWriteValue(document.getElementById("GamePortProtocol").checked ? "TCP" : "UDP", "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
-	
-	setText(JSON.stringify(lmaConfig, null, 2));
+    readWriteValue(document.getElementById("RunContainer").checked, "RunContainer", lmaConfig);
+    if(lmaConfig.RunContainer){
+        lmaConfig.ContainerStartParameters =
+        {
+            "StartGameCommand": startCommand,
+            "resourcelimits": { "cpus": 1, "memorygib": 16 },
+            "imagedetails": { "registry": "mcr.microsoft.com", "imagename": "playfab/multiplayer", "imagetag": "wsc-10.0.17763.973.1", "username": "", "password": "" }
+        };
+        readWriteValue(document.getElementById("MountPath").value, "MountPath", lmaConfig.AssetDetails[0]); // REVIEWER QUESTION: Container only?
+    }else{
+        lmaConfig.ProcessStartParameters = {"StartGameCommand": startCommand};
+    }
+
+
+    readWriteValue(document.getElementById("OutputFolder").value, "OutputFolder", lmaConfig);
+    readWriteValue(document.getElementById("LocalFilePath").value, "LocalFilePath", lmaConfig.AssetDetails[0]);
+
+    readWriteValue(document.getElementById("NumHeartBeatsForActivateResponse").value, "NumHeartBeatsForActivateResponse", lmaConfig);
+    readWriteValue(document.getElementById("NumHeartBeatsForTerminateResponse").value, "NumHeartBeatsForTerminateResponse", lmaConfig);
+
+    readWriteValue(document.getElementById("AgentListeningPort").value, "AgentListeningPort", lmaConfig);
+    readWriteValue(document.getElementById("NodePort").value, "NodePort", lmaConfig.PortMappingsList[0][0]);
+    readWriteValue(document.getElementById("GamePortNumber").value, "Number", lmaConfig.PortMappingsList[0][0].GamePort);
+    readWriteValue(document.getElementById("GamePortName").value, "Name", lmaConfig.PortMappingsList[0][0].GamePort);
+    readWriteValue(document.getElementById("GamePortProtocol").checked ? "TCP" : "UDP", "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
+
+    setText(JSON.stringify(lmaConfig, null, 2));
+    
+    RunAllValidations();
 }

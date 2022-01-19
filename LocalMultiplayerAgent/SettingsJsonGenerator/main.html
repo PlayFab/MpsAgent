@@ -39,7 +39,7 @@ Region: <!--input type="text" id="Region" value="WestUs"-->
 <br />
 Initial Players: <input onchange="onInputChange()" type="text" size="100%" id="InitialPlayers" value="Player1, Player2">
 <br />
-<input onchange="onInputChange()" type="checkbox" id="OutputPlaceholders"> Display less common configs
+<input onchange="onInputChange()" type="checkbox" id="OutputPlaceholders"> Add advanced config json options
 
 <hr />
 <h4>Docker Container Configuration:</h4>
@@ -47,7 +47,7 @@ Initial Players: <input onchange="onInputChange()" type="text" size="100%" id="I
 
 <hr />
 <h4>Asset Configuration (This tool only supports 1 asset currently):</h4>
-Asset Input Zip <input onchange="onInputChange()" type="text" size="100%" id="LocalFilePath" value="C:\depot\ThirdPersonMPServer.zip">
+Asset Input Zip <input onchange="onInputChange()" type="file" size="100%" id="LocalFilePath" value="">
 <br />
 Asset Extract Path: <input onchange="onInputChange()" type="text" size="100%" id="MountPath" value="C:\Assets">
 <br />
@@ -55,6 +55,8 @@ Asset Extract Path: <input onchange="onInputChange()" type="text" size="100%" id
 <hr />
 <h4>General Configuration:</h4>
 Output Log Folder: <input onchange="onInputChange()" type="text" size="100%" id="OutputFolder" value="C:\Assets\WindowsContainerLogOutput">
+<br />
+Start Command: <span id="StartCommandValidate" style="color:red"></span><input onchange="onInputChange()" type="text" size="100%" id="StartCommand" value="MyGameServer.exe -log">
 <br />
 <!-- 1800 ticks is 15 minutes -->
 Activate after ticks: <input onchange="onInputChange()" type="range" id="NumHeartBeatsForActivateResponse" min="1" max="1800" value="10"><span id="NumHeartBeatsForActivateResponseOutput"></span>
@@ -80,7 +82,7 @@ Container Internal Port <input onchange="onInputChange()" type="range" id="GameP
 
 </td><td>
 
-<textarea id="outputText" rows="50" cols="150" value="Sample json will populate here"></textarea>
+<textarea id="outputText" rows="55" cols="150" value="Sample json will populate here"></textarea>
 
 </td></tr><table>
 

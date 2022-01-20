@@ -15,6 +15,7 @@ function readWriteValue(value, valueName, lmaConfig){
 function RunAllValidations(){
     ValidateStartCommand();
     ValidateAssetZip();
+    ValidateMountPath();
 }
 
 function ValidateStartCommand(){
@@ -54,6 +55,32 @@ function ValidateAssetZip(){
     }
         
     document.getElementById("LocalFilePathValidate").innerHTML = validationMessage;
+}
+
+function ValidateMountPath(){
+    let validationMessage = "";
+    let warningMessage = "";
+    let runMode = document.getElementById("RunContainer").value;
+    let mountPath = document.getElementById("MountPath").value;
+
+    if (runMode == "WinProcess"){
+        if(mountPath.search("C:\\\\Assets") != 0){
+            warningMessage = "It is recommended that you choose C:\\Assets or a sub-folder";
+        }
+    }else if(runMode == "WinContainer"){
+        if(mountPath.search("C:\\\\") != 0){
+            validationMessage = "Your path must start with the C:\\ drive for Windows containers";
+        } else if(mountPath.search("C:\\\\Assets") != 0){
+            warningMessage = "It is recommended that you choose C:\\Assets or a sub-folder";
+        }
+    }else if(runMode == "LinuxContainer"){
+        if(mountPath.search("/Data/") != 0){
+            warningMessage = "It is recommended that you choose a sub-folder of /Data";
+        }
+    }
+        
+    document.getElementById("MountPathValidate").innerHTML = validationMessage;
+    document.getElementById("MountPathWarning").innerHTML = warningMessage;
 }
 
 function onInputChange(){

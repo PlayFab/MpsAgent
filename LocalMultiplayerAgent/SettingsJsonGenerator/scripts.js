@@ -3,25 +3,25 @@ let BuildGuId = crypto.randomUUID();
 let SessionGuId = crypto.randomUUID()
 
 // These values match an enum for RunMode in the HTML file
-let RUN_MODE_WIN_PROCESS = "WinProcess";
-let RUN_MODE_WIN_CONTAINER = "WinContainer";
-let RUN_MODE_LINUX_CONTAINER = "LinuxContainer";
+const RUN_MODE_WIN_PROCESS = "WinProcess";
+const RUN_MODE_WIN_CONTAINER = "WinContainer";
+const RUN_MODE_LINUX_CONTAINER = "LinuxContainer";
 
 // regex strings for various validation steps
-let ANTIREQUIRED_ABSOLUTE_PATH_SEARCH = ":"; // Rough attempt at identifying an apparent absolute path
-let FAKE_PATH_SEARCH = "fakepath"; // New browsers spoof a fake path into JavaScript, and hide the real path
-let SUGGESTED_WIN_EXTRACT_PATH_SEARCH = "C:\\\\Assets"; // Windows Process and Container modes are both suggested to use this path
-let SUGGESTED_LINUX_EXTRACT_PATH_SEARCH = "/Data/"; // Linux container mode is suggested to use this root path
-let REQUIRED_WIN_CONTAINER_EXTRACT_PATH_SEARCH = "C:\\\\"; // Windows Container always has exactly 1 drive, the C:\ drive
+const ANTIREQUIRED_ABSOLUTE_PATH_SEARCH = ":"; // Rough attempt at identifying an apparent absolute path
+const FAKE_PATH_SEARCH = "fakepath"; // New browsers spoof a fake path into JavaScript, and hide the real path
+const SUGGESTED_WIN_EXTRACT_PATH_SEARCH = "C:\\\\Assets"; // Windows Process and Container modes are both suggested to use this path
+const SUGGESTED_LINUX_EXTRACT_PATH_SEARCH = "/Data/"; // Linux container mode is suggested to use this root path
+const REQUIRED_WIN_CONTAINER_EXTRACT_PATH_SEARCH = "C:\\\\"; // Windows Container always has exactly 1 drive, the C:\ drive
 
 // User visible messages - Basically a string table for eventual translation if we go that far
-let MSG_START_RELATIVE_PATH = "The Start Command should be a relative path into the zip file, not an absolute path.";
-let MSG_START_ABSOLUTE_PATH = "The Start Command should be an absolute path that starts with the Asset Mount Path";
-let MSG_START_EMPTY_PATH = "The Start Command should be empty (The container should launch the GSDK and Game Server directly)";
-let MSG_OBSCURED_PATH = "Warning: This browser obscures the actual path of files. You will need to manually fix the LocalFilePath in the json";
-let MSG_EXTRACT_WIN_PROCESS = "It is recommended that you choose C:\\Assets or a sub-folder";
-let MSG_EXTRACT_WIN_CONTAINER = "Your path must start with the C:\\ drive for Windows containers";
-let MSG_EXTRACT_LINUX_CONTAINER = "It is recommended that you choose a sub-folder of /Data";
+const MSG_START_RELATIVE_PATH = "The Start Command should be a relative path into the zip file, not an absolute path.";
+const MSG_START_ABSOLUTE_PATH = "The Start Command should be an absolute path that starts with the Asset Mount Path";
+const MSG_START_EMPTY_PATH = "The Start Command should be empty (The container should launch the GSDK and Game Server directly)";
+const MSG_OBSCURED_PATH = "Warning: This browser obscures the actual path of files. You will need to manually fix the LocalFilePath in the json";
+const MSG_EXTRACT_WIN_PROCESS = "It is recommended that you choose C:\\Assets or a sub-folder";
+const MSG_EXTRACT_WIN_CONTAINER = "Your path must start with the C:\\ drive for Windows containers";
+const MSG_EXTRACT_LINUX_CONTAINER = "It is recommended that you choose a sub-folder of /Data";
 
 function readWriteValue(value, valueName, lmaConfig){
     if(lmaConfig){

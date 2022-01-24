@@ -2,6 +2,27 @@
 let BuildGuId = crypto.randomUUID();
 let SessionGuId = crypto.randomUUID()
 
+// These values match an enum for RunMode in the HTML file
+const RUN_MODE_WIN_PROCESS = "WinProcess";
+const RUN_MODE_WIN_CONTAINER = "WinContainer";
+const RUN_MODE_LINUX_CONTAINER = "LinuxContainer";
+
+// regex strings for various validation steps
+const ANTIREQUIRED_ABSOLUTE_PATH_SEARCH = ":"; // Rough attempt at identifying an apparent absolute path
+const FAKE_PATH_SEARCH = "fakepath"; // New browsers spoof a fake path into JavaScript, and hide the real path
+const SUGGESTED_WIN_EXTRACT_PATH_SEARCH = "C:\\\\Assets"; // Windows Process and Container modes are both suggested to use this path
+const SUGGESTED_LINUX_EXTRACT_PATH_SEARCH = "/Data/"; // Linux container mode is suggested to use this root path
+const REQUIRED_WIN_CONTAINER_EXTRACT_PATH_SEARCH = "C:\\\\"; // Windows Container always has exactly 1 drive, the C:\ drive
+
+// User visible messages - Basically a string table for eventual translation if we go that far
+const MSG_START_RELATIVE_PATH = "The Start Command should be a relative path into the zip file, not an absolute path.";
+const MSG_START_ABSOLUTE_PATH = "The Start Command should be an absolute path that starts with the Asset Mount Path";
+const MSG_START_EMPTY_PATH = "The Start Command should be empty (The container should launch the GSDK and Game Server directly)";
+const MSG_OBSCURED_PATH = "Warning: This browser obscures the actual path of files. You will need to manually fix the LocalFilePath in the json";
+const MSG_EXTRACT_WIN_PROCESS = "It is recommended that you choose C:\\Assets or a sub-folder";
+const MSG_EXTRACT_WIN_CONTAINER = "Your path must start with the C:\\ drive for Windows containers";
+const MSG_EXTRACT_LINUX_CONTAINER = "It is recommended that you choose a sub-folder of /Data";
+
 function readWriteValue(value, valueName, lmaConfig){
     if(lmaConfig){
         lmaConfig[valueName] = value;
@@ -19,27 +40,26 @@ function RunAllValidations(){
 }
 
 function ValidateStartCommand(){
-    let runMode = document.getElementById("RunContainer").value;
+    let runMode = document.getElementById("RunMode").value;
     let startCommand = document.getElementById("StartCommand").value;
 
     let validationMessage = "";
-    if (runMode == "WinProcess"){
-        // Very lousy first-attempt at identifying an apparent absolute path
-        let isValid = (startCommand.search(":") == -1);
+    if (runMode == RUN_MODE_WIN_PROCESS){
+        let isValid = (startCommand.search(ANTIREQUIRED_ABSOLUTE_PATH_SEARCH) == -1);
         if (!isValid){
-            validationMessage = "The Start Command should be a relative path into the zip file, not an absolute path.";
+            validationMessage = MSG_START_RELATIVE_PATH;
         }
-    }else if(runMode == "WinContainer"){
+    }else if(runMode == RUN_MODE_WIN_CONTAINER){
         let mountPath = document.getElementById("MountPath").value;
         // Verify that the mountPath is at index zero, and thus startCommand starts with mountPath
         let isValid = (startCommand.search(mountPath) == 0);
         if (!isValid){
-            validationMessage = "The Start Command should be an absolute path that starts with the Asset Mount Path";
+            validationMessage = MSG_START_ABSOLUTE_PATH;
         }
-    }else if(runMode == "LinuxContainer"){
+    }else if(runMode == RUN_MODE_LINUX_CONTAINER){
         let mountPath = document.getElementById("MountPath").value;
         if (startCommand){
-            validationMessage = "The Start Command should be empty (The container should launch the GSDK and Game Server)";
+            validationMessage = MSG_START_EMPTY_PATH;
         }
     }
 
@@ -49,37 +69,39 @@ function ValidateStartCommand(){
 
 function ValidateAssetZip(){
     let validationMessage = "";
-    let fakepathIndex = document.getElementById("LocalFilePath").value.search("fakepath");
+    let fakepathIndex = document.getElementById("LocalFilePath").value.search(FAKE_PATH_SEARCH);
     if (fakepathIndex != -1){
-        validationMessage = "Warning: This browser obscures the actual path of files. You will need to manually fix the LocalFilePath in the json"
+        validationMessage = MSG_OBSCURED_PATH;
     }
-        
+
     document.getElementById("LocalFilePathValidate").innerHTML = validationMessage;
 }
 
 function ValidateMountPath(){
     let validationMessage = "";
     let warningMessage = "";
-    let runMode = document.getElementById("RunContainer").value;
+    let runMode = document.getElementById("RunMode").value;
     let mountPath = document.getElementById("MountPath").value;
 
-    if (runMode == "WinProcess"){
-        if(mountPath.search("C:\\\\Assets") != 0){
-            warningMessage = "It is recommended that you choose C:\\Assets or a sub-folder";
+    if (runMode == RUN_MODE_WIN_PROCESS){
+        if(mountPath.search(SUGGESTED_WIN_EXTRACT_PATH_SEARCH) != 0){
+            warningMessage = MSG_EXTRACT_WIN_PROCESS;
         }
-    }else if(runMode == "WinContainer"){
-        if(mountPath.search("C:\\\\") != 0){
-            validationMessage = "Your path must start with the C:\\ drive for Windows containers";
-        } else if(mountPath.search("C:\\\\Assets") != 0){
-            warningMessage = "It is recommended that you choose C:\\Assets or a sub-folder";
+    }else if(runMode == RUN_MODE_WIN_CONTAINER){
+        if(mountPath.search(REQUIRED_WIN_CONTAINER_EXTRACT_PATH_SEARCH) != 0){
+            validationMessage = MSG_EXTRACT_WIN_CONTAINER;
+        } else if(mountPath.search(SUGGESTED_WIN_EXTRACT_PATH_SEARCH) != 0){
+            warningMessage = MSG_EXTRACT_WIN_PROCESS;
         }
-    }else if(runMode == "LinuxContainer"){
-        if(mountPath.search("/Data/") != 0){
-            warningMessage = "It is recommended that you choose a sub-folder of /Data";
+    }else if(runMode == RUN_MODE_LINUX_CONTAINER){
+        if(mountPath.search(SUGGESTED_LINUX_EXTRACT_PATH_SEARCH) != 0){
+            warningMessage = MSG_EXTRACT_LINUX_CONTAINER;
         }
     }
-        
+
+    // TODO: This could instead be a little red exclamation mark, with the validationMessage as hovertext
     document.getElementById("MountPathValidate").innerHTML = validationMessage;
+    // TODO: This could instead be a little yellow hazard mark, with the warningMessage as hovertext
     document.getElementById("MountPathWarning").innerHTML = warningMessage;
 }
 
@@ -107,10 +129,10 @@ function onInputChange(){
     }
 
     let startCommand = document.getElementById("StartCommand").value;
-    let runMode = document.getElementById("RunContainer").value;
+    let runMode = document.getElementById("RunMode").value;
 
-    readWriteValue(runMode != "WinProcess", "RunContainer", lmaConfig);
-    if(runMode == "WinProcess")
+    readWriteValue(runMode != RUN_MODE_WIN_PROCESS, "RunMode", lmaConfig);
+    if(runMode == RUN_MODE_WIN_PROCESS)
     {
         lmaConfig.ProcessStartParameters = {"StartGameCommand": startCommand};
     }else{
@@ -137,6 +159,6 @@ function onInputChange(){
     readWriteValue(document.getElementById("GamePortProtocol").value, "Protocol", lmaConfig.PortMappingsList[0][0].GamePort);
 
     document.getElementById("outputText").value = JSON.stringify(lmaConfig, null, 2);
-    
+
     RunAllValidations();
 }

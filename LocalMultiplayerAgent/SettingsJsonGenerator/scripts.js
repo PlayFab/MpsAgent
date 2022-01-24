@@ -2,6 +2,15 @@
 let BuildGuId = crypto.randomUUID();
 let SessionGuId = crypto.randomUUID()
 
+const WINDOWS_DEFAULT_CONTAINER_DETAILS = { "registry": "mcr.microsoft.com", "imagename": "playfab/multiplayer", "imagetag": "wsc-10.0.17763.973.1", "username": "", "password": "" };
+const LINUX_DEFAULT_CONTAINER_DETAILS = {
+    "Registry": "REPLACE_WITH_CUSTOMER_ID.azurecr.io",
+    "ImageName": "REPLACE_WITH_CUSTOMER_IMAGE_NAME",
+    "ImageTag": "REPLACE_WITH_CUSTOMER_IMAGE_VERSION",
+    "Username": "REPLACE_WITH_CUSTOMER_USERNAME",
+    "Password": "REPLACE_WITH_CUSTOMER_PASSWORD"
+};
+
 // These values match an enum for RunMode in the HTML file
 const RUN_MODE_WIN_PROCESS = "WinProcess";
 const RUN_MODE_WIN_CONTAINER = "WinContainer";
@@ -139,9 +148,15 @@ function onInputChange(){
         lmaConfig.ContainerStartParameters =
         {
             "StartGameCommand": startCommand,
-            "resourcelimits": { "cpus": 1, "memorygib": 16 },
-            "imagedetails": { "registry": "mcr.microsoft.com", "imagename": "playfab/multiplayer", "imagetag": "wsc-10.0.17763.973.1", "username": "", "password": "" }
+            "resourcelimits": { "cpus": 1, "memorygib": 16 }
         };
+
+        if(runMode == RUN_MODE_WIN_CONTAINER){
+            lmaConfig.ContainerStartParameters.imagedetails = WINDOWS_DEFAULT_CONTAINER_DETAILS;
+        }else if(runMode == RUN_MODE_LINUX_CONTAINER){
+            lmaConfig.ContainerStartParameters.imagedetails = LINUX_DEFAULT_CONTAINER_DETAILS;
+        }
+
         readWriteValue(document.getElementById("MountPath").value, "MountPath", lmaConfig.AssetDetails[0]);
         readWriteValue(document.getElementById("GamePortNumber").value, "Number", lmaConfig.PortMappingsList[0][0].GamePort);
     }

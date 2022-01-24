@@ -14,3 +14,7 @@ dotnet publish VMAgent.csproj -c release -o outputFolder --runtime ubuntu.18.04-
 
 The "outputFolder" in the directory containing the csproj file will have the dlls and exe.
 Once the files are copied over, the LocalMultiplayerAgent file will need to be converted to executable - chmod +X LocalMultiplayerAgent
+
+## MultiplayerSettings.json
+
+The [MultiplayerSettings.json generator tool](./README.md) can assist you with configuring your MultiplayerSettings.json file, and configuring it for your server.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This folder contains a webpage utility which generates the MultiplayerSettings.json file you need, based on a set of chosen options. If you are having difficulty using LocalMultiplayerAgent or editing MultiplayerSettings.json, this tool should be useful.
+This folder contains a webpage utility which generates the [MultiplayerSettings.json](../MultiplayerSettings.json) file you need, based on a set of chosen options. If you are having difficulty using ```LocalMultiplayerAgent``` or editing ```MultiplayerSettings.json```, this tool should be useful.
 
 ## How to use
 

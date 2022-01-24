@@ -11,11 +11,11 @@ This folder contains a webpage utility which generates the MultiplayerSettings.j
 * Open ```main.html``` in a browser
     * Any one of:
     * Drag the file onto an open browser window
-    * Right-Click, _Open_ or _Open With_
+    * Right-Click, **Open** or **Open With**
 * Select options required by your server
     * Observe immediate changes to output json structure
 * Copy json structure from tool page
-* Paste into MultiplayerSettings.json
+* Paste into ```MultiplayerSettings.json```
     * Save
 * DONE!
 

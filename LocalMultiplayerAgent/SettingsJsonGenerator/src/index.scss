@@ -45,7 +45,7 @@ fieldset {
 	}
 
 	label {
-		display: block;
+		display: inline-block;
 		font-weight: bold;
 
 		&.checkbox {
@@ -71,4 +71,8 @@ p.info {
 	color: dimgray;
 	margin: 0;
 	font-size: 0.85rem;
+}
+
+[data-tippy-content] {
+	border-bottom: 2px dashed silver;
 }

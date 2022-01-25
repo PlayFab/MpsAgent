@@ -11,11 +11,7 @@ h1 {
 main {
   display: grid;
   gap: 2rem;
-}
-@media (min-width: 768px) {
-  main {
-    grid-template-columns: 1fr 1fr;
-  }
+  grid-template-columns: 1fr 1fr;
 }
 
 div.output {
@@ -46,7 +42,7 @@ fieldset legend {
   font-size: 1.2rem;
 }
 fieldset label {
-  display: block;
+  display: inline-block;
   font-weight: bold;
 }
 fieldset label.checkbox {
@@ -69,4 +65,8 @@ p.info {
   color: dimgray;
   margin: 0;
   font-size: 0.85rem;
+}
+
+[data-tippy-content] {
+  border-bottom: 2px dashed silver;
 }

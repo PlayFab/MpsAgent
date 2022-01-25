@@ -1,3 +1,6 @@
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css"; // optional for styling
+
 /* START Remove when TypeScript 4.6 supports the Crypto type natively */
 interface Crypto {
 	randomUUID: () => string;
@@ -214,3 +217,5 @@ allSelectElementsArray.forEach((selectElement: HTMLInputElement) => {
 });
 
 onInputChange();
+
+tippy("[data-tippy-content]");

@@ -135,9 +135,7 @@
 						<div class="field">
 							<!-- 172800 ticks is 24 hours -->
 							<label for="AgentListeningPort">Agent Port</label>
-							<input type="range" id="AgentListeningPort" min="1024" max="65535" value="56001" /><span
-								id="AgentListeningPortOutput"
-							></span>
+							<input type="text" id="AgentListeningPort" min="1024" max="65535" value="56001" />
 						</div>
 					</fieldset>
 
@@ -159,17 +157,13 @@
 
 						<div class="field">
 							<label for="NodePort">External Port</label>
-							<input type="range" id="NodePort" min="1024" max="65535" value="56100" /><span
-								id="NodePortOutput"
-							></span>
+							<input type="text" id="NodePort" min="1024" max="65535" value="56100" />
 						</div>
 
 						<div class="field">
 							<!-- TODO: Hide container only input when using WinProcess mode -->
 							<label for="GamePortNumber">Container Internal Port</label>
-							<input type="range" id="GamePortNumber" min="1024" max="65535" value="30000" /><span
-								id="NumberOutput"
-							></span>
+							<input type="text" id="GamePortNumber" min="1024" max="65535" value="30000" />
 						</div>
 					</fieldset>
 				</form>

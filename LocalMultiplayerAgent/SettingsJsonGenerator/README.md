@@ -1,21 +1,23 @@
-# LocalMultiplayerAgent MultiplayerSettings.json generation utility
+# LocalMultiplayerAgent MultiplayerSettings.json Generator
 
-## Overview
+This folder contains a web page which generates the [MultiplayerSettings.json](../MultiplayerSettings.json) file based on your options.
 
-This folder contains a webpage utility which generates the [MultiplayerSettings.json](../MultiplayerSettings.json) file you need, based on a set of chosen options. If you are having difficulty using ```LocalMultiplayerAgent``` or editing ```MultiplayerSettings.json```, this tool should be useful.
+Useful if you are having difficulty using `LocalMultiplayerAgent` or editing `MultiplayerSettings.json`.
 
-## How to use
+## Instructions
 
-* Clone this repo
-* View the folder which contains this README (using Windows Explorer, Mac Finder, etc)
-* Open ```main.html``` in a browser
-    * Any one of:
-    * Drag the file onto an open browser window
-    * Right-Click, **Open** or **Open With**
-* Select options required by your server
-    * Observe immediate changes to output json structure
-* Copy json structure from tool page
-* Paste into ```MultiplayerSettings.json```
-    * Save
-* DONE!
+1.  Clone this repository
+2.  Open the `index.html` in this folder in any web browser
+3.  Select options required by your server. The JSON on the right side will update immediately.
+4.  Copy the JSON and paste into `MultiplayerSettings.json`
 
+## Generating
+
+To make changes to the JavaScript that runs this page:
+
+1. Install Node JS
+2. Run
+    ```bash
+    npm install
+    npm run build
+    ```

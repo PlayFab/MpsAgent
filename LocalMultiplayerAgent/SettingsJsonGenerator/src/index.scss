@@ -4,10 +4,14 @@ body {
 	font-size: 1rem;
 }
 
+h1 {
+	text-align: center;
+}
+
 main {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
 	gap: 2rem;
+	grid-template-columns: 1fr 1fr;
 }
 
 div.output {
@@ -22,16 +26,12 @@ div.output {
 
 div.field {
 	margin-top: 1rem;
-
-	&:first-of-type {
-		margin-top: 0;
-	}
 }
 
 fieldset {
 	border: 0;
 	margin-top: 1rem;
-	border-top: 5px solid skyblue;
+	border-top: 5px solid #ff6d21;
 
 	&:first-of-type {
 		margin-top: 0;
@@ -40,6 +40,22 @@ fieldset {
 	legend {
 		font-weight: bold;
 		padding: 0.25rem;
+		text-transform: uppercase;
+		font-size: 1.2rem;
+	}
+
+	label {
+		display: block;
+		font-weight: bold;
+
+		&.checkbox {
+			display: inline;
+		}
+	}
+
+	input,
+	select {
+		margin: 0.15rem;
 	}
 }
 
@@ -49,4 +65,10 @@ span.warning {
 
 span.caution {
 	color: olive;
+}
+
+p.info {
+	color: dimgray;
+	margin: 0;
+	font-size: 0.85rem;
 }

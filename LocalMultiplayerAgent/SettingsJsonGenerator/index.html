@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>LocalMultiplayerAgent MultiplayerSettings.json Generator</title>
+		<link rel="stylesheet" href="index.css" />
+	</head>
+	<body>
+		<h1>LocalMultiplayerAgent MultiplayerSettings.json Generator</h1>
+
+		<main>
+			<div class="input">
+				<form>
+					<fieldset>
+						<legend>PlayFab Configuration</legend>
+
+						<div class="field">
+							<label for="TitleId">Title ID</label>
+							<input type="text" id="TitleId" value="" />
+						</div>
+
+						<div class="field">
+							<label for="Region">Region</label>
+							<select name="Region" id="Region">
+								<option value="EastUs">EastUs</option>
+								<option value="EastUs2">EastUs2</option>
+								<option value="WestUs">WestUs</option>
+								<option value="WestUs2">WestUs2</option>
+								<option value="NorthCentralUs">NorthCentralUs</option>
+								<option value="SouthCentralUs">SouthCentralUs</option>
+								<option value="CentralUs">CentralUs</option>
+								<option value="WestCentralUs">WestCentralUs</option>
+								<option value="JapanEast">JapanEast</option>
+								<option value="JapanWest">JapanWest</option>
+								<option value="WestEurope">WestEurope</option>
+								<option value="NorthEurope">NorthEurope</option>
+								<option value="BrazilSouth">BrazilSouth</option>
+								<option value="AustrailiaEast">AustrailiaEast</option>
+								<option value="AustrailiaSoutheast">AustrailiaSoutheast</option>
+								<option value="EastAsia">EastAsia</option>
+								<option value="SoutheastAsia">SoutheastAsia</option>
+								<option value="SouthAfricaNorth">SouthAfricaNorth</option>
+								<option value="UAENorth">UAENorth</option>
+								<option value="CentralIndia">CentralIndia</option>
+								<option value="FranceCentral">FranceCentral</option>
+								<option value="KoreaCentral">KoreaCentral</option>
+							</select>
+						</div>
+
+						<div class="field">
+							<label for="InitialPlayers">Initial players</label>
+							<input type="text" size="100%" id="InitialPlayers" value="Player1, Player2" />
+						</div>
+
+						<div class="field">
+							<input type="checkbox" id="OutputPlaceholders" />
+							<label for="OutputPlaceholders">Add advanced config json options</label>
+						</div>
+					</fieldset>
+
+					<fieldset>
+						<legend>OS/Container configuration</legend>
+
+						<div class="field">
+							<select name="RunMode" id="RunMode">
+								<option value="WinProcess">Windows Process</option>
+								<option value="WinContainer">Windows Docker Container</option>
+								<option value="LinuxContainer">Linux Docker Container</option>
+							</select>
+						</div>
+					</fieldset>
+
+					<fieldset>
+						<legend>Asset configuration</legend>
+						<p class="info">This tool only supports one asset currently</p>
+
+						<div class="field">
+							<label for="LocalFilePath">Asset Input Zip</label>
+							<span class="warning" id="LocalFilePathValidate"></span>
+							<input type="file" size="100%" id="LocalFilePath" value="" />
+						</div>
+
+						<div class="field">
+							<label for="MountPath">Asset Extract Path</label>
+							<span class="warning" id="MountPathValidate"></span>
+							<span class="caution" id="MountPathWarning"></span>
+							<input type="text" size="100%" id="MountPath" value="C:\Assets" />
+						</div>
+					</fieldset>
+
+					<fieldset>
+						<legend>General Configuration</legend>
+
+						<div class="field">
+							<label for="OutputFolder">Output Log Folder</label>
+							<input
+								type="text"
+								size="100%"
+								id="OutputFolder"
+								value="C:\Assets\WindowsContainerLogOutput"
+							/>
+						</div>
+
+						<div class="field">
+							<label for="StartCommand">Start Command</label>
+							<span class="warning" id="StartCommandValidate"></span>
+							<input type="text" size="100%" id="StartCommand" value="MyGameServer.exe -log" />
+						</div>
+
+						<div class="field">
+							<!-- 1800 ticks is 15 minutes -->
+							<label for="NumHeartBeatsForActivateResponse"
+								>Transition from Standby->Active after ticks</label
+							>
+							<input
+								type="range"
+								id="NumHeartBeatsForActivateResponse"
+								min="1"
+								max="1800"
+								value="10"
+							/><span id="NumHeartBeatsForActivateResponseOutput"></span>
+						</div>
+
+						<div class="field">
+							<!-- 172800 ticks is 24 hours -->
+							<label for="NumHeartBeatsForTerminateResponse">Set Terminate status after ticks</label>
+							<input
+								type="range"
+								id="NumHeartBeatsForTerminateResponse"
+								min="2"
+								max="172800"
+								value="172800"
+							/><span id="NumHeartBeatsForTerminateResponseOutput"></span>
+						</div>
+
+						<div class="field">
+							<!-- 172800 ticks is 24 hours -->
+							<label for="AgentListeningPort">Agent Port</label>
+							<input type="range" id="AgentListeningPort" min="1024" max="65535" value="56001" /><span
+								id="AgentListeningPortOutput"
+							></span>
+						</div>
+					</fieldset>
+
+					<fieldset>
+						<legend>Server Port Configuration</legend>
+
+						<div class="field">
+							<label for="GamePortName">GamePort Name</label>
+							<input type="text" id="GamePortName" value="UnrealServerGsdkHostPort" />
+						</div>
+
+						<div class="field">
+							<label for="GamePortProtocol">GamePort Protocol</label>
+							<select name="GamePortProtocol" id="GamePortProtocol">
+								<option value="UDP">UDP</option>
+								<option value="TCP">TCP</option>
+							</select>
+						</div>
+
+						<div class="field">
+							<label for="NodePort">External Port</label>
+							<input type="range" id="NodePort" min="1024" max="65535" value="56100" /><span
+								id="NodePortOutput"
+							></span>
+						</div>
+
+						<div class="field">
+							<!-- TODO: Hide container only input when using WinProcess mode -->
+							<label for="GamePortNumber">Container Internal Port</label>
+							<input type="range" id="GamePortNumber" min="1024" max="65535" value="30000" /><span
+								id="NumberOutput"
+							></span>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<div class="output">
+				<textarea id="outputText" value="Sample json will populate here"></textarea>
+			</div>
+		</main>
+
+		<script src="index.js"></script>
+	</body>
+</html>

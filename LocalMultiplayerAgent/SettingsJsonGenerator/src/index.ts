@@ -8,6 +8,10 @@ interface Crypto {
 declare var crypto: Crypto;
 /* END */
 
+function IsNull(data: any): boolean {
+	return typeof data === "undefined" || data === null || (typeof data === "string" && data.length === 0);
+}
+
 // Set these exactly once on page load, so they are consistent for a single session, but still random across multiple sessions
 let BuildGuId = crypto.randomUUID();
 let SessionGuId = crypto.randomUUID();
@@ -211,6 +215,32 @@ const allSelectElementsArray = Array.prototype.slice.call(document.getElementsBy
 
 allInputElementsArray.forEach((inputElement: HTMLInputElement) => {
 	inputElement.addEventListener("change", () => {
+		const hasMin = !IsNull(inputElement.getAttribute("min"));
+		const hasMax = !IsNull(inputElement.getAttribute("max"));
+
+		// Are you typing in a number on a field which has min/max attributes?
+		if (!isNaN(Number(inputElement.value)) && (hasMin || hasMax)) {
+			let value = Number(inputElement.value);
+
+			if (hasMin) {
+				const min = Number(inputElement.getAttribute("min"));
+
+				if (value < min) {
+					value = min;
+				}
+			}
+
+			if (hasMax) {
+				const max = Number(inputElement.getAttribute("max"));
+
+				if (value > max) {
+					value = max;
+				}
+			}
+
+			inputElement.value = value.toString();
+		}
+
 		onInputChange();
 	});
 });

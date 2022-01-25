@@ -56,7 +56,11 @@ const MSG_EXTRACT_LINUX_CONTAINER = "We recommended you choose a sub-folder of /
 
 function readWriteValue(value: any, valueName: string, lmaConfig: any) {
 	if (lmaConfig) {
-		lmaConfig[valueName] = value;
+		if (isNaN(value)) {
+			lmaConfig[valueName] = value;
+		} else {
+			lmaConfig[valueName] = Number(value);
+		}
 	}
 	let mirrorElement = document.getElementById(valueName + "Output");
 	if (mirrorElement) {
@@ -238,7 +242,7 @@ allInputElementsArray.forEach((inputElement: HTMLInputElement) => {
 				}
 			}
 
-			inputElement.value = value.toString();
+			inputElement.value = value as any;
 		}
 
 		onInputChange();

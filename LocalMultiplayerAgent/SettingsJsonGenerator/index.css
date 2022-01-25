@@ -53,6 +53,10 @@ fieldset select {
   margin: 0.15rem;
 }
 
+div.hidden {
+  display: none;
+}
+
 span.warning {
   color: darkred;
 }

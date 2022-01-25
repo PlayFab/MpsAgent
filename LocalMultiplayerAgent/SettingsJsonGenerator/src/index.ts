@@ -75,24 +75,29 @@ function ValidateStartCommand() {
 	let startCommand = GetElementValue("StartCommand");
 
 	let validationMessage = "";
-	if (runMode == RUN_MODE_WIN_PROCESS) {
-		let isValid = startCommand.search(ANTIREQUIRED_ABSOLUTE_PATH_SEARCH) == -1;
+	if (runMode === RUN_MODE_WIN_PROCESS) {
+		let isValid = startCommand.search(ANTIREQUIRED_ABSOLUTE_PATH_SEARCH) === -1;
 		if (!isValid) {
 			validationMessage = MSG_START_RELATIVE_PATH;
 		}
-	} else if (runMode == RUN_MODE_WIN_CONTAINER) {
+	} else if (runMode === RUN_MODE_WIN_CONTAINER) {
 		let mountPath = GetElementValue("MountPath");
 		// Verify that the mountPath is at index zero, and thus startCommand starts with mountPath
-		let isValid = startCommand.search(mountPath) == 0;
+		let isValid = startCommand.search(mountPath) === 0;
 		if (!isValid) {
 			validationMessage = MSG_START_ABSOLUTE_PATH;
 		}
-	} else if (runMode == RUN_MODE_LINUX_CONTAINER) {
+	} else if (runMode === RUN_MODE_LINUX_CONTAINER) {
 		let mountPath = GetElementValue("MountPath");
 		if (startCommand) {
 			validationMessage = MSG_START_EMPTY_PATH;
 		}
 	}
+
+	// PAUL: Put your Linux-specific fields here
+	// Show the linux-docker-fields div if the user selects Linux docker containers
+	(document.getElementById("linux-docker-fields") as HTMLDivElement).className =
+		runMode === RUN_MODE_LINUX_CONTAINER ? "" : "hidden";
 
 	// TODO: This could instead be a little red exclamation mark, with the validationMessage as hovertext
 	(document.getElementById("StartCommandValidate") as HTMLSpanElement).innerHTML = validationMessage;
@@ -114,17 +119,17 @@ function ValidateMountPath() {
 	let runMode = GetElementValue("RunMode");
 	let mountPath = GetElementValue("MountPath");
 
-	if (runMode == RUN_MODE_WIN_PROCESS) {
+	if (runMode === RUN_MODE_WIN_PROCESS) {
 		if (mountPath.search(SUGGESTED_WIN_EXTRACT_PATH_SEARCH) != 0) {
 			warningMessage = MSG_EXTRACT_WIN_PROCESS;
 		}
-	} else if (runMode == RUN_MODE_WIN_CONTAINER) {
+	} else if (runMode === RUN_MODE_WIN_CONTAINER) {
 		if (mountPath.search(REQUIRED_WIN_CONTAINER_EXTRACT_PATH_SEARCH) != 0) {
 			validationMessage = MSG_EXTRACT_WIN_CONTAINER;
 		} else if (mountPath.search(SUGGESTED_WIN_EXTRACT_PATH_SEARCH) != 0) {
 			warningMessage = MSG_EXTRACT_WIN_PROCESS;
 		}
-	} else if (runMode == RUN_MODE_LINUX_CONTAINER) {
+	} else if (runMode === RUN_MODE_LINUX_CONTAINER) {
 		if (mountPath.search(SUGGESTED_LINUX_EXTRACT_PATH_SEARCH) != 0) {
 			warningMessage = MSG_EXTRACT_LINUX_CONTAINER;
 		}
@@ -163,7 +168,7 @@ function onInputChange() {
 	let runMode = GetElementValue("RunMode");
 
 	readWriteValue(runMode !== RUN_MODE_WIN_PROCESS, "RunMode", lmaConfig);
-	if (runMode == RUN_MODE_WIN_PROCESS) {
+	if (runMode === RUN_MODE_WIN_PROCESS) {
 		lmaConfig.ProcessStartParameters = { StartGameCommand: startCommand };
 	} else {
 		lmaConfig.ContainerStartParameters = {
@@ -171,9 +176,9 @@ function onInputChange() {
 			resourcelimits: { cpus: 1, memorygib: 16 },
 		};
 
-		if (runMode == RUN_MODE_WIN_CONTAINER) {
+		if (runMode === RUN_MODE_WIN_CONTAINER) {
 			lmaConfig.ContainerStartParameters.imagedetails = WINDOWS_DEFAULT_CONTAINER_DETAILS;
-		} else if (runMode == RUN_MODE_LINUX_CONTAINER) {
+		} else if (runMode === RUN_MODE_LINUX_CONTAINER) {
 			lmaConfig.ContainerStartParameters.imagedetails = LINUX_DEFAULT_CONTAINER_DETAILS;
 		}
 

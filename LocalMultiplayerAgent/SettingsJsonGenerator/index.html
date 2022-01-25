@@ -12,7 +12,7 @@
 			<div class="input">
 				<form>
 					<fieldset>
-						<legend>PlayFab Configuration</legend>
+						<legend>PlayFab configuration</legend>
 
 						<div class="field">
 							<label
@@ -72,11 +72,15 @@
 								<option value="LinuxContainer">Linux Docker Container</option>
 							</select>
 						</div>
+
+						<div class="hidden" id="linux-docker-fields">
+							<p>PAUL: Put your Linux-specific fields here</p>
+						</div>
 					</fieldset>
 
 					<fieldset>
 						<legend>Asset configuration</legend>
-						<p class="info">This tool only supports one asset currently</p>
+						<p class="info">This tool only supports one asset</p>
 
 						<div class="field">
 							<label for="LocalFilePath">Asset Input Zip</label>
@@ -93,10 +97,10 @@
 					</fieldset>
 
 					<fieldset>
-						<legend>General Configuration</legend>
+						<legend>General configuration</legend>
 
 						<div class="field">
-							<label for="OutputFolder">Output Log Folder</label>
+							<label for="OutputFolder">Output log folder</label>
 							<input
 								type="text"
 								size="100%"
@@ -106,7 +110,7 @@
 						</div>
 
 						<div class="field">
-							<label for="StartCommand">Start Command</label>
+							<label for="StartCommand">Start command</label>
 							<span class="warning" id="StartCommandValidate"></span>
 							<input type="text" size="100%" id="StartCommand" value="MyGameServer.exe -log" />
 						</div>
@@ -114,7 +118,7 @@
 						<div class="field">
 							<!-- 1800 ticks is 15 minutes -->
 							<label for="NumHeartBeatsForActivateResponse"
-								>Transition from Standby->Active after ticks</label
+								>Transition from standby -&gt; active after ticks</label
 							>
 							<input
 								type="range"
@@ -127,7 +131,7 @@
 
 						<div class="field">
 							<!-- 172800 ticks is 24 hours -->
-							<label for="NumHeartBeatsForTerminateResponse">Set Terminate status after ticks</label>
+							<label for="NumHeartBeatsForTerminateResponse">Set terminate status after ticks</label>
 							<input
 								type="range"
 								id="NumHeartBeatsForTerminateResponse"
@@ -139,21 +143,21 @@
 
 						<div class="field">
 							<!-- 172800 ticks is 24 hours -->
-							<label for="AgentListeningPort">Agent Port</label>
+							<label for="AgentListeningPort">Agent port</label>
 							<input type="text" id="AgentListeningPort" min="1024" max="65535" value="56001" />
 						</div>
 					</fieldset>
 
 					<fieldset>
-						<legend>Server Port Configuration</legend>
+						<legend>Server port configuration</legend>
 
 						<div class="field">
-							<label for="GamePortName">GamePort Name</label>
+							<label for="GamePortName">GamePort name</label>
 							<input type="text" id="GamePortName" value="UnrealServerGsdkHostPort" />
 						</div>
 
 						<div class="field">
-							<label for="GamePortProtocol">GamePort Protocol</label>
+							<label for="GamePortProtocol">GamePort protocol</label>
 							<select name="GamePortProtocol" id="GamePortProtocol">
 								<option value="UDP">UDP</option>
 								<option value="TCP">TCP</option>
@@ -161,13 +165,13 @@
 						</div>
 
 						<div class="field">
-							<label for="NodePort">External Port</label>
+							<label for="NodePort">External port</label>
 							<input type="text" id="NodePort" min="1024" max="65535" value="56100" />
 						</div>
 
 						<div class="field">
 							<!-- TODO: Hide container only input when using WinProcess mode -->
-							<label for="GamePortNumber">Container Internal Port</label>
+							<label for="GamePortNumber">Container internal port</label>
 							<input type="text" id="GamePortNumber" min="1024" max="65535" value="30000" />
 						</div>
 					</fieldset>

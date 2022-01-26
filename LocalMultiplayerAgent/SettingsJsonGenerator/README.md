@@ -4,6 +4,8 @@ This folder contains a web page which generates the [MultiplayerSettings.json](.
 
 Useful if you are having difficulty using `LocalMultiplayerAgent` or editing `MultiplayerSettings.json`.
 
+![Screenshot of this JSON generator utility](/screenshot.png?raw=true)
+
 ## Instructions
 
 1.  Clone this repository

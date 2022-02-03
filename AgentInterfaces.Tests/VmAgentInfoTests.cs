@@ -58,5 +58,30 @@ namespace AgentInterfaces.Tests
             IReadOnlyList<string> newProperties = propertyNames.Except(knownProperties).ToList();
             Assert.IsFalse(newProperties.Any(), $"Please add new properties {string.Join(", ", newProperties)} to the list above and to the ToLogString method.");
         }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void TestVmStateEnumIntCast()
+        {
+            var vmStatesEnumIntCast = new Dictionary<VmState, int>
+            {
+                //test all vm states except for obsolete ones
+                {VmState.Unknown, 0},
+                {VmState.Unassigned, 1},
+                {VmState.Assigned, 2},
+                {VmState.Propping, 3},
+                {VmState.ProppingFailed, 4},
+                {VmState.ProppingCompleted, 5},
+                {VmState.StartServersFailed, 7},
+                {VmState.Running, 9},
+                {VmState.PendingResourceCleanup, 10},
+                {VmState.ServersRemoved, 12},
+                {VmState.TooManyServerRestarts, 13}
+            };
+            foreach (VmState vmState in vmStatesEnumIntCast.Keys)
+            {
+                Assert.AreEqual((int)vmState, vmStatesEnumIntCast[vmState]);
+            }
+        }
     }
 }

@@ -59,20 +59,24 @@ namespace AgentInterfaces.Tests
             Assert.IsFalse(newProperties.Any(), $"Please add new properties {string.Join(", ", newProperties)} to the list above and to the ToLogString method.");
         }
 
+        /// <summary>
+        /// Test to ensure enum order doesn't change when a new VmState is added. Control plane relies on this enum to determine the order healthyVmsEligibleToRelease.
+        /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
-        public void TestVmStateEnumIntCast()
+        public void VmStateEnumOrder()
         {
             var vmStatesEnumIntCast = new Dictionary<VmState, int>
             {
-                //test all vm states except for obsolete ones
                 {VmState.Unknown, 0},
                 {VmState.Unassigned, 1},
                 {VmState.Assigned, 2},
                 {VmState.Propping, 3},
                 {VmState.ProppingFailed, 4},
                 {VmState.ProppingCompleted, 5},
+                {VmState.ServerStartFailed, 6},
                 {VmState.StartServersFailed, 7},
+                {VmState.PartiallyRunning, 8},
                 {VmState.Running, 9},
                 {VmState.PendingResourceCleanup, 10},
                 {VmState.ServersRemoved, 12},

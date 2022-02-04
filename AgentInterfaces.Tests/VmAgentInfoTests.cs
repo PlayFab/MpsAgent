@@ -64,27 +64,30 @@ namespace AgentInterfaces.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
-        public void VmStateEnumOrder()
+        public void KnowVmStateOrder()
         {
-            var vmStatesEnumIntCast = new Dictionary<VmState, int>
+           //we need to keep the order vm state because we use this order to determine healthy vms to release
+            var knownVmStateOrder = new Dictionary<string, int>
             {
-                {VmState.Unknown, 0},
-                {VmState.Unassigned, 1},
-                {VmState.Assigned, 2},
-                {VmState.Propping, 3},
-                {VmState.ProppingFailed, 4},
-                {VmState.ProppingCompleted, 5},
-                {VmState.ServerStartFailed, 6},
-                {VmState.StartServersFailed, 7},
-                {VmState.PartiallyRunning, 8},
-                {VmState.Running, 9},
-                {VmState.PendingResourceCleanup, 10},
-                {VmState.ServersRemoved, 12},
-                {VmState.TooManyServerRestarts, 13}
+                {nameof(VmState.Unknown), 0},
+                {nameof(VmState.Unassigned), 1},
+                {nameof(VmState.Assigned), 2 },
+                {nameof(VmState.Propping), 3 },
+                {nameof(VmState.ProppingFailed), 4},
+                {nameof(VmState.ProppingCompleted), 5},
+                {"ServerStartFailed", 6}, //obselete vmstate
+                {nameof(VmState.StartServersFailed), 7},
+                {"PartiallyRunning", 8}, //obselete vmstate
+                {nameof(VmState.Running), 9},
+                {nameof(VmState.PendingResourceCleanup), 10},
+                {"SessionHostsRemoved", 11 }, //obselete vmstate
+                {nameof(VmState.ServersRemoved), 12},
+                {nameof(VmState.TooManyServerRestarts), 13 }
             };
-            foreach (VmState vmState in vmStatesEnumIntCast.Keys)
+           
+            foreach(string vmstate in knownVmStateOrder.Keys)
             {
-                Assert.AreEqual((int)vmState, vmStatesEnumIntCast[vmState]);
+                Assert.IsFalse((int)Enum.Parse(typeof(VmState), vmstate) != knownVmStateOrder[vmstate], $"Please keep VmState $vmstate in original order and add new VmState in the end.");
             }
         }
     }

@@ -22,6 +22,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
             GameSharedContentFolderVm = Path.Combine(TempStorageRootVm, "GameSharedContent");
             GameLogsRootFolderVm = Path.Combine(TempStorageRootVm, "GameLogs");
+            DumpsRootFolderVm = Path.Combine(TempStorageRootVm, "Dumps");
             AssetExtractionRootFolderVm = Path.Combine(TempStorageRootVm, "ExtAssets");
             AssetDownloadRootFolderVm = Path.Combine(TempStorageRootVm, "DownloadedAssets");
             CertificateRootFolderVm = Path.Combine(TempStorageRootVm, "GameCertificates");
@@ -59,6 +60,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public string GameSharedContentFolderContainer { get; set; }
 
         public string GameLogsRootFolderVm { get; }
+
+        // Only used on Process-based servers. All dumps are placed in this folder, and then must be moved into
+        // the corresponding server's logs/_dumps folder during log upload.
+        public string DumpsRootFolderVm { get; }
 
         public string GameLogsRootFolderContainer { get; set; }
 

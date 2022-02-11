@@ -180,11 +180,11 @@ function onInputChange() {
 		if (runMode === RUN_MODE_WIN_CONTAINER) {
 			lmaConfig.ContainerStartParameters.imagedetails = WINDOWS_DEFAULT_CONTAINER_DETAILS;
 		} else if (runMode === RUN_MODE_LINUX_CONTAINER) {
-			let linuxCustomerId = GetElementValue("CustomerId");
-			let linuxImageName = GetElementValue("ImageName");
-			let linuxImageTag = GetElementValue("ImageTag");
-			let linuxUsername = GetElementValue("Username");
-			let linuxPassword = GetElementValue("Password");
+			const linuxCustomerId = GetElementValue("CustomerId");
+			const linuxImageName = GetElementValue("ImageName");
+			const linuxImageTag = GetElementValue("ImageTag");
+			const linuxUsername = GetElementValue("Username");
+			const linuxPassword = GetElementValue("Password");
 
 			lmaConfig.ContainerStartParameters.imagedetails = {
 				"Registry": linuxCustomerId,

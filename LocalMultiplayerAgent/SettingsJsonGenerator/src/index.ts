@@ -23,13 +23,6 @@ const WINDOWS_DEFAULT_CONTAINER_DETAILS = {
 	username: "",
 	password: "",
 };
-const LINUX_DEFAULT_CONTAINER_DETAILS = {
-	Registry: "REPLACE_WITH_CUSTOMER_ID.azurecr.io",
-	ImageName: "REPLACE_WITH_CUSTOMER_IMAGE_NAME",
-	ImageTag: "REPLACE_WITH_CUSTOMER_IMAGE_VERSION",
-	Username: "REPLACE_WITH_CUSTOMER_USERNAME",
-	Password: "REPLACE_WITH_CUSTOMER_PASSWORD",
-};
 
 // These values match an enum for RunMode in the HTML file
 const RUN_MODE_WIN_PROCESS = "WinProcess";
@@ -187,7 +180,19 @@ function onInputChange() {
 		if (runMode === RUN_MODE_WIN_CONTAINER) {
 			lmaConfig.ContainerStartParameters.imagedetails = WINDOWS_DEFAULT_CONTAINER_DETAILS;
 		} else if (runMode === RUN_MODE_LINUX_CONTAINER) {
-			lmaConfig.ContainerStartParameters.imagedetails = LINUX_DEFAULT_CONTAINER_DETAILS;
+			let linuxCustomerId = GetElementValue("CustomerId");
+			let linuxImageName = GetElementValue("ImageName");
+			let linuxImageTag = GetElementValue("ImageTag");
+			let linuxUsername = GetElementValue("Username");
+			let linuxPassword = GetElementValue("Password");
+
+			lmaConfig.ContainerStartParameters.imagedetails = {
+				"Registry": linuxCustomerId,
+				"ImageName": linuxImageName,
+				"ImageTag": linuxImageTag,
+				"Username": linuxUsername,
+				"Password": linuxPassword
+			};
 		}
 
 		readWriteValue(GetElementValue("MountPath"), "MountPath", lmaConfig.AssetDetails[0]);

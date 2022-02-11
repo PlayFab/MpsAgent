@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             await sessionHostRunner.WaitOnServerExit(typeSpecificId).ConfigureAwait(false);
             string logFolder = Path.Combine(Globals.VmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostInfo.LogFolderId);
-            await sessionHostRunner.CollectLogs(typeSpecificId, logFolder, Globals.VmConfiguration.VmDirectories.DumpsRootFolderVm, sessionHostManager);
+            await sessionHostRunner.CollectLogs(typeSpecificId, logFolder, sessionHostManager);
             await sessionHostRunner.TryDelete(typeSpecificId);
         }
 

@@ -465,7 +465,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return volumeBindings;
         }
 
-        public override async Task CollectLogs(string containerId, string logsFolder, string _dumpsFolderVm, ISessionHostManager sessionHostManager)
+        public override async Task CollectLogs(string containerId, string logsFolder, ISessionHostManager sessionHostManager)
         {
             try
             {

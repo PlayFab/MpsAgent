@@ -318,10 +318,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     }
                 }
             }
-            else
-            {
-                _logger?.LogVerbose("Unix file setting not needed");
-            }
         }
 
         public void CreateDirectoryAndParents(DirectoryInfo directory)

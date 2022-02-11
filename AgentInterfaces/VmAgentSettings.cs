@@ -20,5 +20,15 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Titles that do not use PlayFab MultiPlayer Servers for allocating the servers, and only use it for scaling.
         /// </summary>
         public HashSet<string> TitlesUsingExternalAllocations { get; set; }
+
+        /// <summary>
+        ///  Whether the maintenance schedule time should be passed to GSDK.
+        /// </summary>
+        public bool ShouldPassMaintenanceInfoToGsdk { get; set; }
+
+        /// <summary>
+        /// Whether to retain the assets (to prevent a re-download) when a VM gets reassigned after being unassigned.
+        /// </summary>
+        public bool ShouldRetainAssetsOnReassignment { get; set; }
     }
 }

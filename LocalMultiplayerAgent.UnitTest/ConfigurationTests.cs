@@ -248,7 +248,33 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
             settings.SetDefaultsIfNotSpecified();
             new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+        }
 
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void ValidateNumHeartbeats()
+        {
+            // test for NumHeartBeatsForActivateResponse
+            dynamic config = GetValidConfig();            
+            config.NumHeartBeatsForActivateResponse = 0;
+            MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+            settings.SetDefaultsIfNotSpecified();
+            new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+
+            // test for NumHeartBeatsForTerminateResponse
+            config = GetValidConfig();            
+            config.NumHeartBeatsForTerminateResponse = 0;
+            settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+            settings.SetDefaultsIfNotSpecified();
+            new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+
+            // test for NumHeartBeatsForTerminateResponse and NumHeartBeatsForActivateResponse
+            config = GetValidConfig();            
+            config.NumHeartBeatsForTerminateResponse = 10;
+            config.NumHeartBeatsForActivateResponse = 10;
+            settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+            settings.SetDefaultsIfNotSpecified();
+            new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
         }
 
         [TestMethod]

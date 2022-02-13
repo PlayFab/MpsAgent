@@ -186,6 +186,24 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 }
             }
 
+            if(_settings.NumHeartBeatsForActivateResponse <= 0)
+            {
+                Console.WriteLine("NumHeartBeatsForActivateResponse must be greater than 0.");
+                isSuccess = false;
+            }
+
+            if(_settings.NumHeartBeatsForTerminateResponse <= 0)
+            {   
+                Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than 0.");
+                isSuccess = false;
+            }
+
+            if(_settings.NumHeartBeatsForTerminateResponse <= _settings.NumHeartBeatsForActivateResponse)
+            {
+                Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than NumHeartBeatsForActivateResponse. Ideally more than 1, since you would like the server to be alive for a few seconds");
+                isSuccess = false;
+            }
+
             return isSuccess;
 
         }

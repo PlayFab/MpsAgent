@@ -52,6 +52,18 @@
     <Content Include="SetupLinuxContainersOnWindows.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SettingsJsonGenerator/index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SettingsJsonGenerator/main.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+     <Content Include="SettingsJsonGenerator/index.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SettingsJsonGenerator/index.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -6,27 +6,20 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ProtoBuf;
 
-    [ProtoContract]
     public class SessionConfig
     {
-        [ProtoMember(1)]
         public Guid SessionId { get; set; }
 
-        [ProtoMember(2)]
         public string SessionCookie { get; set; }
 
-        [ProtoMember(3)]
         public List<string> InitialPlayers { get; set; }
 
         /// <summary>
         /// Session metadata
         /// </summary>
-        [ProtoMember(4)]
         public Dictionary<string, string> Metadata { get; set; }
 
-        [ProtoMember(5)]
         public LegacyAllocationInfo LegacyAllocationInfo { get; set; }
 
         /// <summary>

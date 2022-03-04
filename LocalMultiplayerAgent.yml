@@ -45,6 +45,16 @@ steps:
     TargetFolder: '$(projectName)Publish\'
     flattenFolders: true
 
+- task: CopyFiles@2
+  inputs:
+    Contents: |
+      $(projectName)\SettingsJsonGenerator\index.html
+      $(projectName)\SettingsJsonGenerator\index.js
+      $(projectName)\SettingsJsonGenerator\main.css
+      $(projectName)\SettingsJsonGenerator\index.css
+    TargetFolder: '$(projectName)Publish\SettingsJsonGenerator\'
+    flattenFolders: true
+
 - task: EsrpCodeSigning@1
   inputs: 
     FolderPath: '$(projectName)Publish\'

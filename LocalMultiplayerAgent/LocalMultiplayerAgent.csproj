@@ -40,29 +40,35 @@
   <ItemGroup>
     <Content Update="MultiplayerSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
     <Content Update="MultiplayerSettingsLinuxContainersOnWindowsSample.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
-    <None Remove="Setup.ps1" />
     <Content Include="Setup.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
-    <None Remove="SetupLinuxContainersOnWindows.ps1" />
     <Content Include="SetupLinuxContainersOnWindows.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
     <Content Include="SettingsJsonGenerator/index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
     <Content Include="SettingsJsonGenerator/main.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
      <Content Include="SettingsJsonGenerator/index.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
     <Content Include="SettingsJsonGenerator/index.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
 

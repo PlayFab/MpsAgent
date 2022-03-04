@@ -1,0 +1,41 @@
+﻿{
+  "RunContainer": true,
+  "ForcePullFromAcrOnLinuxContainersOnWindows": false,
+  "OutputFolder": "C:\\output\\UnityServerLinux",
+  "NumHeartBeatsForActivateResponse": 10,
+  "NumHeartBeatsForTerminateResponse": 60,
+  "TitleId": "",
+  "BuildId": "00000000-0000-0000-0000-000000000000",
+  "Region": "WestUs",
+  "AgentListeningPort": 56001,
+  "ContainerStartParameters": {
+    "ImageDetails": {
+      "Registry": "mydockerregistry.io",
+      "ImageName": "mygame",
+      "ImageTag": "0.1",
+      "Username": "",
+      "Password": ""
+    }
+  },
+  "DeploymentMetadata": {
+    "Environment": "LOCAL",
+    "FeaturesEnabled": "List,Of,Features,Enabled"
+  },
+  "PortMappingsList": [
+    [
+      {
+        "NodePort": 56100,
+        "GamePort": {
+          "Name": "game_port",
+          "Number": 7777,
+          "Protocol": "TCP"
+        }
+      }
+    ]
+  ],
+  "SessionConfig": {
+    "SessionId": "ba67d671-512a-4e7d-a38c-2329ce181946",
+    "SessionCookie": null,
+    "InitialPlayers": [ "Player1", "Player2" ]
+  }
+}

@@ -1,0 +1,76 @@
+body {
+  background: white;
+  font-family: sans-serif;
+  font-size: 1rem;
+}
+
+h1 {
+  text-align: center;
+}
+
+main {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+div.output {
+  display: flex;
+}
+div.output textarea {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+div.field {
+  margin-top: 1rem;
+}
+
+fieldset {
+  border: 0;
+  margin-top: 1rem;
+  border-top: 5px solid #ff6d21;
+}
+fieldset:first-of-type {
+  margin-top: 0;
+}
+fieldset legend {
+  font-weight: bold;
+  padding: 0.25rem;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+}
+fieldset label {
+  display: inline-block;
+  font-weight: bold;
+}
+fieldset label.checkbox {
+  display: inline;
+}
+fieldset input,
+fieldset select {
+  margin: 0.15rem;
+}
+
+div.hidden {
+  display: none;
+}
+
+span.warning {
+  color: darkred;
+}
+
+span.caution {
+  color: olive;
+}
+
+p.info {
+  color: dimgray;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+[data-tippy-content] {
+  border-bottom: 2px dashed silver;
+}

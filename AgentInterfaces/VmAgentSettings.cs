@@ -22,6 +22,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public HashSet<string> TitlesUsingExternalAllocations { get; set; }
 
         /// <summary>
+        /// Titles which are excluded from enforcing deleting Container sessions that are not tracked in VMAgent
+        /// </summary>
+        public HashSet<string> TitlesExemptFromRogueContainerPolicing { get; set; }
+
+        /// <summary>
         ///  Whether the maintenance schedule time should be passed to GSDK.
         /// </summary>
         public bool ShouldPassMaintenanceInfoToGsdk { get; set; }

@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Net;
@@ -79,5 +80,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         bool DirectoryExists(string directoryPath);
 
+        IEnumerable<FileInfo> GetFiles(DirectoryInfo source, bool recursive);
     }
 }

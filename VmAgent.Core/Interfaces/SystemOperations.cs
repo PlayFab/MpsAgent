@@ -5,17 +5,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using global::VmAgent.Core.Interfaces;
     using Mono.Unix;
-    using Mono.Unix.Native;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.IO.Compression;
     using System.Linq;
     using System.Net;
     using System.Runtime.InteropServices;
     using System.Security.Cryptography.X509Certificates;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using OpenFlags = System.Security.Cryptography.X509Certificates.OpenFlags;
@@ -338,6 +335,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             DirectoryInfo info = new DirectoryInfo(directoryPath);
             return _fileSystemOperations.Exists(info);
+        }
+
+        public IEnumerable<FileInfo> GetFiles(DirectoryInfo source, bool recursive = false)
+        {
+            return _fileSystemOperations.GetFiles(source, recursive);
         }
     }
 }

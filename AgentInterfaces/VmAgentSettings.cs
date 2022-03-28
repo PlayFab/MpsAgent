@@ -30,5 +30,10 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Whether to retain the assets (to prevent a re-download) when a VM gets reassigned after being unassigned.
         /// </summary>
         public bool ShouldRetainAssetsOnReassignment { get; set; }
+
+        /// <summary>
+        /// Whether we should stop bringing up new session hosts (when old ones terminate), if the VM has been scheduled for maintenance.
+        /// </summary>
+        public bool DisableSessionHostCreationOnMaintenanceEvent { get; set; }
     }
 }

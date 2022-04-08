@@ -78,5 +78,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         string GetLogFolderForSessionHostId(string sessionHostId);
 
         string GetTypeSpecificIdForSessionHost(string sessionHostId);
+
+        void MarkForMaintenance(MaintenanceSchedule schedule);
+
+        bool IsMarkedForMaintenance();
     }
 }

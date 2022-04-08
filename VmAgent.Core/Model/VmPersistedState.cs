@@ -20,6 +20,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
         public SessionHostsStartInfo GameResourceDetails { get; set; }
 
         /// <summary>
+        /// Maintenance schedule for this VM, if any.
+        /// </summary>
+        public MaintenanceSchedule MaintenanceSchedule { get; set; }
+
+        /// <summary>
         /// Whether the start up script (at VM) level has been executed. The script should be run before starting session hosts.
         /// </summary>
         public bool IsSessionHostStartupScriptExecutionComplete { get; set; }

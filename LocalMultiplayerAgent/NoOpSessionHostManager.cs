@@ -172,5 +172,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         {
             return "";
         }
+
+        public void MarkForMaintenance(MaintenanceSchedule schedule)
+        {
+        }
+
+        public bool IsMarkedForMaintenance()
+        {
+            return false;
+        }
     }
 }

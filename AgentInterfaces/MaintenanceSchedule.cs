@@ -18,6 +18,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string ReportingVmId { get; set; }
     }
 
+    // https://docs.microsoft.com/en-us/azure/virtual-machines/windows/scheduled-events#query-for-events
     public class MaintenanceEvent
     {
         public string EventId { get; set; }
@@ -32,5 +33,9 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string EventStatus { get; set; }
 
         public DateTime? NotBefore { get; set; }
+
+        public string EventSource { get; set; }
+
+        public int DurationInSeconds { get; set; }
     }
 }

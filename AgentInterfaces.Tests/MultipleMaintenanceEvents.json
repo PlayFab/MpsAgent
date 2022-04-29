@@ -9,7 +9,9 @@
       "Resources": [
         "_6EF3169C-3658-4598-ADE5-E0FE62E8CEF8-AzureBatch-Deployment_1",
       ],
-      "NotBefore": "Tue, 11 Jul 2017 20:08:47 GMT"
+      "NotBefore": "Tue, 11 Jul 2017 20:08:47 GMT",
+      "EventSource": "Platform",
+      "DurationInSeconds" :  9 
     },
     {
       "EventId": "ca7e7bd4-86bf-42b0-8ee3-f0671fb00671",
@@ -19,7 +21,9 @@
       "Resources": [
         "_9e90cb08-3a7d-4dfc-833a-3d93298cd83e-AzureBatch-Deployment_2"
       ],
-      "NotBefore": "Tue, 11 Jul 2017 20:08:47 GMT"
+      "NotBefore": "Tue, 11 Jul 2017 20:08:47 GMT",
+      "EventSource": "User",
+      "DurationInSeconds": -1
     }
   ]
 }

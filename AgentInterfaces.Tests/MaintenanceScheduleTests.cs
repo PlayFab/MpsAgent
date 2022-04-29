@@ -20,6 +20,7 @@ namespace AgentInterfaces.Tests
             Assert.AreEqual("1", schedule.DocumentIncarnation);
             Assert.AreEqual(1, schedule.MaintenanceEvents.Count);
             Assert.AreEqual(1, schedule.MaintenanceEvents[0].AffectedResources.Count);
+            Assert.AreEqual(10, schedule.MaintenanceEvents[0].DurationInSeconds);
             AssertNonNullProperties(schedule);
         }
 
@@ -32,6 +33,8 @@ namespace AgentInterfaces.Tests
             Assert.AreEqual("1", schedule.DocumentIncarnation);
             Assert.AreEqual(2, schedule.MaintenanceEvents.Count);
             Assert.AreEqual(1, schedule.MaintenanceEvents[0].AffectedResources.Count);
+            Assert.AreEqual(9, schedule.MaintenanceEvents[0].DurationInSeconds);
+            Assert.AreEqual(-1, schedule.MaintenanceEvents[1].DurationInSeconds);
             AssertNonNullProperties(schedule);
         }
 
@@ -43,7 +46,6 @@ namespace AgentInterfaces.Tests
             MaintenanceSchedule schedule = JsonConvert.DeserializeObject<MaintenanceSchedule>(payload);
             Assert.AreEqual("1", schedule.DocumentIncarnation);
             Assert.AreEqual(0, schedule.MaintenanceEvents.Count);
-
         }
 
         [TestMethod]
@@ -64,6 +66,7 @@ namespace AgentInterfaces.Tests
             Assert.IsNotNull(maintenanceSchedule.MaintenanceEvents[0].EventStatus);
             Assert.IsNotNull(maintenanceSchedule.MaintenanceEvents[0].EventType);
             Assert.IsNotNull(maintenanceSchedule.MaintenanceEvents[0].NotBefore);
+            Assert.IsNotNull(maintenanceSchedule.MaintenanceEvents[0].EventSource);
         }
     }
 }

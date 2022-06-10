@@ -6,11 +6,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
 
     public class ProcessWrapper : IProcessWrapper
     {
+        StreamReader ErrorStreamReader = null;
+
         public void Kill(int id)
         {
             try
@@ -32,8 +35,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public int Start(ProcessStartInfo startInfo)
         {
-            return Process.Start(startInfo).Id;
+            Process newProcess = Process.Start(startInfo);
+            StartErrorStreamReader(newProcess);
+            return newProcess.Id;
         }
+
+        public void StartErrorStreamReader(Process process)
+        {
+            ErrorStreamReader = process.StandardError;
+        }
+        public StreamReader StandardErrorReader => ErrorStreamReader;
 
         public IEnumerable<int> List()
         {

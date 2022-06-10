@@ -18,6 +18,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     {
         private readonly IProcessWrapper _processWrapper;
 
+        /// <summary>
+        /// The name of the file where the console logs for the server are captured.
+        /// </summary>
+        private const string ConsoleLogCaptureFileName = "PF_ConsoleLogs.txt";
+
         public ProcessRunner(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
@@ -49,6 +54,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             processStartInfo.Arguments = arguments;
             processStartInfo.WorkingDirectory = sessionHostStartInfo.GameWorkingDirectory ?? Path.GetDirectoryName(executableFileName);
             processStartInfo.Environment.AddRange(sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, sessionHostUniqueId, sessionHostManager.VmAgentSettings));
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.RedirectStandardError = true;
 
             _logger.LogInformation($"Starting process for session host with instance number {instanceNumber} and process info: FileName - {executableFileName}, Args - {arguments}.");
 
@@ -64,6 +71,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             catch (Exception exception)
             {
                 _logger.LogException($"Failed to start process based host with instance number {instanceNumber}", exception);
+                CollectLogs(processId: "123", logFolderPathOnVm, sessionHostManager); //processId may be handy
                 sessionHostManager.RemoveSessionHost(sessionHostUniqueId);
                 sessionHost = null;
             }
@@ -76,6 +84,30 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
+            try
+            {
+                _logger.LogVerbose($"Collecting logs for process {processId}.");
+                string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
+
+                    using (_processWrapper.StandardErrorReader)
+                    {
+                        Stopwatch sw = new Stopwatch(); // may want to have everything, debug and check
+                        while (!_processWrapper.StandardErrorReader.EndOfStream) //.ReadToEnd - loads everything (no while)
+                        {
+                            if (sw.Elapsed.Seconds > 3) // don't flood STDOUT with messages, output one every 3 seconds if logs are too many
+                            {
+                                _logger.LogVerbose($"Gathering logs for process {processId}, please wait...");
+                                sw.Restart(); 
+                            }
+                            _systemOperations.FileAppendAllText(destinationFileName, _processWrapper.StandardErrorReader.ReadLine() + Environment.NewLine); // if .ReadToEnd, use this at the end
+                        }
+                    }
+                    _logger.LogVerbose($"Written logs for process {processId} to {destinationFileName}.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException($"Failed to write error logs from Windows process: {processId}", ex);
+            }
             return Task.CompletedTask;
         }
 

@@ -60,15 +60,15 @@ steps:
     MaxRetryAttempts: '5'
     
 - task: DotNetCoreCLI@2
-    displayName: dotnet pack
-    inputs:
-      command: pack
-      projects: '$(projectName)/$(projectName).csproj'
-      arguments: --configuration $(BuildConfiguration)
-      searchPatternPack: '$(projectName)/$(projectName).csproj'.csproj
-      nobuild: true
-      versioningScheme: byBuildNumber
-      buildProperties: platform=anycpu
+  displayName: dotnet pack
+  inputs:
+    command: pack
+    projects: '$(projectName)/$(projectName).csproj'
+    arguments: --configuration $(BuildConfiguration)
+    searchPatternPack: '$(projectName)/$(projectName).csproj'.csproj
+    nobuild: true
+    versioningScheme: byBuildNumber
+    buildProperties: platform=anycpu
       
 - task: NuGetCommand@2
   displayName: 'nuget push'

@@ -11,6 +11,8 @@ trigger:
     include:
     - /VmAgent.Core/
 
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
+
 pool:
   vmImage: 'ubuntu-latest'
 

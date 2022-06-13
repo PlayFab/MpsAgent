@@ -65,7 +65,7 @@ steps:
     command: pack
     projects: '$(projectName)/$(projectName).csproj'
     arguments: --configuration $(BuildConfiguration)
-    searchPatternPack: '$(projectName)/$(projectName).csproj'.csproj
+    searchPatternPack: '$(projectName)/$(projectName).csproj'
     nobuild: true
     versioningScheme: byBuildNumber
     buildProperties: platform=anycpu

@@ -4,7 +4,12 @@
 # https://aka.ms/yaml
 
 trigger:
-- manual
+  branches:
+    include:
+    - refs/heads/main
+  paths:
+    include:
+    - /AgentInterfaces/
 
 name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
 

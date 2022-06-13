@@ -6,7 +6,7 @@
 trigger:
   branches:
     include:
-    - refs/heads/main
+    - main
   paths:
     include:
     - /AgentInterfaces/
@@ -74,8 +74,6 @@ steps:
     SessionTimeout: '60'
     MaxConcurrency: '50'
     MaxRetryAttempts: '5'
-    
-
       
 - task: NuGetCommand@2
   displayName: 'nuget push'

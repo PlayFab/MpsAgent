@@ -6,6 +6,8 @@
 trigger:
 - manual
 
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
+
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -56,6 +58,18 @@ steps:
     SessionTimeout: '60'
     MaxConcurrency: '50'
     MaxRetryAttempts: '5'
+    
+- task: DotNetCoreCLI@2
+    displayName: dotnet pack
+    inputs:
+      command: pack
+      projects: '$(projectName)/$(projectName).csproj'
+      arguments: --configuration $(BuildConfiguration)
+      searchPatternPack: '$(projectName)/$(projectName).csproj'.csproj
+      nobuild: true
+      versioningScheme: byBuildNumber
+      buildProperties: platform=anycpu
+      
 - task: NuGetCommand@2
   displayName: 'nuget push'
   inputs:

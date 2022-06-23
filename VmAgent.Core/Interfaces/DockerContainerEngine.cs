@@ -37,12 +37,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         private readonly int _maxRetryAttempts = 30;
 
         private readonly bool _shouldPublicPortMatchGamePort;
-
-        /// <summary>
-        /// The name of the file where the console logs for the server are captured.
-        /// </summary>
-        private const string ConsoleLogCaptureFileName = "PF_ConsoleLogs.txt";
-
         /// <summary>
         /// Lazily instantiates the Docker client.
         /// </summary>
@@ -157,7 +151,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 hostConfig.CapAdd.Add("SYS_PTRACE");
             }
-            
+
 
             if(hostConfig.LogConfig == null)
             {
@@ -197,7 +191,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 MetricConstants.ContainerStartTime);
             _logger.LogInformation($"Container {containerId} start completed.");
         }
-        
+
         private class LogReporter : IProgress<JSONMessage>
         {
             private readonly ConcurrentDictionary<string, LayerProgress> _layerProgresses = new ConcurrentDictionary<string, LayerProgress>();
@@ -360,7 +354,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             SessionHostsStartInfo sessionHostStartInfo = gameResourceDetails.SessionHostsStartInfo;
             ContainerImageDetails imageDetails = sessionHostStartInfo.ImageDetails;
             string imageName = $"{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
-            
+
             // Support running local images with no explicit registry in the name.
             if (!string.IsNullOrEmpty(imageDetails.Registry))
             {
@@ -409,14 +403,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 await StartContainer(dockerId);
                 _logger.LogInformation($"Started container {dockerId}, with assignmentId {sessionHostStartInfo.AssignmentId}, instance number {instanceNumber}, and logFolderId {logFolderId}");
-            } 
+            }
             catch (Exception exception)
             {
                 _logger.LogException($"Failed to start container based host with instance number {instanceNumber}", exception);
                 sessionHostManager.RemoveSessionHost(dockerId);
                 sessionHost = null;
             }
-           
+
 
             return sessionHost;
         }
@@ -586,7 +580,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     throw new ApplicationException("CreateImageAsync is completed but the image doesn't exist");
                 }
             });
-            
+
             _logger.LogEvent(MetricConstants.PullImage, null, new Dictionary<string, double>
                 {
                     { MetricConstants.DownloadDurationInMilliseconds, logReporter.DownloadSummary?.DurationInMilliseconds ?? 0d },
@@ -614,7 +608,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
                 {
                     var windowsStartCommand = new List<string>();
-                    
+
                     if (request.WindowsCrashDumpConfiguration?.IsEnabled == true)
                     {
                         // set crash dump registry keys on startup
@@ -664,6 +658,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 }
             }
             return null;
+        }
+
+        public override Task CreateExceptionLogs(string logsFolder, string exceptionMessage)
+        {
+            throw new NotSupportedException();
         }
     }
 }

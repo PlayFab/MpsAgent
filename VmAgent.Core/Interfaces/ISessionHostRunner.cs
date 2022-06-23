@@ -25,5 +25,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         Task WaitOnServerExit(string containerId);
 
         Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager);
+
+        Task CreateExceptionLogs(string logFolder, string exceptionMessage);
     }
 }

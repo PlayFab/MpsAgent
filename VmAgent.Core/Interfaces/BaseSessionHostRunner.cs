@@ -21,6 +21,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         protected readonly ISystemOperations _systemOperations;
 
+        /// <summary>
+        /// The name of the file where the console logs for the server are captured.
+        /// </summary>
+        public const string ConsoleLogCaptureFileName = "PF_ConsoleLogs.txt";
+
         protected BaseSessionHostRunner(
             VmConfiguration vmConfiguration,
             MultiLogger logger,
@@ -32,6 +37,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         }
 
         abstract public Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager);
+
+        abstract public Task CreateExceptionLogs(string logsFolder, string exceptionMessage);
 
         abstract public Task<SessionHostInfo> CreateAndStart(int instanceNumber, GameResourceDetails gameResourceDetails, ISessionHostManager sessionHostManager);
 

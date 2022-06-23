@@ -13,10 +13,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         int Start(ProcessStartInfo startInfo);
 
-        void StartErrorStreamReader(Process process);
-
-        StreamReader StandardErrorReader { get; }
-
         IEnumerable<int> List();
 
         void WaitForProcessExit(int id);

@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             MultiLogger logger,
             ISystemOperations systemOperations,
             IProcessWrapper processWrapper = null)
-            : base(vmConfiguration, logger, systemOperations)
+            : base (vmConfiguration, logger, systemOperations)
         {
             _processWrapper = processWrapper;
         }
@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(sessionHost);
         }
 
-        public override Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager)
+        public override Task CollectLogs(string processId, string logsFolder, ISessionHostManager sessionHostManager)
         {
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // If required, we can add action handlers (see SystemOperations.RunProcess for example).

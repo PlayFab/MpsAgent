@@ -5,7 +5,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
 
     public interface IProcessWrapper
     {

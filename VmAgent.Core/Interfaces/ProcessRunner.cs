@@ -68,7 +68,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 sessionHostManager.RemoveSessionHost(sessionHostUniqueId);
                 sessionHost = null;
                 string exceptionMessage = exception.ToString();
-                CreateExceptionLogs(logFolderPathOnVm, exceptionMessage);
+                CreateStartGameExceptionLogs(logFolderPathOnVm, exceptionMessage);
             }
 
             return Task.FromResult(sessionHost);
@@ -79,10 +79,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
-            throw new NotSupportedException();
+            return Task.CompletedTask;
         }
 
-        public override Task CreateExceptionLogs(string logsFolder, string exceptionMessage)
+        public override Task CreateStartGameExceptionLogs(string logsFolder, string exceptionMessage)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             }
             catch (Exception ex)
             {
-                _logger.LogException($"Failed to write failed start game error logs for Windows process", ex);
+                _logger.LogException($"Failed to write failed start game error logs for process", ex);
             }
             return Task.CompletedTask;
         }

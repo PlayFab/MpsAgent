@@ -660,9 +660,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return null;
         }
 
-        public override Task CreateExceptionLogs(string logsFolder, string exceptionMessage)
+        public override Task CreateStartGameExceptionLogs(string logsFolder, string exceptionMessage)
         {
-            throw new NotSupportedException();
+            return Task.CompletedTask;
         }
     }
 }

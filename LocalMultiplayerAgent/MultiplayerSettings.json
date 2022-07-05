@@ -39,7 +39,7 @@
     "ImageDetails": {
       "Registry": "mcr.microsoft.com",
       "ImageName": "playfab/multiplayer",
-      "ImageTag": "wsc-10.0.17763.973.1",
+      "ImageTag": "wsc-10.0.17763.3046",
       "Username": "",
       "Password": ""
     }

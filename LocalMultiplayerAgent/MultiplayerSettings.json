@@ -1,5 +1,6 @@
 {
   "RunContainer": false,
+  "CreateDeployment": true,
   "OutputFolder": "",
   "NumHeartBeatsForActivateResponse": 10,
   "NumHeartBeatsForTerminateResponse": 60,

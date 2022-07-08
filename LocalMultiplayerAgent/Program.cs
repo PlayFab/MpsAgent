@@ -16,6 +16,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
     using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
+    using Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool;
 
     public class Program
     {
@@ -88,6 +89,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                 .CreateAndStartContainerWaitForExit(settings.ToSessionHostsStartInfo());
 
             await host.StopAsync();
+
+            DeploymentScript deploymentScript = new DeploymentScript(settings);
+            await deploymentScript.RunScriptAsync();
+
         }
     }
 }

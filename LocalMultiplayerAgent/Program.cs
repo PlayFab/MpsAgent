@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
-    using System.Reflection;
     using System.Threading.Tasks;
     using AgentInterfaces;
     using AspNetCore.Hosting;
@@ -15,7 +14,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using Newtonsoft.Json;
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
-    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
     using Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool;
 
     public class Program

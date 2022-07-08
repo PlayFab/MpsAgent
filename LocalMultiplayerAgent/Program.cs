@@ -88,9 +88,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             await host.StopAsync();
 
-            DeploymentScript deploymentScript = new DeploymentScript(settings);
-            await deploymentScript.RunScriptAsync();
-
+            if (settings.CreateDeployment)
+            {
+                DeploymentScript deploymentScript = new DeploymentScript(settings);
+                await deploymentScript.RunScriptAsync();
+            }
         }
     }
 }

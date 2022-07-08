@@ -3,9 +3,7 @@
 
 namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 {
-    //using System;
     using System.Collections.Generic;
-    //using AgentInterfaces;
     using PlayFab.MultiplayerModels;
 
     public class DeploymentSettings

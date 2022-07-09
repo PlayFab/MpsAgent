@@ -87,6 +87,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         public void BeforeEachTest()
         {
             _mockSystemOperations.Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+            _mockSystemOperations.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(true);
         }
 
         [TestMethod]

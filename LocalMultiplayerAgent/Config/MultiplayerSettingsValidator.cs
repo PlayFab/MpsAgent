@@ -35,6 +35,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 throw new Exception("OutputFolder or TitleId not found. Call SetDefaultsIfNotSpecified() before this method");
             }
 
+            if (!_systemOperations.DirectoryExists(_settings.OutputFolder))
+            {
+                Console.WriteLine($"OutputFolder '{_settings.OutputFolder}' does not exist. Check your MultiplayerSettings.json file");
+                return false;
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");

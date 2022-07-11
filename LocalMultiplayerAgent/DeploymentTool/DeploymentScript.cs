@@ -15,11 +15,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
     public class DeploymentScript
     {
         private readonly MultiplayerSettings settings;
-        private readonly DeploymentSettings settingsDeployment;
+        private readonly DeploymentSettings deploymemtSettings;
         public DeploymentScript(MultiplayerSettings multiplayerSettings)
         {
             settings = multiplayerSettings;
-            settingsDeployment = JsonConvert.DeserializeObject<DeploymentSettings>(File.ReadAllText("DeploymentTool/deployment.json"));
+            deploymemtSettings = JsonConvert.DeserializeObject<DeploymentSettings>(File.ReadAllText("DeploymentTool/deployment.json"));
         }
 
         public async Task RunScriptAsync()
@@ -36,18 +36,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             var req = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
             var res = await PlayFabAuthenticationAPI.GetEntityTokenAsync(req);
 
-            if (res.Error != null)
-            {
-                Console.WriteLine(res.Error.ErrorMessage);
-                return;
-            }
+            PrintError(res.Error);
 
             // TODO: do validation checks
 
             dynamic createBuild = null;
             if (settings.RunContainer)
             {
-                if (settingsDeployment.OSPlatform == "Windows")
+                if (deploymemtSettings.OSPlatform == "Windows")
                 {
                     CreateBuildWithManagedContainerRequest request = GetManagedContainerRequest();
 
@@ -91,8 +87,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithCustomContainerRequest
             {
-                BuildName = settingsDeployment.BuildName,
-                VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize),
+                BuildName = deploymemtSettings.BuildName,
+                VmSize = Enum.Parse<AzureVmSize>(deploymemtSettings.VmSize),
                 ContainerFlavor = ContainerFlavor.CustomLinux,
                 ContainerImageReference = new ContainerImageReference()
                 {
@@ -101,16 +97,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 },
                 Ports = PortMapping(),
                 ContainerRunCommand = settings.ContainerStartParameters.StartGameCommand,
-                RegionConfigurations = settingsDeployment.RegionConfigurations?.Select(x => new BuildRegionParams()
+                RegionConfigurations = deploymemtSettings.RegionConfigurations?.Select(x => new BuildRegionParams()
                 {
                     Region = x.Region,
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
-                    MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize)
+                    MultiplayerServerCountPerVm = deploymemtSettings.MultiplayerServerCountPerVm,
+                    VmSize = Enum.Parse<AzureVmSize>(deploymemtSettings.VmSize)
 
                 }).ToList(),
-                MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
+                MultiplayerServerCountPerVm = deploymemtSettings.MultiplayerServerCountPerVm,
             };
         }
 
@@ -118,20 +114,20 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithManagedContainerRequest
             {
-                VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize),
+                VmSize = Enum.Parse<AzureVmSize>(deploymemtSettings.VmSize),
                 GameCertificateReferences = null,
                 Ports = PortMapping(),
-                MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                RegionConfigurations = settingsDeployment.RegionConfigurations?.Select(x => new BuildRegionParams()
+                MultiplayerServerCountPerVm = deploymemtSettings.MultiplayerServerCountPerVm,
+                RegionConfigurations = deploymemtSettings.RegionConfigurations?.Select(x => new BuildRegionParams()
                 {
                     Region = x.Region,
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
-                    MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize)
+                    MultiplayerServerCountPerVm = deploymemtSettings.MultiplayerServerCountPerVm,
+                    VmSize = Enum.Parse<AzureVmSize>(deploymemtSettings.VmSize)
 
                 }).ToList(),
-                BuildName = settingsDeployment.BuildName,
+                BuildName = deploymemtSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails?.Select(x => new AssetReferenceParams()
                 {
                     FileName = GetAssetFileNameFromPath(x.LocalFilePath),
@@ -148,26 +144,26 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithProcessBasedServerRequest
             {
-                VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize),
+                VmSize = Enum.Parse<AzureVmSize>(deploymemtSettings.VmSize),
                 GameCertificateReferences = null,
                 Ports = PortMapping(),
-                MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                RegionConfigurations = settingsDeployment.RegionConfigurations?.Select(x => new BuildRegionParams()
+                MultiplayerServerCountPerVm = deploymemtSettings.MultiplayerServerCountPerVm,
+                RegionConfigurations = deploymemtSettings.RegionConfigurations?.Select(x => new BuildRegionParams()
                 {
                     Region = x.Region,
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
-                    MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize)
+                    MultiplayerServerCountPerVm = deploymemtSettings.MultiplayerServerCountPerVm,
+                    VmSize = Enum.Parse<AzureVmSize>(deploymemtSettings.VmSize)
 
                 }).ToList(),
-                BuildName = settingsDeployment.BuildName,
+                BuildName = deploymemtSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails?.Select(x => new AssetReferenceParams()
                 {
                     FileName = GetAssetFileNameFromPath(x.LocalFilePath),
                 }).ToList(),
                 StartMultiplayerServerCommand = settings.ProcessStartParameters.StartGameCommand,
-                OsPlatform = settingsDeployment.OSPlatform
+                OsPlatform = deploymemtSettings.OSPlatform
             };
         }
 
@@ -226,6 +222,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return await PlayFabMultiplayerAPI.GetAssetDownloadUrlAsync(downloadRequest);
         }
 
+        public void PrintError(dynamic error)
+        {
+            if (error != null && error.ErrorMessage != null)
+            {
+                Console.WriteLine($"{error.ErrorMessage}");
+            }
+        }
+
         public async Task CheckAssetFiles(string filename)
         {
            
@@ -238,11 +242,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 //TODO: log progress of asset upload
                 var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(request1);
 
-                if (uriResult.Error != null)
-                {
-                    Console.WriteLine(uriResult.Error.ErrorMessage);
-                    return;
-                }
+                PrintError(uriResult.Error);
 
                 var uri = new System.Uri(uriResult.Result.AssetUploadUrl);
 
@@ -250,9 +250,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 await blockBlob.UploadFromFileAsync(filename);
             }
 
-            else if (filevalidator.Result.Error != null)
+            else
             {
-                Console.WriteLine($"{filevalidator.Result.Error.ErrorMessage}");
+                PrintError(filevalidator.Result.Error);
                 return;
             }
         }

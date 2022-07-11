@@ -60,8 +60,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 }
                 else
                 {
-                    //for CustomLinux Container
-                    //yet to be implemented
+                    //TODO: for CustomLinux Container
                 }
             }
             else
@@ -93,7 +92,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return new CreateBuildWithCustomContainerRequest
             {
                 BuildName = settingsDeployment.BuildName,
-                VmSize = (AzureVmSize)Enum.Parse(typeof(AzureVmSize), settingsDeployment.VmSize),
+                VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize),
                 ContainerFlavor = ContainerFlavor.CustomLinux,
                 ContainerImageReference = new ContainerImageReference()
                 {
@@ -108,7 +107,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                    VmSize = (AzureVmSize)Enum.Parse(typeof(AzureVmSize), settingsDeployment.VmSize)
+                    VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize)
 
                 }).ToList(),
                 MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
@@ -119,7 +118,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithManagedContainerRequest
             {
-                VmSize = (AzureVmSize)Enum.Parse(typeof(AzureVmSize), settingsDeployment.VmSize),
+                VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize),
                 GameCertificateReferences = null,
                 Ports = PortMapping(),
                 MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
@@ -129,7 +128,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                    VmSize = (AzureVmSize)Enum.Parse(typeof(AzureVmSize), settingsDeployment.VmSize)
+                    VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize)
 
                 }).ToList(),
                 BuildName = settingsDeployment.BuildName,
@@ -149,7 +148,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithProcessBasedServerRequest
             {
-                VmSize = (AzureVmSize)Enum.Parse(typeof(AzureVmSize), settingsDeployment.VmSize),
+                VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize),
                 GameCertificateReferences = null,
                 Ports = PortMapping(),
                 MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
@@ -159,7 +158,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = settingsDeployment.MultiplayerServerCountPerVm,
-                    VmSize = (AzureVmSize)Enum.Parse(typeof(AzureVmSize), settingsDeployment.VmSize)
+                    VmSize = Enum.Parse<AzureVmSize>(settingsDeployment.VmSize)
 
                 }).ToList(),
                 BuildName = settingsDeployment.BuildName,
@@ -172,39 +171,44 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             };
         }
 
-        public async Task<PlayFabResult<CreateBuildWithProcessBasedServerResponse>> CreateBuildWithProcessBasedServer(CreateBuildWithProcessBasedServerRequest request)
+        public void PrintDeploymentMessage(dynamic request)
         {
             Console.WriteLine($"Starting deployment {request.BuildName} for titleId, regions  {string.Join(", ", request.RegionConfigurations.Select(x => x.Region))}");
+        }
+
+        public async Task<PlayFabResult<CreateBuildWithProcessBasedServerResponse>> CreateBuildWithProcessBasedServer(CreateBuildWithProcessBasedServerRequest request)
+        {
+            PrintDeploymentMessage(request);
 
             return await PlayFabMultiplayerAPI.CreateBuildWithProcessBasedServerAsync(request);
         }
 
         public async Task<PlayFabResult<CreateBuildWithManagedContainerResponse>> CreateBuildWithManagedContainer(CreateBuildWithManagedContainerRequest request)
         {
-            Console.WriteLine($"Starting deployment {request.BuildName} for titleId, regions  {string.Join(", ", request.RegionConfigurations.Select(x => x.Region))}");
+            PrintDeploymentMessage(request);
 
             return await PlayFabMultiplayerAPI.CreateBuildWithManagedContainerAsync(request);
         }
 
         public async Task<PlayFabResult<CreateBuildWithCustomContainerResponse>> CreateBuildWithCustomContainer(CreateBuildWithCustomContainerRequest request)
         {
-            Console.WriteLine($"Starting deployment {request.BuildName} for titleId, regions  {string.Join(", ", request.RegionConfigurations.Select(x => x.Region))}");
+            PrintDeploymentMessage(request);
 
             return await PlayFabMultiplayerAPI.CreateBuildWithCustomContainerAsync(request);
         }
 
         public List<PlayFab.MultiplayerModels.Port> PortMapping()
         {
-            List<PlayFab.MultiplayerModels.Port> ports = null;
+            var ports = new List<Port>();
 
             foreach (var portList in settings.PortMappingsList)
             {
-                ports = portList?.Select(x => new PlayFab.MultiplayerModels.Port()
+                ports.AddRange(portList?.Select(x => new Port()
                 {
                     Name = x.GamePort.Name,
                     Num = settings.RunContainer ? x.GamePort.Number : 0,
                     Protocol = (ProtocolType)Enum.Parse(typeof(ProtocolType), x.GamePort.Protocol)
-                }).ToList();
+                }).ToList());
             }
 
             return ports;
@@ -212,7 +216,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
         public string GetAssetFileNameFromPath(string filePath)
         {
-            return System.IO.Path.GetFileName(filePath);
+            return Path.GetFileName(filePath);
         }
 
         public async Task<PlayFabResult<GetAssetDownloadUrlResponse>> FileExistsInBlob(string filename)
@@ -237,7 +241,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 if (uriResult.Error != null)
                 {
                     Console.WriteLine(uriResult.Error.ErrorMessage);
+                    return;
                 }
+
                 var uri = new System.Uri(uriResult.Result.AssetUploadUrl);
 
                 var blockBlob = new CloudBlockBlob(uri);
@@ -247,6 +253,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             else if (filevalidator.Result.Error != null)
             {
                 Console.WriteLine($"{filevalidator.Result.Error.ErrorMessage}");
+                return;
             }
         }
     }

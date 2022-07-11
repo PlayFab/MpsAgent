@@ -9,11 +9,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.InteropServices;
     using AgentInterfaces;
     using Docker.DotNet.Models;
     using VmAgent.Core;
-    using VmAgent.Core.Interfaces;
 
     public class MultiplayerSettings
     {

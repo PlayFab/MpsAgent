@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         private readonly DeploymentSettings deploymentSettings;
         public DeploymentScript(MultiplayerSettings multiplayerSettings)
         {
-            settings = multiplayerSettings;
+            settings = multiplayerSettings ?? throw new ArgumentNullException(nameof(multiplayerSettings));
             deploymentSettings = JsonConvert.DeserializeObject<DeploymentSettings>(File.ReadAllText("DeploymentTool/deployment.json"));
         }
 

@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 {
     public class DeploymentSettingsValidator
     {
-        //private readonly ISystemOperations _systemOperations;
         private readonly DeploymentSettings _settings;
 
         public DeploymentSettingsValidator(DeploymentSettings settings)
@@ -21,9 +20,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
                 throw new Exception("Build name is required to create a build");
             }
 
-            if (string.IsNullOrWhiteSpace(_settings.VmSize))
+            AzureVmSize vmSize = Enum.Parse<AzureVmSize>(_settings.VmSize);
+            bool validVmSize = Enum.IsDefined(typeof(AzureVmSize), vmSize);
+
+            if (string.IsNullOrWhiteSpace(_settings.VmSize) || !validVmSize)
             {
-                throw new Exception("VmSize was not specified");
+                throw new Exception("Make sure you specified the right value for VmSize");
             }
 
             if (string.IsNullOrWhiteSpace(_settings.OSPlatform))
@@ -66,27 +68,30 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
             {
                 foreach (BuildRegionParams detail in regionDetails)
                 {
-                    if (string.IsNullOrEmpty(detail.Region))
-                    {
-                        Console.WriteLine("Region name unspecified");
-                        return false;
-                    }
+                    AzureRegion region = Enum.Parse<AzureRegion>(detail.Region);
+                    bool isValidRegion = Enum.IsDefined(typeof(AzureRegion), region);
 
-                    if (string.IsNullOrEmpty(detail.VmSize.ToString()))
+                    if (string.IsNullOrEmpty(detail.Region) || !isValidRegion)
                     {
-                        Console.WriteLine("Region details must contain a VmSize");
+                        Console.WriteLine("Make sure you specified the right value for Region");
                         return false;
                     }
 
                     if (detail.MaxServers < 0)
                     {
-                        Console.WriteLine("Max servers for a region should be greater than 0");
+                        Console.WriteLine($"Max servers for a region {detail.Region} should be greater than 0");
                         return false;
                     }
 
-                    if (detail.MultiplayerServerCountPerVm < 0)
+                    if (!string.IsNullOrEmpty(detail.VmSize.ToString()) && Enum.IsDefined(typeof(AzureVmSize), detail.VmSize))
                     {
-                        Console.WriteLine("Servers per machine should be greater than 0");
+                        Console.WriteLine($"Regional override in {detail.Region} must contain the right VmSize");
+                        return false;
+                    }
+
+                    if (detail.MultiplayerServerCountPerVm != null && detail.MultiplayerServerCountPerVm < 0)
+                    {
+                        Console.WriteLine($"Regional override in {detail.Region} must have servers per machine greater than 0");
                         return false;
                     }
                 }

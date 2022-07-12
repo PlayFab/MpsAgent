@@ -244,7 +244,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
             if (filevalidator.Result.Result == null)
             {
-                GetAssetUploadUrlRequest request1 = new() { FileName = filename };
+                GetAssetUploadUrlRequest request1 = new GetAssetUploadUrlRequest() { FileName = filename };
 
                 //TODO: log progress of asset upload
                 var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(request1);

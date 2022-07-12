@@ -4,7 +4,14 @@
 # https://aka.ms/yaml
 
 trigger:
-- manual
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - /AgentInterfaces/
+
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -29,10 +36,21 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
     projects: '$(projectName)/$(projectName).csproj'
   displayName: 'dotnet build $(buildConfiguration)'
-
+  
+- task: DotNetCoreCLI@2
+  displayName: dotnet pack
+  inputs:
+    command: pack
+    projects: '$(projectName)/$(projectName).csproj'
+    arguments: --configuration $(BuildConfiguration)
+    searchPatternPack: '$(projectName)/$(projectName).csproj'
+    nobuild: true
+    versioningScheme: byBuildNumber
+    buildProperties: platform=anycpu
+    
 - task: EsrpCodeSigning@1
   inputs:
-    FolderPath: '/home/vsts/work/1/s/$(projectName)/bin/$(buildConfiguration)/'
+    FolderPath: '/home/vsts/work/1/a/'
     ConnectedServiceName: 'Thunderhead Code-Sign service'
     Pattern: '*.nupkg'
     signConfigType: 'inlineSignParams'
@@ -56,10 +74,11 @@ steps:
     SessionTimeout: '60'
     MaxConcurrency: '50'
     MaxRetryAttempts: '5'
+      
 - task: NuGetCommand@2
   displayName: 'nuget push'
   inputs:
     command: 'push'
-    packagesToPush: '/home/vsts/work/1/s/$(projectName)/bin/$(buildConfiguration)/**/*.nupkg'
+    packagesToPush: '/home/vsts/work/1/a/*.nupkg'
     nuGetFeedType: 'internal'
     publishVstsFeed: 'ab71e721-8bf3-4593-ad79-ef477a915924'

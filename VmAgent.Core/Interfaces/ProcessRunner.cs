@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
                 using (StreamWriter sw = File.AppendText(destinationFileName))
                 {
-                    sw.WriteLine(DateTime.Now.ToString("HH:mm:ss D"));
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"));
                     sw.WriteLine($"{exceptionMessage}");
                 }
                 _logger.LogVerbose($"Written logs for failed start game process to {destinationFileName}.");

@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using AgentInterfaces;
     using Microsoft.Azure.Gaming.VmAgent.ContainerEngines;
@@ -66,6 +67,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 _logger.LogException($"Failed to start process based host with instance number {instanceNumber}", exception);
                 sessionHostManager.RemoveSessionHost(sessionHostUniqueId);
                 sessionHost = null;
+                string exceptionMessage = exception.ToString();
+                CreateStartGameExceptionLogs(logFolderPathOnVm, exceptionMessage);
             }
 
             return Task.FromResult(sessionHost);
@@ -76,6 +79,27 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             // The game server is free to read the env variable for log folder and write all output to a file in that folder.
             // If required, we can add action handlers (see SystemOperations.RunProcess for example).
             // However, keeping the file handle around can be tricky.
+            return Task.CompletedTask;
+        }
+
+        public override Task CreateStartGameExceptionLogs(string logsFolder, string exceptionMessage)
+        {
+            try
+            {
+                _logger.LogVerbose("Collecting logs for failed start game process.");
+                string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
+
+                using (StreamWriter sw = File.AppendText(destinationFileName))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"));
+                    sw.WriteLine($"{exceptionMessage}");
+                }
+                _logger.LogVerbose($"Written logs for failed start game process to {destinationFileName}.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException($"Failed to write failed start game error logs for process", ex);
+            }
             return Task.CompletedTask;
         }
 

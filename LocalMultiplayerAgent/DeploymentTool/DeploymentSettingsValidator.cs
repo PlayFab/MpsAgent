@@ -10,14 +10,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 
         public DeploymentSettingsValidator(DeploymentSettings settings)
         {
-            _settings = settings ?? throw new ArgumentException("Deployment settings cannot be null");
+            _settings = settings ?? throw new ArgumentNullException("Deployment settings cannot be null");
         }
 
         public bool IsValid()
         {
             if (string.IsNullOrWhiteSpace(_settings.BuildName))
             {
-                throw new Exception("Build name is required to create a build");
+                throw new ArgumentNullException("Build name is required to create a build");
             }
 
             AzureVmSize vmSize = Enum.Parse<AzureVmSize>(_settings.VmSize);
@@ -25,41 +25,21 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 
             if (string.IsNullOrWhiteSpace(_settings.VmSize) || !validVmSize)
             {
-                throw new Exception("Make sure you specified the right value for VmSize");
+                throw new Exception
+                    ("Make sure you specified the right value for VmSize. " +
+                    "Refer to this if you need: " +
+                    "https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayer-server/create-build-with-custom-container?view=playfab-rest#azurevmsize"
+                    );
             }
 
             if (string.IsNullOrWhiteSpace(_settings.OSPlatform))
             {
-                throw new Exception("OSPlatform must be specified");
+                throw new ArgumentNullException("OSPlatform must be specified");
             }
 
-
-            bool assetsValidationSuccess = AreAssetsValid(_settings.AssetFileNames);
             bool regionsValidationSuccess = AreRegionsValid(_settings.RegionConfigurations);
 
-            return assetsValidationSuccess && regionsValidationSuccess;
-
-        }
-
-        private bool AreAssetsValid(List<string> assetFileNames)
-        {
-            if (assetFileNames?.Count > 0)
-            {
-                foreach (string fileName in assetFileNames)
-                {
-                    if (string.IsNullOrEmpty(fileName))
-                    {
-                        Console.WriteLine("Asset file name must be specified");
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            Console.WriteLine("Assets must be specified for game servers running on Windows.");
-            return false;
-
+            return regionsValidationSuccess;
         }
 
         private bool AreRegionsValid(List<BuildRegionParams> regionDetails)
@@ -73,7 +53,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 
                     if (string.IsNullOrEmpty(detail.Region) || !isValidRegion)
                     {
-                        Console.WriteLine("Make sure you specified the right value for Region");
+                        Console.WriteLine("Make sure you specified the right value for Region. Find reference here: " +
+                            "https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.locationnames?view=azure-dotnet");
                         return false;
                     }
 
@@ -99,9 +80,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
                 return true;
             }
 
-            Console.WriteLine("Assets must be specified for game servers running on Windows.");
+            Console.WriteLine("Region(s) must be specified for your game servers.");
             return false;
-
         }
     }
 }

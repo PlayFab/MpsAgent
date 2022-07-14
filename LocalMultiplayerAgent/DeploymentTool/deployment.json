@@ -9,8 +9,5 @@
             "StandbyServers": 5
         }
     ],
-    "OSPlatform": "Windows",
-    "AssetFileNames": [
-       "<your_game_server_name>"
-    ]
+    "OSPlatform": "Windows"
 }

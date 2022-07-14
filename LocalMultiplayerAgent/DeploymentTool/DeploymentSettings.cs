@@ -16,8 +16,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 
         public string OSPlatform { get; set; }
 
-        public List<string> AssetFileNames { get; } = new List<string>();
-
         public List<BuildRegionParams> RegionConfigurations { get; } = new List<BuildRegionParams>();
     }
 }

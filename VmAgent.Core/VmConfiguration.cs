@@ -37,6 +37,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         public const string FqdnEnvVariable = "PF_FQDN";
 
+        // Used by the games to share user generated content (and other files that are downloaded once, used multiple times).
+        // This points to the folder on the VM, and should only be used by VM-level scripts. Game servers
+        // should use `PF_SHARED_CONTENT_FOLDER` instead (which points to wherever the folder is mounted in the container)
+        public const string SharedContentFolderVmVariable = "PF_SHARED_CONTENT_FOLDER_VM";
+
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
 
         public int ListeningPort { get; }
@@ -94,6 +99,29 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             };
 
             sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => environmentVariables.Add(x.Key, x.Value));
+
+            return environmentVariables;
+        }
+
+        /// <summary>
+        /// Gets the set of environment variables for scripts running at the VM level.
+        /// </summary>
+        /// <param name="sessionHostsStartInfo">The details for starting the game servers.</param>
+        /// <param name="vmConfiguration">The details for the VM.</param>
+        /// <returns>A dictionary of environment variables</returns>
+        /// <remarks>This method is expected to be called only after the VM is assigned (i.e sessionHostsStartInfo is not null).</remarks>
+        public static IDictionary<string, string> GetEnvironmentVariablesForVmScripts(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
+        {
+            ArgumentValidator.ThrowIfNull(sessionHostsStartInfo, nameof(sessionHostsStartInfo));
+            
+            var environmentVariables = new Dictionary<string, string>()
+            {
+                {
+                    SharedContentFolderVmVariable, vmConfiguration.VmDirectories.GameSharedContentFolderVm
+                }
+            };
+
+            environmentVariables.AddRange(GetCommonEnvironmentVariables(sessionHostsStartInfo, vmConfiguration));
 
             return environmentVariables;
         }

@@ -1,56 +1,56 @@
 {
-  "RunContainer": false,
-  "CreateDeployment": true,
-  "OutputFolder": "",
-  "NumHeartBeatsForActivateResponse": 10,
-  "NumHeartBeatsForTerminateResponse": 60,
-  "AgentListeningPort": 56001,
-  "AssetDetails": [
-    {
-      "MountPath": "C:\\Assets",
-      "LocalFilePath": "<path_to_game_server_package>"
-    }
-  ],
-  "DeploymentMetadata": {
-    "Environment": "LOCAL",
-    "FeaturesEnabled": "List,Of,Features,Enabled"
-  },
-  "GameCertificateDetails": [],
-  "PortMappingsList": [
-    [
-      {
-        "NodePort": 56100,
-        "GamePort": {
-          "Name": "game_port",
-          "Number": 3600,
-          "Protocol": "TCP"
+    "RunContainer": false,
+    "CreateDeployment": false,
+    "OutputFolder": "",
+    "NumHeartBeatsForActivateResponse": 10,
+    "NumHeartBeatsForTerminateResponse": 60,
+    "AgentListeningPort": 56001,
+    "AssetDetails": [
+        {
+            "MountPath": "C:\\Assets",
+            "LocalFilePath": "<path_to_game_server_package>"
         }
-      }
-    ]
-  ],
-  "ProcessStartParameters": {
-    "StartGameCommand": "<your_game_server_exe>"
-  },
-  "ContainerStartParameters": {
-    "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
-    "ResourceLimits": {
-      "Cpus": 0,
-      "MemoryGib": 0
+    ],
+    "DeploymentMetadata": {
+        "Environment": "LOCAL",
+        "FeaturesEnabled": "List,Of,Features,Enabled"
     },
-    "ImageDetails": {
-      "Registry": "mcr.microsoft.com",
-      "ImageName": "playfab/multiplayer",
-      "ImageTag": "wsc-10.0.17763.2458",
-      "Username": "",
-      "Password": ""
-    }
-  },
-  "SessionConfig": {
-    "SessionId": "ba67d671-512a-4e7d-a38c-2329ce181946",
-    "SessionCookie": null,
-    "InitialPlayers": [ "Player1", "Player2" ]
-  },
-  "TitleId": "",
-  "BuildId": "00000000-0000-0000-0000-000000000000",
-  "Region": "WestUs"
+    "GameCertificateDetails": [],
+    "PortMappingsList": [
+        [
+            {
+                "NodePort": 56100,
+                "GamePort": {
+                    "Name": "game_port",
+                    "Number": 3600,
+                    "Protocol": "TCP"
+                }
+            }
+        ]
+    ],
+    "ProcessStartParameters": {
+        "StartGameCommand": "<your_game_server_exe>"
+    },
+    "ContainerStartParameters": {
+        "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
+        "ResourceLimits": {
+            "Cpus": 0,
+            "MemoryGib": 0
+        },
+        "ImageDetails": {
+            "Registry": "mcr.microsoft.com",
+            "ImageName": "playfab/multiplayer",
+            "ImageTag": "wsc-10.0.17763.2458",
+            "Username": "",
+            "Password": ""
+        }
+    },
+    "SessionConfig": {
+        "SessionId": "ba67d671-512a-4e7d-a38c-2329ce181946",
+        "SessionCookie": null,
+        "InitialPlayers": [ "Player1", "Player2" ]
+    },
+    "TitleId": "",
+    "BuildId": "00000000-0000-0000-0000-000000000000",
+    "Region": "WestUs"
 }

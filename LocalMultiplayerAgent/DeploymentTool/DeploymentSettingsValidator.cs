@@ -32,11 +32,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
                     );
             }
 
-            if (string.IsNullOrWhiteSpace(_settings.OSPlatform))
-            {
-                throw new ArgumentNullException("OSPlatform must be specified");
-            }
-
             bool regionsValidationSuccess = AreRegionsValid(_settings.RegionConfigurations);
 
             return regionsValidationSuccess;

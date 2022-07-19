@@ -249,7 +249,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
             Console.WriteLine("Assets must be specified for game servers running on Windows.");
             return false;
-
         }
     }
 }

@@ -14,8 +14,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 
         public int MultiplayerServerCountPerVm { get; set; }
 
-        public string OSPlatform { get; set; }
-
         public List<BuildRegionParams> RegionConfigurations { get; } = new List<BuildRegionParams>();
     }
 }

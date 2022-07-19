@@ -52,9 +52,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             }
 
             dynamic createBuild;
+
             if (settings.RunContainer)
             {
-                if (deploymentSettings.OSPlatform == "Windows")
+                if (Globals.GameServerEnvironment == GameServerEnvironment.Windows)
                 {
                     CreateBuildWithManagedContainerRequest request = GetManagedContainerRequest();
 
@@ -91,14 +92,22 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
             if (createBuild.Error != null)
             {
-                Console.WriteLine("Failed to successfully create build: \n");
-                foreach (var error in createBuild.Error.ErrorDetails)
+                Console.WriteLine("Failed to successfully create build");
+                if(createBuild.Error.ErrorMessage != null)
                 {
-                    foreach (var errorMessage in error.Value)
-                    {
-                        Console.WriteLine($"{errorMessage}");
-                    }
+                    Console.WriteLine($"{createBuild.Error.ErrorMessage}");
                 }
+                else if (createBuild.Error.ErrorDetails.Any())
+                {
+                    foreach (var error in createBuild.Error.ErrorDetails)
+                    {
+                        foreach (var errorMessage in error.Value)
+                        {
+                            Console.WriteLine($"{errorMessage}");
+                        }
+                    }
+                    Console.WriteLine($"{createBuild.Error.ErrorMessage}");
+                }  
             }
             else
             {
@@ -131,7 +140,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 }).ToList(),
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails?.Select(x => new AssetReferenceParams()
                 {
-                    FileName = GetAssetFileNameFromPath(x.LocalFilePath),
+                    FileName = x.LocalFilePath,
                     MountPath = x.MountPath
                 }).ToList() : new List<AssetReferenceParams>(),
                 MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
@@ -158,7 +167,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 BuildName = deploymentSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails?.Select(x => new AssetReferenceParams()
                 {
-                    FileName = GetAssetFileNameFromPath(x.LocalFilePath),
+                    FileName = x.LocalFilePath,
                     MountPath = x.MountPath
                 }).ToList() : new List<AssetReferenceParams>(),
                 StartMultiplayerServerCommand = settings.ContainerStartParameters.StartGameCommand,
@@ -188,10 +197,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 BuildName = deploymentSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails?.Select(x => new AssetReferenceParams()
                 {
-                    FileName = GetAssetFileNameFromPath(x.LocalFilePath),
+                    FileName = x.LocalFilePath,
                 }).ToList() : new List<AssetReferenceParams>(),
                 StartMultiplayerServerCommand = settings.ProcessStartParameters.StartGameCommand,
-                OsPlatform = deploymentSettings.OSPlatform
+                OsPlatform = Globals.GameServerEnvironment.ToString()
             };
         }
 
@@ -221,7 +230,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return await PlayFabMultiplayerAPI.CreateBuildWithCustomContainerAsync(request);
         }
 
-        public List<PlayFab.MultiplayerModels.Port> PortMapping()
+        public List<Port> PortMapping()
         {
             var ports = new List<Port>();
 
@@ -243,17 +252,18 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return Path.GetFileName(filePath);
         }
 
-        public async Task CheckAssetFilesAsync(string filename)
+        public async Task CheckAssetFilesAsync(string fileNamePath)
         {
-            GetAssetUploadUrlRequest request1 = new GetAssetUploadUrlRequest() { FileName = filename };
-            
-            var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(request1);
+            string fileName = Path.GetFileName(fileNamePath);
+            GetAssetUploadUrlRequest request1 = new GetAssetUploadUrlRequest() { FileName = fileName };
 
+            var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(request1);
+            
             if (uriResult.Error != null)
             {
                 if (uriResult.Error.ErrorMessage.Contains("AssetAlreadyExists"))
                 {
-                    Console.WriteLine($"{filename} is already uploaded. Going ahead with deployment...");
+                    Console.WriteLine($"{fileName} is already uploaded. Going ahead with deployment...");
                 }
                 else
                 {
@@ -269,9 +279,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     var uri = new Uri(uriResult.Result.AssetUploadUrl);
                     var blockBlob = new CloudBlockBlob(uri);
 
-                    Console.WriteLine($"Uploading {filename}...");
-                    await blockBlob.UploadFromFileAsync(filename);
-                    Console.WriteLine($"Uploading {filename} successful!");
+                    Console.WriteLine($"Uploading {fileName}...");
+
+                    await blockBlob.UploadFromFileAsync(fileNamePath);
+
+                    Console.WriteLine($"Uploading {fileName} successful!");
                 }
                 catch (Exception ex)
                 {

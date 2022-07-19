@@ -25,7 +25,7 @@ You need to have [.NET Core](https://dotnet.microsoft.com/download) installed an
 
 ```bash
 git clone https://github.com/PlayFab/MpsAgent.git
-cd LocalMultiplayerAgent 
+cd ./MpsAgent/LocalMultiplayerAgent 
 # replace the LocalMultiplayerAgentPublishFolder with the folder of your choice
 dotnet publish --runtime win-x64 -c Release -o LocalMultiplayerAgentPublishFolder -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
 # you can read here about .NET publish CLI options https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish

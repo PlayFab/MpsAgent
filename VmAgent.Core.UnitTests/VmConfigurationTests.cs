@@ -43,11 +43,11 @@ namespace VmAgent.Core.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void VmScriptEnvVariablesWithBuildMetadata()
+        public void VmStartupScriptEnvVariablesWithBuildMetadata()
         {
             var metadata = new Dictionary<string, string>() { { "key1", "value1" }, { "key2", "value2" } };
             SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(metadata);
-            IDictionary<string, string> envVariables = VmConfiguration.GetEnvironmentVariablesForVmScripts(sessionHostsStartInfo, VmConfiguration);
+            IDictionary<string, string> envVariables = VmConfiguration.GetEnvironmentVariablesForVmStartupScripts(sessionHostsStartInfo, VmConfiguration);
             ValidateVmScriptEnvironmentVariables(envVariables, sessionHostsStartInfo);
         }
 

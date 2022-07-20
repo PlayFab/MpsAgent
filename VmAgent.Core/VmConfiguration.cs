@@ -104,13 +104,13 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         }
 
         /// <summary>
-        /// Gets the set of environment variables for scripts running at the VM level.
+        /// Gets the set of environment variables for startup scripts running at the VM level.
         /// </summary>
         /// <param name="sessionHostsStartInfo">The details for starting the game servers.</param>
         /// <param name="vmConfiguration">The details for the VM.</param>
         /// <returns>A dictionary of environment variables</returns>
         /// <remarks>This method is expected to be called only after the VM is assigned (i.e sessionHostsStartInfo is not null).</remarks>
-        public static IDictionary<string, string> GetEnvironmentVariablesForVmScripts(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
+        public static IDictionary<string, string> GetEnvironmentVariablesForVmStartupScripts(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
         {
             ArgumentValidator.ThrowIfNull(sessionHostsStartInfo, nameof(sessionHostsStartInfo));
             

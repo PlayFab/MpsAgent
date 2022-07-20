@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Gaming.AgentInterfaces
 {
+    using System;
     using System.Collections.Generic;
 
     public class VmAgentSettings
@@ -35,5 +36,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Whether we should stop bringing up new session hosts (when old ones terminate), if the VM has been scheduled for maintenance.
         /// </summary>
         public bool DisableSessionHostCreationOnMaintenanceEvent { get; set; }
+
+        /// <summary>
+        /// ControlPlane can use this field to notify VmAgent that it will shut down soon.
+        /// This isn't really a "setting", and isn't stored in Thunderfig. VmAgentSettings is just a convenient way for 
+        /// ControlPlane to communicate with VmAgent.
+        /// </summary>
+        public DateTimeOffset? ShutdownRequestedNotBefore { get; set; }
     }
 }

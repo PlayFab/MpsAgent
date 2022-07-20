@@ -8,6 +8,5 @@
             "MaxServers": 10,
             "StandbyServers": 5
         }
-    ],
-    "OSPlatform": "Windows"
+    ]
 }

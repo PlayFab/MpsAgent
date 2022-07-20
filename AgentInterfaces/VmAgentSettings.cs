@@ -43,5 +43,10 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// ControlPlane to communicate with VmAgent.
         /// </summary>
         public DateTimeOffset? ShutdownRequestedNotBefore { get; set; }
+
+        /// <summary>
+        /// List of disallowed executables.
+        /// </summary>
+        public IReadOnlyCollection<string> DisallowedExecutables { get; set; }
     }
 }

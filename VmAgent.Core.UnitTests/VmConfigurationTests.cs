@@ -29,7 +29,7 @@ namespace VmAgent.Core.UnitTests
             var metadata = new Dictionary<string, string>() {{"key1", "value1"}, {"key2", "value2"}};
             SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(metadata);
             IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
-            ValidateEnvironmentVariables(envVariables, sessionHostsStartInfo);
+            ValidateCommonEnvironmentVariables(envVariables, sessionHostsStartInfo);
         }
 
         [TestMethod]
@@ -38,7 +38,17 @@ namespace VmAgent.Core.UnitTests
         {
             SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo();
             IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
-            ValidateEnvironmentVariables(envVariables, sessionHostsStartInfo);
+            ValidateCommonEnvironmentVariables(envVariables, sessionHostsStartInfo);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void VmStartupScriptEnvVariablesWithBuildMetadata()
+        {
+            var metadata = new Dictionary<string, string>() { { "key1", "value1" }, { "key2", "value2" } };
+            SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(metadata);
+            IDictionary<string, string> envVariables = VmConfiguration.GetEnvironmentVariablesForVmStartupScripts(sessionHostsStartInfo, VmConfiguration);
+            ValidateVmScriptEnvironmentVariables(envVariables, sessionHostsStartInfo);
         }
 
         private SessionHostsStartInfo CreateSessionHostStartInfo(IDictionary<string, string> buildMetadata = null)
@@ -49,7 +59,7 @@ namespace VmAgent.Core.UnitTests
             };
         }
 
-        private void ValidateEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo)
+        private void ValidateCommonEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo)
         {
             envVariables.Should().Contain(VmConfiguration.PublicIPv4AddressEnvVariable, sessionHostsStartInfo.PublicIpV4Address);
             envVariables.Should().Contain(VmConfiguration.PublicIPv4AddressEnvVariableV2, sessionHostsStartInfo.PublicIpV4Address);
@@ -58,6 +68,12 @@ namespace VmAgent.Core.UnitTests
             envVariables.Should().Contain(VmConfiguration.BuildIdEnvVariable, DeploymentId.ToString());
             envVariables.Should().Contain(VmConfiguration.RegionEnvVariable, Region);
             sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => envVariables.Should().Contain(x.Key, x.Value));
+        }
+
+        private void ValidateVmScriptEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo)
+        {
+            ValidateCommonEnvironmentVariables(envVariables, sessionHostsStartInfo);
+            envVariables.Should().Contain(VmConfiguration.SharedContentFolderVmVariable, VmConfiguration.VmDirectories.GameSharedContentFolderVm);
         }
 
         private string CreateAssignmentId()

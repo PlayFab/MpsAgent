@@ -111,7 +111,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return new CreateBuildWithCustomContainerRequest
             {
                 BuildName = deploymentSettings.BuildName,
-                VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize),
+                VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null,
                 ContainerFlavor = ContainerFlavor.CustomLinux,
                 ContainerImageReference = new ContainerImageReference()
                 {
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
+                    VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize sd) ? sd : null
 
                 }).ToList(),
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails?.Select(x => new AssetReferenceParams()
@@ -146,7 +146,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithManagedContainerRequest
             {
-                VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize),
+                VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null,
                 GameCertificateReferences = settings.GameCertificateDetails != null ? settings.GameCertificateDetails.Select(x => new GameCertificateReferenceParams()
                 {
                     Name = x.Name
@@ -159,7 +159,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
+                    VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null
 
                 }).ToList(),
                 BuildName = deploymentSettings.BuildName,
@@ -179,7 +179,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithProcessBasedServerRequest
             {
-                VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize),
+                VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null,
                 GameCertificateReferences = settings.GameCertificateDetails != null ? settings.GameCertificateDetails.Select(x => new GameCertificateReferenceParams()
                 {
                     Name = x.Name
@@ -192,7 +192,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
+                    VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null
 
                 }).ToList(),
                 BuildName = deploymentSettings.BuildName,
@@ -233,7 +233,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
         public async Task CheckAndUploadLinuxContainerImageAsync(string imageSkipToken = null, int pageSize = 10)
         {
-            while (string.IsNullOrEmpty(imageSkipToken))
+            do
             {
                 var ContainerImagesRequest = new ListContainerImagesRequest
                 {
@@ -259,7 +259,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                         Console.WriteLine("Make sure you have uploaded your Linux container image to Docker before attempting deploy");
                     }
                 }
-            }
+            } while (!string.IsNullOrEmpty(imageSkipToken));
         }
 
         public async Task<PlayFabResult<EmptyResponse>> UploadCertificateAsync(GameCertificateDetails certificate)
@@ -284,7 +284,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             List<string> failedCertUploads = null;
 
-            while (string.IsNullOrEmpty(certSkipToken))
+            do
             {
                 var certificateSummariesRequest = new ListCertificateSummariesRequest
                 {
@@ -322,9 +322,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                                 Console.WriteLine($"Uploading {certificate.Name} successful!");
                             }
                         }
-                    } 
+                    }
                 }
-            }
+            } while (!string.IsNullOrEmpty(certSkipToken));
 
             if (failedCertUploads?.Count > 0)
             {
@@ -342,7 +342,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 {
                     Name = x.GamePort.Name,
                     Num = settings.RunContainer ? x.GamePort.Number : 0,
-                    Protocol = (ProtocolType)Enum.Parse(typeof(ProtocolType), x.GamePort.Protocol)
+                    Protocol = Enum.Parse<ProtocolType>(x.GamePort.Protocol)
                 }).ToList());
             }
 
@@ -365,7 +365,19 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             {
                 if (uriResult.Error.ErrorMessage.Contains("AssetAlreadyExists"))
                 {
-                    Console.WriteLine($"{fileName} is already uploaded. Going ahead with deployment...");
+                    Console.WriteLine($"{fileName} is already uploaded. " +
+                        $"\nIf this is a mistake in file naming, enter 'Y'. This will allow you to end the current session so you can rename your file and run again" +
+                        $"\nEnter 'N' if you want to go ahead.");
+                    
+                    string msg = Console.ReadLine();
+                    if (msg.ToUpper() == "Y")
+                    {
+                        Environment.Exit(1);
+                    }
+                    else if (msg.ToUpper() == "N")
+                    {
+                        Console.WriteLine("Going ahead with deployment...");
+                    }
                 }
                 else
                 {

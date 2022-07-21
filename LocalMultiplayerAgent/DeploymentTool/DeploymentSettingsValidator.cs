@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
                 throw new ArgumentNullException("Build name is required to create a build");
             }
 
-            AzureVmSize vmSize = Enum.Parse<AzureVmSize>(_settings.VmSize);
+            Enum.TryParse(_settings.VmSize, out AzureVmSize vmSize);
             bool validVmSize = Enum.IsDefined(typeof(AzureVmSize), vmSize);
 
             if (string.IsNullOrWhiteSpace(_settings.VmSize) || !validVmSize)
@@ -43,7 +43,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
             {
                 foreach (BuildRegionParams detail in regionDetails)
                 {
-                    AzureRegion region = Enum.Parse<AzureRegion>(detail.Region);
+                    Enum.TryParse(detail.Region, out AzureRegion region);
                     bool isValidRegion = Enum.IsDefined(typeof(AzureRegion), region);
 
                     if (string.IsNullOrEmpty(detail.Region) || !isValidRegion)

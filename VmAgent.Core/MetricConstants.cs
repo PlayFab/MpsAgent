@@ -42,5 +42,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public const string MdmStart = "MdmStart";
         public const string TimeToEnterLockMs = "TimeToEnterLockMs";
         public const string StateType = "StateType";
+        public const string CallerName = "CallerName";
     }
 }

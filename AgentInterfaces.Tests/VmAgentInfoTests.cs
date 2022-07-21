@@ -51,7 +51,7 @@ namespace AgentInterfaces.Tests
                 nameof(VmAgentInfo.IsUnassignable),
                 nameof(VmAgentInfo.NetworkConfiguration),
                 nameof(VmAgentInfo.VmMonitoringOutputId),
-                nameof(VmAgentInfo.ConfidenceLevelForViolationOfToS)
+                nameof(VmAgentInfo.ToSViolationRating)
             };
 
             HashSet<string> propertyNames =

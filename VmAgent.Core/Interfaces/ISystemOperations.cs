@@ -81,5 +81,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         bool DirectoryExists(string directoryPath);
 
         IEnumerable<FileInfo> GetFiles(DirectoryInfo source, bool recursive);
+
+        IReadOnlyCollection<string> ListProcesses();
     }
 }

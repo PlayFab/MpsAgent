@@ -42,10 +42,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// </summary>
         public string VmMonitoringOutputId { get; set; }
 
-        /// <summary>
-        /// A confidence interval for whether the VM is in violation of terms of service.
-        /// </summary>
-        public int ConfidenceLevelForViolationOfToS { get; set; }
+        public ToSViolationRating ToSViolationRating { get; set; }
 
         public string ToLogString()
         {
@@ -55,7 +52,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
                 string networkConfiguration = NetworkConfiguration?.ToJsonString() ?? string.Empty;
                 string sessionHostSummary = SessionHostHeartbeatMap.Values.GroupBy(x => x.CurrentGameState).ToDictionary(y => y.Key, y => y.Count()).ToJsonString();
                 return
-                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutputId}, ConfidenceLevelForViolationOfToS: {ConfidenceLevelForViolationOfToS}";
+                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutputId}, ToSViolationRating: {ToSViolationRating}";
             }
 
             return this.ToJsonString();

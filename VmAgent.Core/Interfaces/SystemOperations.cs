@@ -341,5 +341,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             return _fileSystemOperations.GetFiles(source, recursive);
         }
+
+        public IReadOnlyCollection<string> ListProcesses()
+        {
+            return Process.GetProcesses().Select(x => x.ProcessName).ToList();
+        }
     }
 }

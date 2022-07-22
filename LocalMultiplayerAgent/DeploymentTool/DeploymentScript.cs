@@ -1,15 +1,15 @@
-﻿using Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PlayFab;
-using PlayFab.MultiplayerModels;
+using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool;
 using Microsoft.Azure.Storage.Blob;
-using System.Security.Cryptography.X509Certificates;
+using Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config;
+using Newtonsoft.Json;
+using PlayFab;
+using PlayFab.MultiplayerModels;
 
 namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 {
@@ -28,21 +28,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         { 
             PlayFabSettings.staticSettings.TitleId = settings.TitleId;
 
-            string secret = Environment.GetEnvironmentVariable("PF_SECRET");
-            if (string.IsNullOrEmpty(secret))
-            {
-                Console.WriteLine("Deploying to PlayFab Multiplayer Servers...\nEnter developer secret key");
-                PlayFabSettings.staticSettings.DeveloperSecretKey = Console.ReadLine();
-            }
+            Console.WriteLine("Deploying to PlayFab Multiplayer Servers...\n");
 
-            var tokenReq = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
-            var tokenRes = await PlayFabAuthenticationAPI.GetEntityTokenAsync(tokenReq);
+            var auth = await PlayFabAuthentication();
 
-            if (tokenRes.Error != null && tokenRes.Error.ErrorMessage != null)
-            {
-                Console.WriteLine($"{tokenRes.Error.ErrorMessage}");
-                Environment.Exit(1);
-            }
+            ErrorCheck(auth.Error);
 
             DeploymentSettingsValidator validator = new DeploymentSettingsValidator(deploymentSettings);
 
@@ -54,9 +44,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
             await CheckAndUploadCertificatesAsync();
 
-            foreach (var file in settings.AssetDetails)
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Windows)
             {
-                await CheckAndUploadAssetFileAsync(file.LocalFilePath);
+                foreach (var file in settings.AssetDetails)
+                {
+                    await CheckAndUploadAssetFileAsync(file.LocalFilePath);
+                }
             }
 
             dynamic createBuild;
@@ -71,6 +64,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 else
                 {
                     await CheckAndUploadLinuxContainerImageAsync();
+
                     CreateBuildWithCustomContainerRequest request = GetCustomContainerRequest();
                     createBuild = await CreateBuildWithCustomContainerAsync(request);
                 }
@@ -102,8 +96,23 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             }
             else
             {
+                //call BuildSummariesAPI to confirm complete deployment ??
                 Console.WriteLine("Build creation was successful!");
             }
+        }
+
+        public async Task<PlayFabResult<PlayFab.AuthenticationModels.GetEntityTokenResponse>> PlayFabAuthentication()
+        {
+            string secret = Environment.GetEnvironmentVariable("PF_SECRET", EnvironmentVariableTarget.Process);
+            PlayFabSettings.staticSettings.DeveloperSecretKey = secret ?? null;
+            if (string.IsNullOrEmpty(secret))
+            {
+                Console.WriteLine("Enter developer secret key");
+                PlayFabSettings.staticSettings.DeveloperSecretKey = Console.ReadLine();
+            }
+
+            var tokenReq = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
+            return await PlayFabAuthenticationAPI.GetEntityTokenAsync(tokenReq);
         }
 
         public CreateBuildWithCustomContainerRequest GetCustomContainerRequest()
@@ -111,7 +120,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return new CreateBuildWithCustomContainerRequest
             {
                 BuildName = deploymentSettings.BuildName,
-                VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null,
+                VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize),
                 ContainerFlavor = ContainerFlavor.CustomLinux,
                 ContainerImageReference = new ContainerImageReference()
                 {
@@ -130,15 +139,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize sd) ? sd : null
+                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
 
                 }).ToList(),
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails?.Select(x => new AssetReferenceParams()
                 {
-                    FileName = x.LocalFilePath,
+                    FileName = Path.GetFileName(x.LocalFilePath),
                     MountPath = x.MountPath
                 }).ToList() : new List<AssetReferenceParams>(),
                 MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
+                Metadata = (Dictionary<string, string>)settings.DeploymentMetadata ?? new Dictionary<string, string>()
             };
         }
 
@@ -146,7 +156,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             return new CreateBuildWithManagedContainerRequest
             {
-                VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null,
+                VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize),
                 GameCertificateReferences = settings.GameCertificateDetails != null ? settings.GameCertificateDetails.Select(x => new GameCertificateReferenceParams()
                 {
                     Name = x.Name
@@ -159,27 +169,26 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null
+                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
 
                 }).ToList(),
                 BuildName = deploymentSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails.Select(x => new AssetReferenceParams()
                 {
-                    FileName = x.LocalFilePath,
+                    FileName = Path.GetFileName(x.LocalFilePath),
                     MountPath = x.MountPath
                 }).ToList() : new List<AssetReferenceParams>(),
                 StartMultiplayerServerCommand = settings.ContainerStartParameters.StartGameCommand,
-                ContainerFlavor = ContainerFlavor.ManagedWindowsServerCore
+                ContainerFlavor = ContainerFlavor.ManagedWindowsServerCore,
+                Metadata = (Dictionary<string, string>)settings.DeploymentMetadata ?? new Dictionary<string, string>()
             };
         }
-
-        
 
         public CreateBuildWithProcessBasedServerRequest GetProcessBasedServerRequest()
         {
             return new CreateBuildWithProcessBasedServerRequest
             {
-                VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null,
+                VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize),
                 GameCertificateReferences = settings.GameCertificateDetails != null ? settings.GameCertificateDetails.Select(x => new GameCertificateReferenceParams()
                 {
                     Name = x.Name
@@ -192,16 +201,17 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
                     MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.TryParse(deploymentSettings.VmSize, out AzureVmSize value) ? value : null
+                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
 
                 }).ToList(),
                 BuildName = deploymentSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails != null ? settings.AssetDetails.Select(x => new AssetReferenceParams()
                 {
-                    FileName = x.LocalFilePath,
+                    FileName = Path.GetFileName(x.LocalFilePath),
                 }).ToList() : new List<AssetReferenceParams>(),
                 StartMultiplayerServerCommand = settings.ProcessStartParameters.StartGameCommand,
-                OsPlatform = Globals.GameServerEnvironment.ToString()
+                OsPlatform = Globals.GameServerEnvironment.ToString(),
+                Metadata = (Dictionary<string, string>)settings.DeploymentMetadata ?? new Dictionary<string, string>()
             };
         }
 
@@ -242,23 +252,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 };
                 var ContainerImagesResponse = await PlayFabMultiplayerAPI.ListContainerImagesAsync(ContainerImagesRequest);
 
-                if (ContainerImagesResponse.Error != null)
+                ErrorCheck(ContainerImagesResponse.Error);
+                imageSkipToken = ContainerImagesResponse.Result.SkipToken ?? null;
+                IEnumerable<string> existingImages = ContainerImagesResponse.Result.Images.Where(x => x == settings.ContainerStartParameters.ImageDetails.ImageName);
+                if (!existingImages.Any() && string.IsNullOrEmpty(imageSkipToken))
                 {
-                    Console.WriteLine(ContainerImagesResponse.Error.ErrorMessage);
-                    Environment.Exit(1);
+                    //TODO: upload LinuxContainer image API
+                    //This is currently non-existent 
+                    Console.WriteLine("Make sure you have uploaded your Linux container image to Docker before attempting deploy");
                 }
-
-                else
-                {
-                    imageSkipToken = ContainerImagesResponse.Result.SkipToken ?? null;
-                    IEnumerable<string> existingImages = ContainerImagesResponse.Result.Images.Where(x => x == settings.ContainerStartParameters.ImageDetails.ImageName);
-                    if (!existingImages.Any() && string.IsNullOrEmpty(imageSkipToken))
-                    {
-                        //TODO: upload LinuxContainer image API
-                        //This is currently non-existent 
-                        Console.WriteLine("Make sure you have uploaded your Linux container image to Docker before attempting deploy");
-                    }
-                }
+                
             } while (!string.IsNullOrEmpty(imageSkipToken));
         }
 
@@ -282,7 +285,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
         public async Task CheckAndUploadCertificatesAsync(string certSkipToken = null, int pageSize = 10)
         {
-            List<string> failedCertUploads = null;
+            List<string> failedCertUploads = new List<string>();
 
             do
             {
@@ -293,37 +296,31 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 };
                 var certificateSummariesResponse = await PlayFabMultiplayerAPI.ListCertificateSummariesAsync(certificateSummariesRequest);
 
-                if (certificateSummariesResponse.Error != null)
-                {
-                    Console.WriteLine(certificateSummariesResponse.Error.ErrorMessage);
-                    Environment.Exit(1);
-                }
+                ErrorCheck(certificateSummariesResponse.Error);
 
-                else
-                {
-                    certSkipToken = certificateSummariesResponse.Result.SkipToken ?? null;
+                certSkipToken = certificateSummariesResponse.Result.SkipToken ?? null;
 
-                    foreach (var certificate in settings.GameCertificateDetails)
+                foreach (var certificate in settings.GameCertificateDetails)
+                {
+                    IEnumerable<CertificateSummary> existingCerts = certificateSummariesResponse.Result.CertificateSummaries.Where(x => x.Name == certificate.Name);
+                    if (!existingCerts.Any() && string.IsNullOrEmpty(certSkipToken))
                     {
-                        IEnumerable<CertificateSummary> existingCerts = certificateSummariesResponse.Result.CertificateSummaries.Where(x => x.Name == certificate.Name);
-                        if (!existingCerts.Any() && string.IsNullOrEmpty(certSkipToken))
+                        var uploadCertificateRes = await UploadCertificateAsync(certificate);
+
+                        if (uploadCertificateRes.Error != null)
                         {
-                            var uploadCertificateRes = await UploadCertificateAsync(certificate);
+                            Console.WriteLine(uploadCertificateRes.Error.ErrorMessage);
+                            failedCertUploads.Add(certificate.Name);
+                            continue;
+                        }
 
-                            if (uploadCertificateRes.Error != null)
-                            {
-                                Console.WriteLine(uploadCertificateRes.Error.ErrorMessage);
-                                failedCertUploads.Add(certificate.Name);
-                                continue;
-                            }
-
-                            else
-                            {
-                                Console.WriteLine($"Uploading {certificate.Name} successful!");
-                            }
+                        else
+                        {
+                            Console.WriteLine($"Uploading {certificate.Name} successful!");
                         }
                     }
                 }
+                
             } while (!string.IsNullOrEmpty(certSkipToken));
 
             if (failedCertUploads?.Count > 0)
@@ -332,13 +329,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             }
         }
 
-        public List<Port> PortMapping()
+        public List<PlayFab.MultiplayerModels.Port> PortMapping()
         {
-            var ports = new List<Port>();
+            var ports = new List<PlayFab.MultiplayerModels.Port>();
 
             foreach (var portList in settings.PortMappingsList)
             {
-                ports.AddRange(portList?.Select(x => new Port()
+                ports.AddRange(portList?.Select(x => new PlayFab.MultiplayerModels.Port()
                 {
                     Name = x.GamePort.Name,
                     Num = settings.RunContainer ? x.GamePort.Number : 0,
@@ -349,17 +346,33 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return ports;
         }
 
-        public string GetAssetFileNameFromPath(string filePath)
+        public async Task UploadAssetFileAsync(string uploadUrl, string fileNamePath)
         {
-            return Path.GetFileName(filePath);
+            string fileName = Path.GetFileName(fileNamePath);
+            try
+            {
+                //TODO: log progress of asset upload
+                var uri = new Uri(uploadUrl);
+                var blockBlob = new CloudBlockBlob(uri);
+
+                Console.WriteLine($"Uploading {fileName}...");
+
+                await blockBlob.UploadFromFileAsync(fileNamePath);
+
+                Console.WriteLine($"Uploading {fileName} successful!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Environment.Exit(1);
+            }
         }
 
         public async Task CheckAndUploadAssetFileAsync(string fileNamePath)
         {
             string fileName = Path.GetFileName(fileNamePath);
-            GetAssetUploadUrlRequest request1 = new GetAssetUploadUrlRequest() { FileName = fileName };
-
-            var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(request1);
+            GetAssetUploadUrlRequest uriRequest = new GetAssetUploadUrlRequest() { FileName = fileName };
+            var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(uriRequest);
             
             if (uriResult.Error != null)
             {
@@ -387,23 +400,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             }
             else
             {
-                try
-                {
-                    //TODO: log progress of asset upload
-                    var uri = new Uri(uriResult.Result.AssetUploadUrl);
-                    var blockBlob = new CloudBlockBlob(uri);
+                await UploadAssetFileAsync(uriResult.Result.AssetUploadUrl, fileNamePath);
+            }
+        }
 
-                    Console.WriteLine($"Uploading {fileName}...");
-
-                    await blockBlob.UploadFromFileAsync(fileNamePath);
-
-                    Console.WriteLine($"Uploading {fileName} successful!");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    Environment.Exit(1);
-                }
+        public void ErrorCheck(PlayFabError err)
+        {
+            if (err != null && err.ErrorMessage != null)
+            {
+                Console.WriteLine($"{err.ErrorMessage}");
+                Environment.Exit(1);
             }
         }
     }

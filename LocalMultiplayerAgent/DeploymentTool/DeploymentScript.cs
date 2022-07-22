@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
+using Docker.DotNet;
+using Docker.DotNet.Models;
 using Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool;
 using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Gaming.AgentInterfaces;
 using Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config;
 using Newtonsoft.Json;
 using PlayFab;
@@ -25,7 +28,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         }
 
         public async Task RunScriptAsync()
-        { 
+        {
             PlayFabSettings.staticSettings.TitleId = settings.TitleId;
 
             Console.WriteLine("Deploying to PlayFab Multiplayer Servers...\n");
@@ -42,9 +45,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 Environment.Exit(1);
             }
 
-            await CheckAndUploadCertificatesAsync();
+            if (settings.GameCertificateDetails != null)
+            {
+                await CheckAndUploadCertificatesAsync();
+            }
 
-            if (Globals.GameServerEnvironment == GameServerEnvironment.Windows)
+            if (settings.AssetDetails != null)
             {
                 foreach (var file in settings.AssetDetails)
                 {
@@ -78,7 +84,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             if (createBuild.Error != null)
             {
                 Console.WriteLine("Failed to successfully create build");
-                if(createBuild.Error.ErrorMessage != null)
+                if (createBuild.Error.ErrorMessage != null)
                 {
                     Console.WriteLine($"{createBuild.Error.ErrorMessage}");
                 }
@@ -92,7 +98,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                         }
                     }
                     Console.WriteLine($"{createBuild.Error.ErrorMessage}");
-                }  
+                }
             }
             else
             {
@@ -241,6 +247,40 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             return await PlayFabMultiplayerAPI.CreateBuildWithCustomContainerAsync(request);
         }
 
+        public async Task UploadLinuxContainerImageAsync(ContainerImageDetails imageDetails)
+        {
+            GetContainerRegistryCredentialsRequest requ = new GetContainerRegistryCredentialsRequest();
+            var ContainerRegistryCredentialsRes = await PlayFabMultiplayerAPI.GetContainerRegistryCredentialsAsync(requ);
+            ErrorCheck(ContainerRegistryCredentialsRes.Error);
+
+            try
+            {
+                DockerClient client = new DockerClientConfiguration().CreateClient();
+                string registryWithImageName = $"{imageDetails.Registry}/{imageDetails.ImageName}";
+                Progress<JSONMessage> theMess = new Progress<JSONMessage>();
+
+                await client.Images.PushImageAsync(
+                    registryWithImageName,
+                    new ImagePushParameters
+                    {
+                        Tag = imageDetails.ImageTag,
+                    },
+                    new AuthConfig
+                    {
+                        Username = ContainerRegistryCredentialsRes.Result.Username,
+                        Password = ContainerRegistryCredentialsRes.Result.Password
+                    },
+                    theMess
+                );
+                //TODO: show process
+                //Console.WriteLine($"{theMess.}")
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public async Task CheckAndUploadLinuxContainerImageAsync(string imageSkipToken = null, int pageSize = 10)
         {
             do
@@ -253,15 +293,38 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 var ContainerImagesResponse = await PlayFabMultiplayerAPI.ListContainerImagesAsync(ContainerImagesRequest);
 
                 ErrorCheck(ContainerImagesResponse.Error);
+
                 imageSkipToken = ContainerImagesResponse.Result.SkipToken ?? null;
-                IEnumerable<string> existingImages = ContainerImagesResponse.Result.Images.Where(x => x == settings.ContainerStartParameters.ImageDetails.ImageName);
-                if (!existingImages.Any() && string.IsNullOrEmpty(imageSkipToken))
+                IEnumerable<string> existingImageNames = ContainerImagesResponse.Result.Images.Where(x => x == settings.ContainerStartParameters.ImageDetails.ImageName);
+
+                if (!existingImageNames.Any() && string.IsNullOrEmpty(imageSkipToken))
                 {
-                    //TODO: upload LinuxContainer image API
-                    //This is currently non-existent 
-                    Console.WriteLine("Make sure you have uploaded your Linux container image to Docker before attempting deploy");
+                    await UploadLinuxContainerImageAsync(settings.ContainerStartParameters.ImageDetails);
                 }
-                
+                else if (existingImageNames.Any())
+                {
+                    var ContainerImageTagsRequest = new ListContainerImageTagsRequest
+                    {
+                        ImageName = existingImageNames.First() ?? null,
+                    };
+                    var ContainerImageTagsResponse = await PlayFabMultiplayerAPI.ListContainerImageTagsAsync(ContainerImageTagsRequest);
+
+                    ErrorCheck(ContainerImageTagsResponse.Error);
+
+                    IEnumerable<string> existingImageTags = ContainerImageTagsResponse.Result.Tags.Where(x => x == settings.ContainerStartParameters.ImageDetails.ImageTag);
+
+                    if (existingImageTags.Any())
+                    {
+                        Console.WriteLine("Your container image is already uploaded. Continuing deployment...");
+                        break;
+                    }
+
+                    if (!existingImageTags.Any() && string.IsNullOrEmpty(imageSkipToken))
+                    {
+                        await UploadLinuxContainerImageAsync(settings.ContainerStartParameters.ImageDetails);
+                    }
+                }
+
             } while (!string.IsNullOrEmpty(imageSkipToken));
         }
 
@@ -320,7 +383,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                         }
                     }
                 }
-                
+
             } while (!string.IsNullOrEmpty(certSkipToken));
 
             if (failedCertUploads?.Count > 0)
@@ -373,7 +436,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             string fileName = Path.GetFileName(fileNamePath);
             GetAssetUploadUrlRequest uriRequest = new GetAssetUploadUrlRequest() { FileName = fileName };
             var uriResult = await PlayFabMultiplayerAPI.GetAssetUploadUrlAsync(uriRequest);
-            
+
             if (uriResult.Error != null)
             {
                 if (uriResult.Error.ErrorMessage.Contains("AssetAlreadyExists"))
@@ -381,7 +444,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     Console.WriteLine($"{fileName} is already uploaded. " +
                         $"\nIf this is a mistake in file naming, enter 'Y'. This will allow you to end the current session so you can rename your file and run again" +
                         $"\nEnter 'N' if you want to go ahead.");
-                    
+
                     string msg = Console.ReadLine();
                     if (msg.ToUpper() == "Y")
                     {
@@ -395,7 +458,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 else
                 {
                     Console.WriteLine(uriResult.Error.ErrorMessage);
-                    Environment.Exit(1);   
+                    Environment.Exit(1);
                 }
             }
             else

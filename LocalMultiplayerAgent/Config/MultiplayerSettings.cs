@@ -24,8 +24,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
         public string TitleId { get; set; }
 
-        public bool CreateDeployment { get; set; }
-
         public Guid BuildId { get; set; }
 
         public int NumHeartBeatsForActivateResponse { get; set; }

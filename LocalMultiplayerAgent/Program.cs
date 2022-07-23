@@ -48,6 +48,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                 Environment.Exit(1);
             }
 
+            if (Globals.CreateDeployment)
+            {
+                DeploymentScript deploymentScript = new DeploymentScript(settings);
+                await deploymentScript.RunScriptAsync();
+                return;
+            }
+
             string vmId =
                 $"xcloudwusu4uyz5daouzl:{settings.Region}:{Guid.NewGuid()}:tvmps_{Guid.NewGuid():N}{Guid.NewGuid():N}_d";
 
@@ -87,12 +94,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                 .CreateAndStartContainerWaitForExit(settings.ToSessionHostsStartInfo());
 
             await host.StopAsync();
-
-            if (settings.CreateDeployment)
-            {
-                DeploymentScript deploymentScript = new DeploymentScript(settings);
-                await deploymentScript.RunScriptAsync();
-            }
         }
     }
 }

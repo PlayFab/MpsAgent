@@ -42,7 +42,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// This isn't really a "setting", and isn't stored in Thunderfig. VmAgentSettings is just a convenient way for 
         /// ControlPlane to communicate with VmAgent.
         /// </summary>
-        public DateTimeOffset? ShutdownRequestedNotBefore { get; set; }
+        public DateTime? ShutdownRequestedNotBeforeUtc { get; set; }
 
         /// <summary>
         /// List of disallowed executables.

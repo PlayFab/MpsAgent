@@ -48,5 +48,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// List of disallowed executables.
         /// </summary>
         public IReadOnlyCollection<string> DisallowedExecutables { get; set; }
+
+        /// <summary>
+        /// List of urls to send heartbeats to. Updating these dynamically would allow a graceful update of backend without a lot of VMAgents trying
+        /// to send heartbeats to endpoints that don't exist.
+        /// </summary>
+        public string[] HeartbeatUrls { get; set; }
     }
 }

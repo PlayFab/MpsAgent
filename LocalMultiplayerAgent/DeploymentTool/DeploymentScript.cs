@@ -29,8 +29,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
         public async Task RunScriptAsync()
         {
-            PlayFabSettings.staticSettings.TitleId = settings.TitleId;
-
             Console.WriteLine("Deploying to PlayFab Multiplayer Servers...\n");
 
             var auth = await PlayFabAuthentication();
@@ -109,6 +107,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
 
         public async Task<PlayFabResult<PlayFab.AuthenticationModels.GetEntityTokenResponse>> PlayFabAuthentication()
         {
+            PlayFabSettings.staticSettings.TitleId = settings.TitleId;
+            var authValidation = new PlayFabResult<PlayFab.AuthenticationModels.GetEntityTokenResponse>();
             string secret = Environment.GetEnvironmentVariable("PF_SECRET", EnvironmentVariableTarget.Process);
             PlayFabSettings.staticSettings.DeveloperSecretKey = secret ?? null;
             if (string.IsNullOrEmpty(secret))
@@ -117,8 +117,18 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 PlayFabSettings.staticSettings.DeveloperSecretKey = Console.ReadLine();
             }
 
-            var tokenReq = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
-            return await PlayFabAuthenticationAPI.GetEntityTokenAsync(tokenReq);
+            try
+            {
+                var tokenReq = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
+                authValidation = await PlayFabAuthenticationAPI.GetEntityTokenAsync(tokenReq);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Environment.Exit(1);
+            }
+
+            return authValidation;
         }
 
         public CreateBuildWithCustomContainerRequest GetCustomContainerRequest()
@@ -257,7 +267,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             {
                 DockerClient client = new DockerClientConfiguration().CreateClient();
                 string registryWithImageName = $"{imageDetails.Registry}/{imageDetails.ImageName}";
-                Progress<JSONMessage> theMess = new Progress<JSONMessage>();
+                Progress<JSONMessage> theMess = new Progress<JSONMessage>(
+                    msg =>
+                    {    
+                        Console.WriteLine($"{msg.Status}|{msg.ProgressMessage}|{msg.ErrorMessage}");
+                    });
 
                 await client.Images.PushImageAsync(
                     registryWithImageName,
@@ -272,12 +286,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     },
                     theMess
                 );
-                //TODO: show process
-                //Console.WriteLine($"{theMess.}")
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Environment.Exit(1);
             }
         }
 

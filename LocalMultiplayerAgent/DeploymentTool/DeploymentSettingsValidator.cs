@@ -20,6 +20,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
                 throw new ArgumentNullException("Build name is required to create a build");
             }
 
+            if (_settings.MultiplayerServerCountPerVm < 0)
+            {
+                Console.WriteLine("Servers per machine must be greater than 0");
+                return false;
+            }
+
             Enum.TryParse(_settings.VmSize, out AzureVmSize vmSize);
             bool validVmSize = Enum.IsDefined(typeof(AzureVmSize), vmSize);
 

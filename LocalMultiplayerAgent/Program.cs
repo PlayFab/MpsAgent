@@ -48,6 +48,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                 Environment.Exit(1);
             }
 
+            Globals.CreateDeployment = args.Contains("-deploy");
             if (Globals.CreateDeployment)
             {
                 DeploymentScript deploymentScript = new DeploymentScript(settings);

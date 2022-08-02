@@ -1,12 +1,12 @@
 {
-    "BuildName": "GameContainerW",
+    "BuildName": "MyGameBuild",
     "VmSize": "Standard_D2_v2",
-    "MultiplayerServerCountPerVm": 10,
+    "MultiplayerServerCountPerVm": 2,
     "RegionConfigurations": [
         {
             "Region": "EastUs",
-            "MaxServers": 10,
-            "StandbyServers": 5
+            "MaxServers": 5,
+            "StandbyServers": 1
         }
     ]
 }

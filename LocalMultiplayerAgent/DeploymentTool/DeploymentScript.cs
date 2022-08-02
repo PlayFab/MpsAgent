@@ -150,13 +150,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     Name = x.Name
                 }).ToList() ?? new List<GameCertificateReferenceParams>(),
                 ContainerRunCommand = settings.ContainerStartParameters.StartGameCommand,
+                AreAssetsReadonly = deploymentSettings.AreAssetsReadonly,
                 RegionConfigurations =deploymentSettings.RegionConfigurations?.Select(x => new BuildRegionParams()
                 {
                     Region = x.Region,
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
-                    MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
+                    MultiplayerServerCountPerVm = x.MultiplayerServerCountPerVm,
+                    VmSize = x.VmSize
 
                 }).ToList() ?? new List<BuildRegionParams>(),
                 GameAssetReferences = settings.AssetDetails?.Select(x => new AssetReferenceParams()
@@ -180,14 +181,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 }).ToList() ?? new List<GameCertificateReferenceParams>(),
                 Ports = PortMapping(),
                 MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
+                AreAssetsReadonly = deploymentSettings.AreAssetsReadonly,
                 RegionConfigurations = deploymentSettings.RegionConfigurations?.Select(x => new BuildRegionParams()
                 {
                     Region = x.Region,
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
-                    MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
-
+                    MultiplayerServerCountPerVm = x.MultiplayerServerCountPerVm,
+                    VmSize = x.VmSize
                 }).ToList() ?? new List<BuildRegionParams>(),
                 BuildName = deploymentSettings.BuildName,
                 GameAssetReferences = settings.AssetDetails.Select(x => new AssetReferenceParams()
@@ -197,6 +198,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 }).ToList() ?? new List<AssetReferenceParams>(),
                 StartMultiplayerServerCommand = settings.ContainerStartParameters.StartGameCommand,
                 ContainerFlavor = ContainerFlavor.ManagedWindowsServerCore,
+                WindowsCrashDumpConfiguration = deploymentSettings.WindowsCrashDumpConfiguration,
                 Metadata = (Dictionary<string, string>)settings.DeploymentMetadata ?? new Dictionary<string, string>()
             };
         }
@@ -212,13 +214,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 }).ToList() ?? new List<GameCertificateReferenceParams>(),
                 Ports = PortMapping(),
                 MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
+                AreAssetsReadonly = deploymentSettings.AreAssetsReadonly,
                 RegionConfigurations = deploymentSettings.RegionConfigurations?.Select(x => new BuildRegionParams()
                 {
                     Region = x.Region,
                     MaxServers = x.MaxServers,
                     StandbyServers = x.StandbyServers,
-                    MultiplayerServerCountPerVm = deploymentSettings.MultiplayerServerCountPerVm,
-                    VmSize = Enum.Parse<AzureVmSize>(deploymentSettings.VmSize)
+                    MultiplayerServerCountPerVm = x.MultiplayerServerCountPerVm,
+                    VmSize = x.VmSize
 
                 }).ToList() ?? new List<BuildRegionParams>(),
                 BuildName = deploymentSettings.BuildName,

@@ -17,7 +17,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
         {
             if (string.IsNullOrWhiteSpace(_settings.BuildName))
             {
-                throw new ArgumentNullException("Build name is required to create a build");
+                Console.WriteLine("Build name is required to create a build");
+                return false;
             }
 
             if (_settings.MultiplayerServerCountPerVm < 0)
@@ -26,21 +27,38 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
                 return false;
             }
 
-            Enum.TryParse(_settings.VmSize, out AzureVmSize vmSize);
-            bool validVmSize = Enum.IsDefined(typeof(AzureVmSize), vmSize);
+            bool vmSizeValidationSuccess = IsVmSizeValid(_settings.VmSize);
+
+            bool regionsValidationSuccess = AreRegionsValid(_settings.RegionConfigurations);
+
+            return vmSizeValidationSuccess && regionsValidationSuccess;
+        }
+
+        private bool IsVmSizeValid(string VmSize)
+        {
+            bool validVmSize;
+            try
+            {
+                AzureVmSize vmSize = Enum.Parse<AzureVmSize>(VmSize);
+                validVmSize = Enum.IsDefined(typeof(AzureVmSize), vmSize);
+            }
+            catch (Exception ex)
+            {
+                validVmSize = false;
+                Console.WriteLine(ex.Message);
+            }
 
             if (string.IsNullOrWhiteSpace(_settings.VmSize) || !validVmSize)
             {
-                throw new Exception
+                Console.WriteLine
                     ("Make sure you specified the right value for VmSize. " +
                     "Refer to this if you need: " +
                     "https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayer-server/create-build-with-custom-container?view=playfab-rest#azurevmsize"
                     );
+                return false;
             }
 
-            bool regionsValidationSuccess = AreRegionsValid(_settings.RegionConfigurations);
-
-            return regionsValidationSuccess;
+            return true;
         }
 
         private bool AreRegionsValid(List<BuildRegionParams> regionDetails)
@@ -49,8 +67,17 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
             {
                 foreach (BuildRegionParams detail in regionDetails)
                 {
-                    Enum.TryParse(detail.Region, out AzureRegion region);
-                    bool isValidRegion = Enum.IsDefined(typeof(AzureRegion), region);
+                    bool isValidRegion;
+                    try
+                    {
+                        AzureRegion region = Enum.Parse<AzureRegion>(detail.Region);
+                        isValidRegion = Enum.IsDefined(typeof(AzureRegion), region);
+                    }
+                    catch(Exception ex)
+                    {
+                        isValidRegion = false;
+                        Console.WriteLine(ex.Message);
+                    }
 
                     if (string.IsNullOrEmpty(detail.Region) || !isValidRegion)
                     {

@@ -36,9 +36,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             // lcow stands for Linux Containers On Windows => https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
             Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? GameServerEnvironment.Linux : GameServerEnvironment.Windows; // LocalMultiplayerAgent is running only on Windows for the time being
+            Globals.CreateDeployment = args.Contains("-deploy");
+
             MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(File.ReadAllText("MultiplayerSettings.json"));
 
-            settings.SetDefaultsIfNotSpecified();
+            if(!Globals.CreateDeployment)
+            {
+                settings.SetDefaultsIfNotSpecified();
+            }
 
             MultiplayerSettingsValidator validator = new MultiplayerSettingsValidator(settings);
 
@@ -48,7 +53,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                 Environment.Exit(1);
             }
 
-            Globals.CreateDeployment = args.Contains("-deploy");
             if (Globals.CreateDeployment)
             {
                 DeploymentScript deploymentScript = new DeploymentScript(settings);

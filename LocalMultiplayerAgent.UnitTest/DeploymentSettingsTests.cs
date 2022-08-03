@@ -3,6 +3,7 @@ using Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
 {
@@ -39,12 +40,20 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
+        public void NullConfigReturnsException()
+        {
+            Action comparison = () => { DeploymentSettingsValidator validator = new DeploymentSettingsValidator(null); };
+            comparison.Should().Throw<ArgumentNullException>();
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
         public void ValidConfigReturnsValid()
         {
             DeploymentSettings settings = GetTestDeploymentSettings();
             new DeploymentSettingsValidator(settings).IsValid().Should().BeTrue();
         }
-        
+
         [TestMethod]
         [TestCategory("BVT")]
         public void EmptyRegionConfigIsInValid()
@@ -75,7 +84,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
             {
                 region.Region = region.Region.ToLower();
             }
-            
+
             new DeploymentSettingsValidator(settings).IsValid().Should().BeFalse();
         }
 

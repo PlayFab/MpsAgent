@@ -3,7 +3,6 @@ using Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 
 namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
 {
@@ -36,14 +35,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
             DeploymentSettings settings = JsonConvert.DeserializeObject<DeploymentSettings>(config.ToString());
 
             return settings;
-        }
-
-        [TestMethod]
-        [TestCategory("BVT")]
-        public void NullConfigReturnsException()
-        {
-            Action comparison = () => { DeploymentSettingsValidator validator = new DeploymentSettingsValidator(null); };
-            comparison.Should().Throw<ArgumentNullException>();
         }
 
         [TestMethod]

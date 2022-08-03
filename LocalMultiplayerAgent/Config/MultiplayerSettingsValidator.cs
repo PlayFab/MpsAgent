@@ -30,6 +30,17 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
     
         public bool IsValid()
         {
+            if (string.IsNullOrWhiteSpace(_settings.OutputFolder) || string.IsNullOrWhiteSpace(_settings.TitleId))
+            {
+                throw new Exception("OutputFolder or TitleId not found. Call SetDefaultsIfNotSpecified() before this method");
+            }
+
+            if (!_systemOperations.DirectoryExists(_settings.OutputFolder))
+            {
+                Console.WriteLine($"OutputFolder '{_settings.OutputFolder}' does not exist. Check your MultiplayerSettings.json file");
+                return false;
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");
@@ -132,79 +143,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 }
             }
 
-            if(!Globals.CreateDeployment)
+            if (string.IsNullOrWhiteSpace(_settings.Region))
             {
-                if (string.IsNullOrWhiteSpace(_settings.OutputFolder) || string.IsNullOrWhiteSpace(_settings.TitleId))
-                {
-                    throw new Exception("OutputFolder or TitleId not found. Call SetDefaultsIfNotSpecified() before this method");
-                }
+                Console.WriteLine("Region must be specified.");
+                isSuccess = false;
+            }
 
-                if (!_systemOperations.DirectoryExists(_settings.OutputFolder))
-                {
-                    Console.WriteLine($"OutputFolder '{_settings.OutputFolder}' does not exist. Check your MultiplayerSettings.json file");
-                    return false;
-                }
-
-                if (_settings.BuildId == Guid.Empty)
-                {
-                    Console.WriteLine("BuildId must be specified.");
-                    isSuccess = false;
-                }
-
-                if (string.IsNullOrWhiteSpace(_settings.Region))
-                {
-                    Console.WriteLine("Region must be specified.");
-                    isSuccess = false;
-                }
-
-                if (_settings.AgentListeningPort == 0)
-                {
-                    Console.WriteLine("AgentListeningPort must be specified.");
-                    isSuccess = false;
-                }
-
-                if (string.IsNullOrEmpty(_settings.SessionConfig?.SessionCookie))
-                {
-                    Console.WriteLine("Warning: SessionCookie is not specified.");
-                }
-
-                if (_settings.AgentListeningPort != 56001)
-                {
-                    Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running setup.ps1 with the agent port specified.");
-                }
-
-                if (_settings.RunContainer)
-                {
-                    foreach (var portList in _settings.PortMappingsList)
-                    {
-                        foreach (var portInfo in portList)
-                        {
-                            if (portInfo.NodePort == 0)
-                            {
-                                Console.WriteLine("No NodePort was specified (and RunContainer is true).");
-                                isSuccess = false;
-                            }
-                        }
-                    }
-                }
-
-                if (_settings.NumHeartBeatsForActivateResponse <= 0)
-                {
-                    Console.WriteLine("NumHeartBeatsForActivateResponse must be greater than 0.");
-                    isSuccess = false;
-                }
-
-                if (_settings.NumHeartBeatsForTerminateResponse <= 0)
-                {
-                    Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than 0.");
-                    isSuccess = false;
-                }
-
-                if (_settings.NumHeartBeatsForTerminateResponse <= _settings.NumHeartBeatsForActivateResponse)
-                {
-                    Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than NumHeartBeatsForActivateResponse. Ideally more than 1, since you would like the server to be alive for a few seconds");
-                    isSuccess = false;
-                }
+            if (_settings.AgentListeningPort == 0)
+            {
+                Console.WriteLine("AgentListeningPort must be specified.");
+                isSuccess = false;
             }
 
             if (!ulong.TryParse(_settings.TitleId, NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out _))
@@ -213,7 +161,57 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 isSuccess = false;
             }
 
+            if (_settings.BuildId == Guid.Empty)
+            {
+                Console.WriteLine("BuildId must be specified.");
+                isSuccess = false;
+            }
+
+            if (string.IsNullOrEmpty(_settings.SessionConfig?.SessionCookie))
+            {
+                Console.WriteLine("Warning: SessionCookie is not specified.");
+            }
+
+            if (_settings.AgentListeningPort != 56001)
+            {
+                Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running setup.ps1 with the agent port specified.");
+            }
+
+            if (_settings.RunContainer)
+            {
+                foreach (var portList in _settings.PortMappingsList)
+                {
+                    foreach (var portInfo in portList)
+                    {
+                        if (portInfo.NodePort == 0)
+                        {
+                            Console.WriteLine("No NodePort was specified (and RunContainer is true).");
+                            isSuccess = false;
+                        }
+                    }
+                }
+            }
+
+            if(_settings.NumHeartBeatsForActivateResponse <= 0)
+            {
+                Console.WriteLine("NumHeartBeatsForActivateResponse must be greater than 0.");
+                isSuccess = false;
+            }
+
+            if(_settings.NumHeartBeatsForTerminateResponse <= 0)
+            {   
+                Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than 0.");
+                isSuccess = false;
+            }
+
+            if(_settings.NumHeartBeatsForTerminateResponse <= _settings.NumHeartBeatsForActivateResponse)
+            {
+                Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than NumHeartBeatsForActivateResponse. Ideally more than 1, since you would like the server to be alive for a few seconds");
+                isSuccess = false;
+            }
+
             return isSuccess;
+
         }
 
         private bool AreAssetsValid(AssetDetail[] assetDetails)

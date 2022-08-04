@@ -117,6 +117,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
                         Path.Combine(Globals.VmConfiguration.VmDirectories.CertificateRootFolderVm, Path.GetFileName(certUserDetails.Path)));
 
                     //we currently only support passwordless certificates
+                    //passing a certificate with a password here will throw an exception because it requires a password parameter
                     X509Certificate2 cert = new X509Certificate2(certUserDetails.Path);
                     certs.Add(new CertificateDetail()
                     {

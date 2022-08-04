@@ -28,7 +28,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
         public int MultiplayerServerCountPerVm { get; set; }
 
         /// <summary>
-        /// Gets or sets the Linux instrumentation configuration for this deployment.
+        /// Gets or sets the Region configuration(s) for this deployment.
         /// </summary>
         [Required]
         [MinLength(1)]
@@ -48,7 +48,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
 
         /// <summary>
         /// Gets or sets the crash dump configuration for this deployment.
-        /// This is only required for Windows Containers
+        /// This is an optional for Windows Containers
+        /// Windows/Linux Process and Linux Containers do not use this
         /// </summary>
         public WindowsCrashDumpConfiguration WindowsCrashDumpConfiguration { get; set; } = new WindowsCrashDumpConfiguration();
     }

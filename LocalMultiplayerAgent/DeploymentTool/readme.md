@@ -1,11 +1,58 @@
-﻿After testing their game server(s) on LMA, you may want to go ahead and deploy them.
-This tool was developed exactly for this purpose; allow you go ahead to deploy your game servers.
-Technically, you can also just run deployment without testing with LMA **but testing is highly recommended**
+﻿After testing your game server(s) on Local Multiplayer Agent, you may want to go ahead and deploy them to PlayFab Multiplayer Servers.
+This tool was developed exactly for this purpose; allows you go ahead to deploy your game servers to PlayFab Multiplayer Servers after testing with Local Multiplayer Agent.
+Technically, you can just run game server deployment without testing with LMA **but testing is highly recommended**
 
 ## Requirements:
+- Set your PlayFab Title Secret Key as a **User Environment Variable**
+    - Command Prompt
+    `setx PF_SECRET "[variable value]"`
+
+    - Powershell
+    `[Environment]::SetEnvironmentVariable("PF_SECRET","[variable value]","User")`
 
 - Make sure your [MultiplayerSettings.json](../MultiplayerSettings.json) is configured right
-    - These parameters in MultiplayerSettings.json are not required/do not matter if you are trying to run deployment:
+    - Windows Process:
+        `RunContainer: false
+        "ProcessStartParameters": {
+            "StartGameCommand": "<your_game_server_exe>"
+        }
+        ...`
+    - Windows Container:
+        `RunContainer: true
+        "ContainerStartParameters": {
+            "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
+            "ResourceLimits": {
+                "Cpus": 0,
+                "MemoryGib": 0
+            },
+            "ImageDetails": {
+                "Registry": "mcr.microsoft.com",
+                "ImageName": "playfab/multiplayer",
+                "ImageTag": "wsc-10.0.17763.2458",
+                "Username": "",
+                "Password": ""
+             }
+        }
+        ...`
+    - Linux Container on Windows:
+        `RunContainer: true
+        "ContainerStartParameters": {
+            "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
+            "ResourceLimits": {
+                "Cpus": 0,
+                "MemoryGib": 0
+            },
+            "ImageDetails": {
+                "Registry": "mydockerregistry.io",
+                "ImageName": "mygame",
+                "ImageTag": "0.1",
+                "Username": "",
+                "Password": ""
+             }
+        }
+        ...`
+
+    - These parameters in MultiplayerSettings.json are not required/do not matter if you are trying to create game server deployment:
     `  
     "OutputFolder": "",
     "NumHeartBeatsForActivateResponse": 5,
@@ -19,6 +66,8 @@ Technically, you can also just run deployment without testing with LMA **but tes
         "InitialPlayers": [ "Player1", "Player2" ]
     }
     `
+
+    - Linux Process is not currently not support on Local Multiplayer Agent, so users cannot create game server deployment here
 
 ## Steps:
 
@@ -38,7 +87,7 @@ Technically, you can also just run deployment without testing with LMA **but tes
 }
 `
 
-    - These are other optional parameters you could add, if needed:
+    - These are other optional parameters for your `DeploymentSettings.json` you could add, if needed:
     `
     "AreAssetsReadonly": false,
     "UseStreamingForAssetDownloads": false,
@@ -55,3 +104,9 @@ Technically, you can also just run deployment without testing with LMA **but tes
 
     - for Linux Container:
     `.\LocalMultiplayerAgent.exe -lcow -deploy`
+
+
+## After running
+- You should get a message saying your build was successfully created, or an error message if it failed
+- Login to your [PlayFab developer account](https://developer.playfab.com/en-us/login) 
+- Navigate to the Multiplayer/Servers tab of the title under which you created your build

@@ -14,7 +14,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using Newtonsoft.Json;
     using VmAgent.Core;
     using VmAgent.Core.Interfaces;
-    using Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool;
+    using Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool;
 
     public class Program
     {
@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             string[] salutations =
             {
                 "Have a nice day!",
-                "Thank you for using PlayFab Multiplayer Servers",
+                "Thank you for using Azure PlayFab Multiplayer Servers",
                 "Check out our docs at aka.ms/playfabdocs!",
                 "Have a question? Check our community at community.playfab.com"
             };
@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             // lcow stands for Linux Containers On Windows => https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
             Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? GameServerEnvironment.Linux : GameServerEnvironment.Windows; // LocalMultiplayerAgent is running only on Windows for the time being
-            Globals.CreateDeployment = args.Contains("-deploy");
+            Globals.CreateDeployment = args.Contains("-build");
 
             MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(File.ReadAllText("MultiplayerSettings.json"));
 
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
 
             if (Globals.CreateDeployment)
             {
-                DeploymentScript deploymentScript = new DeploymentScript(settings);
+                BuildScript deploymentScript = new BuildScript(settings);
                 await deploymentScript.RunScriptAsync();
                 return;
             }

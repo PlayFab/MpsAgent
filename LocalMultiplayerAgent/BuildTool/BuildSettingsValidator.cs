@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
+namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 {
-    public class DeploymentSettingsValidator
+    public class BuildSettingsValidator
     {
-        private readonly DeploymentSettings _settings;
+        private readonly BuildSettings _settings;
 
-        public DeploymentSettingsValidator(DeploymentSettings settings)
+        public BuildSettingsValidator(BuildSettings settings)
         {
             _settings = settings ?? throw new ArgumentNullException("Deployment settings cannot be null");
         }

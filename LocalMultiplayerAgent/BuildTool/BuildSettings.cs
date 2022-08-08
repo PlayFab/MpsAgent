@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool
+namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using Newtonsoft.Json;
     using PlayFab.MultiplayerModels;
 
 
-    public class DeploymentSettings
+    public class BuildSettings
     {
         /// <summary>
         /// The build name.

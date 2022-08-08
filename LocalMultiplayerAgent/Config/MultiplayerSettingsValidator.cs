@@ -30,107 +30,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
         public bool IsValid()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");
-                return false;
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && _settings.RunContainer)
-            {
-                Console.WriteLine("Running LocalMultiplayerAgent as container mode is not yet supported on Linux. Please set RunContainer to false in MultiplayerSettings.json");
-                return false;
-            }
-
-            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && !_settings.RunContainer)
-            {
-                Console.WriteLine("The specified settings are invalid. Using Linux Game Servers requires running in a container.");
-                return false;
-            }
-
-            string startGameCommand;
-
-            if (_settings.RunContainer)
-            {
-                if (_settings.ContainerStartParameters == null)
-                {
-                    Console.WriteLine("No ContainerStartParameters were specified (and RunContainer is true).");
-                    return false;
-                }
-                startGameCommand = _settings.ContainerStartParameters.StartGameCommand;
-            }
-            else
-            {
-                if (_settings.ProcessStartParameters == null)
-                {
-                    Console.WriteLine("No ProcessStartParameters were specified (and RunContainer is false).");
-                    return false;
-                }
-                startGameCommand = _settings.ProcessStartParameters.StartGameCommand;
-            }
-
             bool isSuccess = AreAssetsValid(_settings.AssetDetails);
-
-            // StartGameCommand is optional on Linux
-            if (string.IsNullOrWhiteSpace(startGameCommand))
-            {
-                if (Globals.GameServerEnvironment == GameServerEnvironment.Windows)
-                {
-                    Console.WriteLine("StartGameCommand must be specified.");
-                    isSuccess = false;
-                }
-            }
-            else if (startGameCommand.Contains("<your_game_server_exe>"))
-            {
-                Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid");
-                isSuccess = false;
-            }
-            else if (_settings.AssetDetails != null && _settings.RunContainer && (Globals.GameServerEnvironment == GameServerEnvironment.Windows))
-            {
-                if ((!_settings.AssetDetails.Any(x => startGameCommand.Contains(x.MountPath, StringComparison.InvariantCultureIgnoreCase))))
-                {
-                    Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid and does not contain the mount path. This should look like: C:\\Assets\\GameServer.exe for example.");
-                    isSuccess = false;
-                }
-            }
-
-            if (_settings.GameCertificateDetails?.Length > 0)
-            {
-                HashSet<string> names = new HashSet<string>();
-                HashSet<string> paths = new HashSet<string>();
-
-                foreach (GameCertificateDetails certDetails in _settings.GameCertificateDetails)
-                {
-                    if (string.IsNullOrEmpty(certDetails.Name.Trim()))
-                    {
-                        Console.WriteLine($"Certificate cannot have an empty name");
-                        isSuccess = false;
-                        continue;
-                    }
-                    if (string.IsNullOrEmpty(certDetails.Path) || !certDetails.Path.EndsWith(".pfx"))
-                    {
-                        Console.WriteLine($"Certificate with filename path '{certDetails.Path}' is not a pfx file");
-                        isSuccess = false;
-                        continue;
-                    }
-                    if (!_systemOperations.FileExists(certDetails.Path))
-                    {
-                        Console.WriteLine($"Certificate with filename {certDetails.Path} does not exist");
-                        isSuccess = false;
-                        continue;
-                    }
-                    if (!names.Add(certDetails.Name))
-                    {
-                        isSuccess = false;
-                        Console.WriteLine($"Certificate with name {certDetails.Name} is included more than once");
-                    }
-                    if (!paths.Add(certDetails.Path))
-                    {
-                        isSuccess = false;
-                        Console.WriteLine($"Certificate with path {certDetails.Path} is included more than once");
-                    }
-                }
-            }
 
             if (!Globals.CreateDeployment)
             {
@@ -206,6 +106,107 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                     isSuccess = false;
                 }
             }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");
+                return false;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && _settings.RunContainer)
+            {
+                Console.WriteLine("Running LocalMultiplayerAgent as container mode is not yet supported on Linux. Please set RunContainer to false in MultiplayerSettings.json");
+                return false;
+            }
+
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && !_settings.RunContainer)
+            {
+                Console.WriteLine("The specified settings are invalid. Using Linux Game Servers requires running in a container.");
+                return false;
+            }
+
+            string startGameCommand;
+
+            if (_settings.RunContainer)
+            {
+                if (_settings.ContainerStartParameters == null)
+                {
+                    Console.WriteLine("No ContainerStartParameters were specified (and RunContainer is true).");
+                    return false;
+                }
+                startGameCommand = _settings.ContainerStartParameters.StartGameCommand;
+            }
+            else
+            {
+                if (_settings.ProcessStartParameters == null)
+                {
+                    Console.WriteLine("No ProcessStartParameters were specified (and RunContainer is false).");
+                    return false;
+                }
+                startGameCommand = _settings.ProcessStartParameters.StartGameCommand;
+            }        
+
+            // StartGameCommand is optional on Linux
+            if (string.IsNullOrWhiteSpace(startGameCommand))
+            {
+                if (Globals.GameServerEnvironment == GameServerEnvironment.Windows)
+                {
+                    Console.WriteLine("StartGameCommand must be specified.");
+                    isSuccess = false;
+                }
+            }
+            else if (startGameCommand.Contains("<your_game_server_exe>"))
+            {
+                Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid");
+                isSuccess = false;
+            }
+            else if (_settings.AssetDetails != null && _settings.RunContainer && (Globals.GameServerEnvironment == GameServerEnvironment.Windows))
+            {
+                if ((!_settings.AssetDetails.Any(x => startGameCommand.Contains(x.MountPath, StringComparison.InvariantCultureIgnoreCase))))
+                {
+                    Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid and does not contain the mount path. This should look like: C:\\Assets\\GameServer.exe for example.");
+                    isSuccess = false;
+                }
+            }
+
+            if (_settings.GameCertificateDetails?.Length > 0)
+            {
+                HashSet<string> names = new HashSet<string>();
+                HashSet<string> paths = new HashSet<string>();
+
+                foreach (GameCertificateDetails certDetails in _settings.GameCertificateDetails)
+                {
+                    if (string.IsNullOrEmpty(certDetails.Name.Trim()))
+                    {
+                        Console.WriteLine($"Certificate cannot have an empty name");
+                        isSuccess = false;
+                        continue;
+                    }
+                    if (string.IsNullOrEmpty(certDetails.Path) || !certDetails.Path.EndsWith(".pfx"))
+                    {
+                        Console.WriteLine($"Certificate with filename path '{certDetails.Path}' is not a pfx file");
+                        isSuccess = false;
+                        continue;
+                    }
+                    if (!_systemOperations.FileExists(certDetails.Path))
+                    {
+                        Console.WriteLine($"Certificate with filename {certDetails.Path} does not exist");
+                        isSuccess = false;
+                        continue;
+                    }
+                    if (!names.Add(certDetails.Name))
+                    {
+                        isSuccess = false;
+                        Console.WriteLine($"Certificate with name {certDetails.Name} is included more than once");
+                    }
+                    if (!paths.Add(certDetails.Path))
+                    {
+                        isSuccess = false;
+                        Console.WriteLine($"Certificate with path {certDetails.Path} is included more than once");
+                    }
+                }
+            }
+
 
             if (!ulong.TryParse(_settings.TitleId, NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out _))
             {

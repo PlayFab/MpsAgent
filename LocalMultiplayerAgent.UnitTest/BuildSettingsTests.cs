@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool;
+using Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,7 +8,7 @@ using System;
 namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
 {
     [TestClass]
-    public class DeploymentSettingsTests
+    public class BuildSettingsTests
     {
         private const string DefaultConfig = @"{
             ""BuildName"": ""GameProcess"",
@@ -30,10 +30,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
             return config;
         }
 
-        private DeploymentSettings GetTestDeploymentSettings()
+        private BuildSettings GetTestDeploymentSettings()
         {
             dynamic config = GetValidConfig();
-            DeploymentSettings settings = JsonConvert.DeserializeObject<DeploymentSettings>(config.ToString());
+            BuildSettings settings = JsonConvert.DeserializeObject<BuildSettings>(config.ToString());
 
             return settings;
         }
@@ -42,70 +42,70 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
         [TestCategory("BVT")]
         public void NullConfigReturnsException()
         {
-            Action comparison = () => { DeploymentSettingsValidator validator = new DeploymentSettingsValidator(null); };
+            Action comparison = () => { BuildSettingsValidator validator = new BuildSettingsValidator(null); };
             comparison.Should().Throw<ArgumentNullException>();
         }
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void ValidConfigReturnsValid()
+        public void ValidConfigReturnsTrue()
         {
-            DeploymentSettings settings = GetTestDeploymentSettings();
-            new DeploymentSettingsValidator(settings).IsValid().Should().BeTrue();
+            BuildSettings settings = GetTestDeploymentSettings();
+            new BuildSettingsValidator(settings).IsValid().Should().BeTrue();
         }
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void EmptyRegionConfigIsInValid()
+        public void EmptyRegionConfigReturnsFalse()
         {
-            DeploymentSettings settings = GetTestDeploymentSettings();
+            BuildSettings settings = GetTestDeploymentSettings();
 
             settings.RegionConfigurations.Clear();
-            new DeploymentSettingsValidator(settings).IsValid().Should().BeFalse();
+            new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
         }
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void InValidVmSizeReturnsInValid()
+        public void InvalidVmSizeReturnsFalse()
         {
-            DeploymentSettings settings = GetTestDeploymentSettings();
+            BuildSettings settings = GetTestDeploymentSettings();
 
             settings.VmSize = settings.VmSize.ToLower();
-            new DeploymentSettingsValidator(settings).IsValid().Should().BeFalse();
+            new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
         }
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void InValidRegionConfigIsInValid()
+        public void InvalidRegionConfigReturnsFalse()
         {
-            DeploymentSettings settings = GetTestDeploymentSettings();
+            BuildSettings settings = GetTestDeploymentSettings();
 
             foreach (var region in settings.RegionConfigurations)
             {
                 region.Region = region.Region.ToLower();
             }
 
-            new DeploymentSettingsValidator(settings).IsValid().Should().BeFalse();
+            new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
         }
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void InvalidServerCountPerVmIsInvalid()
+        public void InvalidServerCountPerVmReturnsFalse()
         {
-            DeploymentSettings settings = GetTestDeploymentSettings();
+            BuildSettings settings = GetTestDeploymentSettings();
 
             settings.MultiplayerServerCountPerVm = -1;
-            new DeploymentSettingsValidator(settings).IsValid().Should().BeFalse();
+            new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
         }
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void InvalidBuildNameIsInvalid()
+        public void InvalidBuildNameReturnsFalse()
         {
-            DeploymentSettings settings = GetTestDeploymentSettings();
+            BuildSettings settings = GetTestDeploymentSettings();
 
             settings.BuildName = null;
-            new DeploymentSettingsValidator(settings).IsValid().Should().BeFalse();
+            new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
         }
     }
 }

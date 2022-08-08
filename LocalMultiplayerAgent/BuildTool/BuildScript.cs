@@ -6,7 +6,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using Microsoft.Azure.Gaming.LocalMultiplayerAgent.DeploymentTool;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Gaming.AgentInterfaces;
 using Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config;
@@ -14,34 +13,34 @@ using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.MultiplayerModels;
 
-namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
+namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 {
-    public class DeploymentScript
+    public class BuildScript
     {
         private readonly MultiplayerSettings settings;
-        private readonly DeploymentSettings deploymentSettings;
+        private readonly BuildSettings deploymentSettings;
 
-        public DeploymentScript(MultiplayerSettings multiplayerSettings)
+        public BuildScript(MultiplayerSettings multiplayerSettings)
         {
             settings = multiplayerSettings ?? throw new ArgumentNullException(nameof(multiplayerSettings));
-            deploymentSettings = JsonConvert.DeserializeObject<DeploymentSettings>(File.ReadAllText("DeploymentTool/DeploymentSettings.json"));
+            deploymentSettings = JsonConvert.DeserializeObject<BuildSettings>(File.ReadAllText("BuildTool/BuildSettings.json"));
         }
 
         public async Task RunScriptAsync()
         {
-            Console.WriteLine("Deploying to PlayFab Multiplayer Servers...\n");
+            Console.WriteLine("Deploying to Azure PlayFab Multiplayer Servers...\n");
 
-            var auth = await PlayFabAuthentication();
-
-            ErrorCheck(auth.Error);
-
-            DeploymentSettingsValidator validator = new DeploymentSettingsValidator(deploymentSettings);
+            BuildSettingsValidator validator = new BuildSettingsValidator(deploymentSettings);
 
             if (!validator.IsValid())
             {
                 Console.WriteLine("The specified settings are invalid. Please correct them and re-run the agent.");
                 Environment.Exit(1);
             }
+
+            var auth = await PlayFabAuthentication();
+
+            ErrorCheck(auth.Error);
 
             if (settings.GameCertificateDetails != null)
             {
@@ -100,7 +99,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
             }
             else
             {
-                //call BuildSummariesAPI to confirm complete deployment ??
                 Console.WriteLine("Build creation was successful!");
             }
         }
@@ -109,18 +107,24 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
         {
             PlayFabSettings.staticSettings.TitleId = settings.TitleId;
             var authValidation = new PlayFabResult<PlayFab.AuthenticationModels.GetEntityTokenResponse>();
+
+            Console.WriteLine("Attempting to read PF_SECRET environment variable...");
             string secret = Environment.GetEnvironmentVariable("PF_SECRET", EnvironmentVariableTarget.Process);
             if (string.IsNullOrEmpty(secret))
             {
-                Console.WriteLine("Enter developer secret key");
+                Console.WriteLine("Failed to read PF_SECRET. Enter your developer secret key");
                 secret = Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("Read PF_SECRET successfully!");
             }
 
             PlayFabSettings.staticSettings.DeveloperSecretKey = secret;
 
             try
             {
-                var tokenReq = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
+                PlayFab.AuthenticationModels.GetEntityTokenRequest tokenReq = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
                 authValidation = await PlayFabAuthenticationAPI.GetEntityTokenAsync(tokenReq);
             }
             catch(Exception ex)
@@ -358,14 +362,32 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                 }
             };
 
-            Console.WriteLine($"Uploading {certificate.Name}...");
-
             return await PlayFabMultiplayerAPI.UploadCertificateAsync(uploadCertificateRequest);
+        }
+
+        public async Task UploadCertificatesAsync(List<GameCertificateDetails> certs)
+        {
+            Console.WriteLine($"{string.Join(", ", certs)} has not been previous uploaded. Attempting to upload...");
+
+            foreach (var cert in certs)
+            {
+                Console.WriteLine($"Uploading {cert.Name}...");
+                var uploadCertificateRes = await UploadCertificateAsync(cert);
+
+                if (uploadCertificateRes.Error != null)
+                {
+                    Console.WriteLine($" Uploading {cert.Name} failed: {uploadCertificateRes.Error.ErrorMessage}");
+                }
+                else 
+                {
+                    Console.WriteLine($"Uploaded {cert.Name} successfully!");
+                }
+            }
         }
 
         public async Task CheckAndUploadCertificatesAsync(string certSkipToken = null, int pageSize = 10)
         {
-            List<string> failedCertUploads = new List<string>();
+            List<GameCertificateDetails> certsToUpload = new List<GameCertificateDetails>();
 
             do
             {
@@ -385,28 +407,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.MPSDeploymentTool
                     IEnumerable<CertificateSummary> existingCerts = certificateSummariesResponse.Result.CertificateSummaries.Where(x => x.Name == certificate.Name);
                     if (!existingCerts.Any() && string.IsNullOrEmpty(certSkipToken))
                     {
-                        var uploadCertificateRes = await UploadCertificateAsync(certificate);
-
-                        if (uploadCertificateRes.Error != null)
-                        {
-                            Console.WriteLine(uploadCertificateRes.Error.ErrorMessage);
-                            failedCertUploads.Add(certificate.Name);
-                            continue;
-                        }
-
-                        else
-                        {
-                            Console.WriteLine($"Uploading {certificate.Name} successful!");
-                        }
+                        certsToUpload.Add(certificate);
                     }
                 }
 
             } while (!string.IsNullOrEmpty(certSkipToken));
 
-            if (failedCertUploads?.Count > 0)
-            {
-                Console.WriteLine($"The folowing certificates failed in the upload process: {string.Join(", ", failedCertUploads)}");
-            }
+            await UploadCertificatesAsync(certsToUpload);
         }
 
         public List<PlayFab.MultiplayerModels.Port> PortMapping()

@@ -44,6 +44,17 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber);
             _systemOperations.CreateDirectory(configFolderPathOnVm);
 
+            string processOutputFilePathOnVm = Path.Combine(logFolderPathOnVm, ConsoleLogCaptureFileName);
+            ProcessOutputLogger processOutputLogger = null;
+            try
+            {
+                processOutputLogger = new ProcessOutputLogger(processOutputFilePathOnVm, _logger);
+            }
+            catch(Exception exception)
+            {
+                _logger.LogException($"Failed to create ProcessOutputLogger with instance number {instanceNumber}", exception);
+            }
+
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             (string executableFileName, string arguments) = GetExecutableAndArguments(sessionHostStartInfo, instanceNumber);
             processStartInfo.FileName = executableFileName;
@@ -58,8 +69,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
             try
             {
-                string processId = _processWrapper.Start(processStartInfo).ToString();
-                sessionHostManager.UpdateSessionHostTypeSpecificId(sessionHostUniqueId, processId);
+                int processId = processOutputLogger != null ? 
+                    _processWrapper.StartWithEventHandler(processStartInfo, processOutputLogger.StdOutputHandler, processOutputLogger.ErrorOutputHandler) : _processWrapper.Start(processStartInfo);
+
+                sessionHostManager.UpdateSessionHostTypeSpecificId(sessionHostUniqueId, processId.ToString());
                 _logger.LogInformation($"Started process for session host. Instance Number: {instanceNumber}, UniqueId: {sessionHostUniqueId}, ProcessId: {processId}");
             }
             catch (Exception exception)
@@ -68,9 +81,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 sessionHostManager.RemoveSessionHost(sessionHostUniqueId);
                 sessionHost = null;
                 string exceptionMessage = exception.ToString();
-                CreateStartGameExceptionLogs(logFolderPathOnVm, exceptionMessage);
+                
+                CreateStartGameExceptionLogs(processOutputLogger, exceptionMessage);
             }
-
             return Task.FromResult(sessionHost);
         }
 
@@ -82,25 +95,20 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.CompletedTask;
         }
 
-        public override Task CreateStartGameExceptionLogs(string logsFolder, string exceptionMessage)
+        public void CreateStartGameExceptionLogs(ProcessOutputLogger processOutputlogger, string exceptionMessage)
         {
             try
             {
                 _logger.LogVerbose("Collecting logs for failed start game process.");
-                string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
+                _logger.LogVerbose($"Written logs for failed start game process to {processOutputlogger.GetProcessLogFilePath()}.");
+                processOutputlogger.Log(exceptionMessage);
 
-                using (StreamWriter sw = File.AppendText(destinationFileName))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"));
-                    sw.WriteLine($"{exceptionMessage}");
-                }
-                _logger.LogVerbose($"Written logs for failed start game process to {destinationFileName}.");
             }
             catch (Exception ex)
             {
                 _logger.LogException($"Failed to write failed start game error logs for process", ex);
+                processOutputlogger.Log(ex.ToString());
             }
-            return Task.CompletedTask;
         }
 
         private (string, string) GetExecutableAndArguments(SessionHostsStartInfo sessionHostsStartInfo, int instanceNumber)

@@ -26,6 +26,5 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager);
 
-        Task CreateStartGameExceptionLogs(string logFolder, string exceptionMessage);
     }
 }

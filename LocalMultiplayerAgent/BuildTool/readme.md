@@ -4,21 +4,23 @@ Technically, you can just run game server deployment without testing with LMA **
 
 ## Requirements:
 - Set your [PlayFab Title Secret Key](https://docs.microsoft.com/en-us/gaming/playfab/gamemanager/secret-key-management) as a **User Environment Variable**
-    - Command Prompt
+    - Command Prompt:
     `setx PF_SECRET "[variable value]"`
 
-    - Powershell
+    - Powershell:
     `[Environment]::SetEnvironmentVariable("PF_SECRET","[variable value]","User")`
 
 - Make sure your [MultiplayerSettings.json](../MultiplayerSettings.json) is configured right
     - [Windows Process](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/run-process-based-gameserver):
-        `RunContainer: false
+        ```json
+        "RunContainer": false
         "ProcessStartParameters": {
             "StartGameCommand": "<your_game_server_exe>"
         }
-        ...`
+        ``` 
     - [Windows Container](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/run-container-gameserver):
-        `RunContainer: true
+        ```json
+        "RunContainer": true
         "ContainerStartParameters": {
             "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
             "ResourceLimits": {
@@ -33,9 +35,10 @@ Technically, you can just run game server deployment without testing with LMA **
                 "Password": ""
              }
         }
-        ...`
+        ```
     - [Linux Container on Windows](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/run-container-gameserver):
-        `RunContainer: true
+        ```json
+        "RunContainer": true
         "ContainerStartParameters": {
             "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
             "ResourceLimits": {
@@ -50,10 +53,10 @@ Technically, you can just run game server deployment without testing with LMA **
                 "Password": ""
              }
         }
-        ...`
+        ```
 
     - These parameters in MultiplayerSettings.json are not required if you are only trying to create a build:
-    `  
+    ```json  
     "OutputFolder": "",
     "NumHeartBeatsForActivateResponse": 5,
     "NumHeartBeatsForTerminateResponse": 10,
@@ -65,14 +68,14 @@ Technically, you can just run game server deployment without testing with LMA **
         "SessionCookie": null,
         "InitialPlayers": [ "Player1", "Player2" ]
     }
-    `
+    ```
 
     - Linux Process is currently not supported on Local Multiplayer Agent, so users cannot create a build with this server type
 
 ## Steps:
 
 - Configure [build settings](./BuildSettings.json). Feel free to reconfigure BuildSettings.json to suit your needs. Example:
-`
+```json
 {
     "BuildName": "MyGameBuild",
     "VmSize": "Standard_D2_v2",
@@ -85,25 +88,24 @@ Technically, you can just run game server deployment without testing with LMA **
         }
     ]
 }
-`
+```
 
-    - These are other optional parameters for your `BuildSettings.json` you could add, if needed:
-    `
-    "AreAssetsReadonly": false,
-    "UseStreamingForAssetDownloads": false,
-    "WindowsCrashDumpConfiguration": {  // WindowsCrashDumpConfiguration is an additional parameter you can add for Windows Container build
-        "IsEnabled": true,
-        "DumpType": 0,
-        "CustomDumpFlags": 6693
-        }
-    `
+**Note**: These are other optional parameters for your `BuildSettings.json` you could add, if needed:
+```json5
+"AreAssetsReadonly": false,
+"UseStreamingForAssetDownloads": false,
+"WindowsCrashDumpConfiguration": {  // WindowsCrashDumpConfiguration is an additional parameter you can add for Windows Container build
+    "IsEnabled": true,
+    "DumpType": 0,
+    "CustomDumpFlags": 6693
+}
+```
 
 - Run 
-    - for Windows Process/Container:
-    `.\LocalMultiplayerAgent.exe -build`
+    - for Windows Process/Container: ```.\LocalMultiplayerAgent.exe -build```
 
     - for Linux Container:
-    `.\LocalMultiplayerAgent.exe -lcow -build`
+    ```.\LocalMultiplayerAgent.exe -lcow -build```
 
 
 ## After running

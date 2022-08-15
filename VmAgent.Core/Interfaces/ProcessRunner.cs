@@ -81,8 +81,15 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 sessionHostManager.RemoveSessionHost(sessionHostUniqueId);
                 sessionHost = null;
                 string exceptionMessage = exception.ToString();
-                
-                CreateStartGameExceptionLogs(processOutputLogger, exceptionMessage);
+
+                if (processOutputLogger != null)
+                {
+                    CreateStartGameExceptionLogs(processOutputLogger, exceptionMessage);
+                }
+                else
+                {
+                    _logger.LogVerbose($"processOutputlogger is not initialized. Failed to write failed start game error logs to {ConsoleLogCaptureFileName} for Process.");
+                }
             }
             return Task.FromResult(sessionHost);
         }

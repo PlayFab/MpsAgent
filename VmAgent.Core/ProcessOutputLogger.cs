@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Exception was thrown during Process output Log file creation under {_logFilePath}. {ex}");
+                _logger.LogInformation($"Exception was thrown while creating a Process Log file under {_logFilePath}. {ex}");
                 throw new ProcessOuputLoggerCreationFailedException($"Process Output Logger failed to create a file. {ex}.");
             }
 
@@ -64,20 +64,26 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         public void Close()
         {
-            _logger.LogInformation($"closing file {_logFilePath}");
+            _logger.LogInformation($"Closing a Process Log file... Target File Path : {GetProcessLogFilePath()}. ");
 
             if (_logWriter != null)
             {
-                _logger.LogInformation($"can't close a log file - {_logFilePath}. StreamWriter is already null.");
                 _logWriter.Close();
                 _logWriter = null;
+            }
+            else
+            {
+                _logger.LogInformation($"Cannot close {_logFilePath}. StreamWriter is already null.");
             }
         }
 
         public void ErrorOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             Process p = sendingProcess as Process;
-            _logger.LogInformation($"ErrorOutputHandler ProcessId: {p.Id} : Error is captured by EventHandler. Target File Path : {GetProcessLogFilePath()}. Closing file...");
+            if (p != null)
+            {
+                _logger.LogInformation($"ErrorOutputHandler was triggered - ProcessId: {p.Id}");
+            }
 
             Log(outLine.Data);
             Close();

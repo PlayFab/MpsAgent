@@ -3,7 +3,7 @@ This tool was developed exactly for this purpose; allows you go ahead to deploy 
 Technically, you can just run game server deployment without testing with LMA **but testing is highly recommended**
 
 ## Requirements:
-- Set your PlayFab Title Secret Key as a **User Environment Variable**
+- Set your [PlayFab Title Secret Key](https://docs.microsoft.com/en-us/gaming/playfab/gamemanager/secret-key-management) as a **User Environment Variable**
     - Command Prompt
     `setx PF_SECRET "[variable value]"`
 
@@ -11,13 +11,13 @@ Technically, you can just run game server deployment without testing with LMA **
     `[Environment]::SetEnvironmentVariable("PF_SECRET","[variable value]","User")`
 
 - Make sure your [MultiplayerSettings.json](../MultiplayerSettings.json) is configured right
-    - Windows Process:
+    - [Windows Process](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/run-process-based-gameserver):
         `RunContainer: false
         "ProcessStartParameters": {
             "StartGameCommand": "<your_game_server_exe>"
         }
         ...`
-    - Windows Container:
+    - [Windows Container](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/run-container-gameserver):
         `RunContainer: true
         "ContainerStartParameters": {
             "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
@@ -34,7 +34,7 @@ Technically, you can just run game server deployment without testing with LMA **
              }
         }
         ...`
-    - Linux Container on Windows:
+    - [Linux Container on Windows](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/run-container-gameserver):
         `RunContainer: true
         "ContainerStartParameters": {
             "StartGameCommand": "C:\\Assets\\<your_game_server_exe>",
@@ -52,7 +52,7 @@ Technically, you can just run game server deployment without testing with LMA **
         }
         ...`
 
-    - These parameters in MultiplayerSettings.json are not required/do not matter if you are trying to create game server deployment:
+    - These parameters in MultiplayerSettings.json are not required if you are only trying to create a build:
     `  
     "OutputFolder": "",
     "NumHeartBeatsForActivateResponse": 5,
@@ -67,11 +67,11 @@ Technically, you can just run game server deployment without testing with LMA **
     }
     `
 
-    - Linux Process is not currently not support on Local Multiplayer Agent, so users cannot create game server deployment here
+    - Linux Process is currently not supported on Local Multiplayer Agent, so users cannot create a build with this server type
 
 ## Steps:
 
-- Configure [build settings](./DeploymentSettings.json). Feel free to reconfigure DeploymentSettings.json to suit your needs. Example:
+- Configure [build settings](./BuildSettings.json). Feel free to reconfigure BuildSettings.json to suit your needs. Example:
 `
 {
     "BuildName": "MyGameBuild",
@@ -87,7 +87,7 @@ Technically, you can just run game server deployment without testing with LMA **
 }
 `
 
-    - These are other optional parameters for your `DeploymentSettings.json` you could add, if needed:
+    - These are other optional parameters for your `BuildSettings.json` you could add, if needed:
     `
     "AreAssetsReadonly": false,
     "UseStreamingForAssetDownloads": false,
@@ -100,13 +100,13 @@ Technically, you can just run game server deployment without testing with LMA **
 
 - Run 
     - for Windows Process/Container:
-    `.\LocalMultiplayerAgent.exe -deploy`
+    `.\LocalMultiplayerAgent.exe -build`
 
     - for Linux Container:
-    `.\LocalMultiplayerAgent.exe -lcow -deploy`
+    `.\LocalMultiplayerAgent.exe -lcow -build`
 
 
 ## After running
-- You should get a message saying your build was successfully created, or an error message if it failed
+- You should get a log message saying your build was successfully created, or an error message if it failed
 - Login to your [PlayFab developer account](https://developer.playfab.com/en-us/login) 
-- Navigate to the Multiplayer/Servers tab of the title under which you created your build
+- Navigate to the Multiplayer/Servers tab of the title under which you created your build to verify that your build was created successfully

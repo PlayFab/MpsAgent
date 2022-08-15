@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
     using AgentInterfaces;
     using VmAgent.Core.Interfaces;
     using System.Linq;
-    using System.IO;
 
     public class MultiplayerSettingsValidator
     {
@@ -28,11 +27,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
             _systemOperations = systemOperations ?? SystemOperations.Default;
         }
 
-        public bool IsValid()
+        public bool IsValid(bool createBuild = false)
         {
             bool isSuccess = AreAssetsValid(_settings.AssetDetails);
 
-            if (!Globals.CreateDeployment)
+            if (!createBuild)
             {
                 if (string.IsNullOrWhiteSpace(_settings.OutputFolder) || string.IsNullOrWhiteSpace(_settings.TitleId))
                 {

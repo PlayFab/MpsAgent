@@ -20,8 +20,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         // Value updated from settings.json
         public static SessionConfig SessionConfig = null;
 
-        public static bool CreateDeployment = false;
-
         public static VmConfiguration VmConfiguration { get; set; }
 
         public static ILogger Logger = LoggerFactory.Create(builder => { builder.AddConsole(); })

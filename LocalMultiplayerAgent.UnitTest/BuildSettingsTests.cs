@@ -90,6 +90,24 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
+        [DataRow("BrazilSouth")]
+        [DataRow("WestCentralUS")]
+        [DataRow("USDoDCentral")]
+        [DataRow("EastUS2EUAP")]
+        public void InvalidRegionConfigReturnsFalse(string reg)
+        {
+            BuildSettings settings = GetTestDeploymentSettings();
+
+            foreach (var region in settings.RegionConfigurations)
+            {
+                region.Region = reg;
+            }
+
+            new BuildSettingsValidator(settings).IsValid().Should().BeTrue();
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
         public void InvalidServerCountPerVmReturnsFalse()
         {
             BuildSettings settings = GetTestDeploymentSettings();
@@ -105,6 +123,36 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
             BuildSettings settings = GetTestDeploymentSettings();
 
             settings.BuildName = null;
+            new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        [DataRow("Standard_D2_v2")]
+        [DataRow("Standard_F4s_v2")]
+        [DataRow("Standard_A1")]
+        [DataRow("Standard_HB120_32rs_v3")]
+        public void ValidVmSizeInputShouldSucceed(string vmSize)
+        {
+            dynamic config = GetValidConfig();
+            config.vmSize = vmSize;
+            BuildSettings settings = JsonConvert.DeserializeObject<BuildSettings>(config.ToString());
+
+            new BuildSettingsValidator(settings).IsValid().Should().BeTrue();
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        [DataRow("D2_v2")]
+        [DataRow(" ")]
+        [DataRow("Standard")]
+        [DataRow("HB120_32rs_v3")]
+        public void InvalidVmSizeInputShouldFail(string vmSize)
+        {
+            dynamic config = GetValidConfig();
+            config.vmSize = vmSize;
+            BuildSettings settings = JsonConvert.DeserializeObject<BuildSettings>(config.ToString());
+
             new BuildSettingsValidator(settings).IsValid().Should().BeFalse();
         }
     }

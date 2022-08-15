@@ -42,12 +42,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 
             ErrorCheck(auth.Error);
 
-            if (settings.GameCertificateDetails != null)
+            if (settings.GameCertificateDetails.Any())
             {
                 await CheckAndUploadCertificatesAsync();
             }
 
-            if (settings.AssetDetails != null)
+            if (settings.AssetDetails.Any())
             {
                 foreach (var file in settings.AssetDetails)
                 {
@@ -367,7 +367,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 
         public async Task UploadCertificatesAsync(List<GameCertificateDetails> certs)
         {
-            Console.WriteLine($"{string.Join(", ", certs)} has not been previous uploaded. Attempting to upload...");
+            Console.WriteLine($"{string.Join(", ", certs)} not been previous uploaded. Attempting to upload...");
 
             foreach (var cert in certs)
             {
@@ -446,7 +446,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 
                 await blockBlob.UploadFromFileAsync(fileNamePath);
 
-                Console.WriteLine($"Uploading {fileName} successful!");
+                Console.WriteLine($"Upload successful!");
             }
             catch (Exception ex)
             {

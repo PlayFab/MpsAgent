@@ -42,12 +42,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 
             ErrorCheck(auth.Error);
 
-            if (settings.GameCertificateDetails.Any())
+            if (settings.GameCertificateDetails != null && settings.GameCertificateDetails.Any())
             {
                 await CheckAndUploadCertificatesAsync();
             }
 
-            if (settings.AssetDetails.Any())
+            if (settings.AssetDetails != null && settings.AssetDetails.Any())
             {
                 foreach (var file in settings.AssetDetails)
                 {
@@ -80,7 +80,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.BuildTool
 
             if (createBuild.Error != null)
             {
-                Console.WriteLine("Failed to successfully create build");
+                Console.WriteLine("Failed to create build");
                 if (createBuild.Error.ErrorMessage != null)
                 {
                     Console.WriteLine($"{createBuild.Error.ErrorMessage}");

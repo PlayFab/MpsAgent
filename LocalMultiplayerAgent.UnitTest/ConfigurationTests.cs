@@ -4,8 +4,6 @@
 namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 {
     using System;
-    using System.Configuration;
-    using System.IO;
     using System.Reflection;
     using AgentInterfaces;
     using Core.Interfaces;

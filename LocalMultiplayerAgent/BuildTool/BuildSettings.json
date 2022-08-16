@@ -1,0 +1,12 @@
+{
+    "BuildName": "MyGameBuild",
+    "VmSize": "Standard_D2_v2",
+    "MultiplayerServerCountPerVm": 2,
+    "RegionConfigurations": [
+        {
+            "Region": "EastUs",
+            "MaxServers": 5,
+            "StandbyServers": 1
+        }
+    ]
+}

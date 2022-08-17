@@ -94,12 +94,13 @@ Technically, you can just run game server deployment without testing with LMA **
 ```json5
 "AreAssetsReadonly": false,
 "UseStreamingForAssetDownloads": false,
-"WindowsCrashDumpConfiguration": {  // WindowsCrashDumpConfiguration is an additional parameter you can add for Windows Container build
+"WindowsCrashDumpConfiguration": {  // Additional parameter for Windows Container build
     "IsEnabled": true,
     "DumpType": 0,
     "CustomDumpFlags": 6693
 }
 ```
+More on WindowsCrashDumpConfiguration [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/crash-dump-collection)
 
 - Run 
     - for Windows Process/Container: ```.\LocalMultiplayerAgent.exe -build```

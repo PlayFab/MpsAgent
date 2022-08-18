@@ -22,9 +22,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         public ProcessOutputLogger(string logFilePath, MultiLogger logger)
         {
-            if (logFilePath == null)
+            if (String.IsNullOrEmpty(logFilePath))
             {
-                throw new ProcessOuputLoggerCreationFailedException($"LogFilePath cannot be null.");
+                throw new ProcessOuputLoggerCreationFailedException($"LogFilePath cannot be null or empty.");
             }
 
             try
@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Exception was thrown while creating a Process Log file under {_logFilePath}. {ex}");
+                _logger.LogInformation($"Exception was thrown while creating a Process Log file under. {ex}");
                 throw new ProcessOuputLoggerCreationFailedException($"Process Output Logger failed to create a file. {ex}.");
             }
 
@@ -86,7 +86,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             }
 
             Log(outLine.Data);
-            Close();
+            try
+            {
+                Close();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Exception was thrown while closing a file. {ex}");
+            }
         }
 
         public void StdOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

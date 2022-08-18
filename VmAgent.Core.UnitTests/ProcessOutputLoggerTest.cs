@@ -2,22 +2,11 @@
 using FluentAssertions;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Azure.Gaming.VmAgent;
 using Microsoft.Azure.Gaming.VmAgent.Core;
-using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
-using Microsoft.Azure.Gaming.VmAgent.Core.Interfaces;
 using Microsoft.Azure.Gaming.VmAgent.Core.UnitTests;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using VmAgent.Core.Dependencies.Interfaces.Exceptions;
 
 namespace VmAgent.Core.UnitTests
@@ -35,6 +24,8 @@ namespace VmAgent.Core.UnitTests
 
         [TestMethod, TestCategory("BVT")]
         [DataRow(null)]
+        [DataRow("")]
+        [DataRow("\\abc")]
         public void InvalidLogFileNameFailed(string invalidFilePath)
         {
             ExceptionAssert.Throws<ProcessOuputLoggerCreationFailedException>(() => new ProcessOutputLogger(invalidFilePath, _multiLogger));
@@ -46,6 +37,28 @@ namespace VmAgent.Core.UnitTests
         {
             ProcessOutputLogger processLogger = new ProcessOutputLogger(validFilePath, _multiLogger);
             processLogger.GetProcessLogFilePath().Should().Equals(validFilePath);
+        }
+
+        [TestMethod, TestCategory("BVT")]
+        public void CloseFileAfterCloseDoNotThrowException()
+        {
+            string fileFilePath = "C:\\PF_Consolelog.txt";
+            ProcessOutputLogger processLogger = new ProcessOutputLogger(fileFilePath, _multiLogger);
+            processLogger.Close();
+            
+            Action act = () => processLogger.Close();
+            act.Should().NotThrow();
+        }
+
+        [TestMethod, TestCategory("BVT")]
+        public void LogToFileAfterCloseFileDoNotThrowException()
+        {
+            string fileFilePath = "C:\\PF_Consolelog.txt";
+            ProcessOutputLogger processLogger = new ProcessOutputLogger(fileFilePath, _multiLogger);
+            processLogger.Close();
+            
+            Action act = () => processLogger.Log("ABCD");
+            act.Should().NotThrow();
         }
     }
 }

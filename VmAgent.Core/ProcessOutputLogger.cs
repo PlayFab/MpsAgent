@@ -92,7 +92,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Exception was thrown while closing a file. {ex}");
+                _logger.LogException($"Exception was thrown while closing a file.", ex);
             }
         }
 

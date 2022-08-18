@@ -70,7 +70,7 @@ Technically, you can just run game server deployment without testing with LMA **
     }
     ```
 
-    - Since Linux Process is currently not supported on Local Multiplayer Agent, so users cannot create a build with this build tool
+    - Since Linux Process is currently not supported on Local Multiplayer Agent, users cannot create a build with this build tool
 
 ## Steps:
 

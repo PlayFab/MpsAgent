@@ -17,4 +17,5 @@ Once the files are copied over, the LocalMultiplayerAgent file will need to be c
 
 ## MultiplayerSettings.json
 
-The [MultiplayerSettings.json generator tool](./SettingsJsonGenerator/README.md) can assist you with configuring your MultiplayerSettings.json file, and configuring it for your server.
+The [MultiplayerSettings.json generator tool](./SettingsJsonGenerator/README.md) can assist you with configuring your `MultiplayerSettings.json` file, and configuring it for your server.
+The [LMA Build Tool](./BuildTool/readme.md) can assist you with configuring your [`BuildSettings.json`](./BuildTool/BuildSettings.json) file for creating builds through LocalMultiplayerAgent.

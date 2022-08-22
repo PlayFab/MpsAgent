@@ -4,76 +4,77 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
-    using ApplicationInsights;
-    using ApplicationInsights.DataContracts;
     using global::VmAgent.Core.Dependencies.Interfaces.Exceptions;
+    using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies;
     using Microsoft.Azure.Gaming.VmAgent.Core.Dependencies.Interfaces;
-    using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
 
     public class ProcessOutputLogger: IProcessOutputLogger
     {
-        private string _logFilePath;
-        private StreamWriter _logWriter;
         private MultiLogger _logger;
+        private IFileWriteWrapper _fileWriteWrapper;
 
-        public ProcessOutputLogger(string logFilePath, MultiLogger logger)
+        public ProcessOutputLogger(string logFilePath, MultiLogger logger) 
+            :this (logFilePath, logger, new FileWriteWrapper()) 
+        { 
+        }
+
+        public ProcessOutputLogger(string logFilePath, MultiLogger logger, IFileWriteWrapper fileWriteWrapper)
         {
-            if (String.IsNullOrEmpty(logFilePath))
+            _logger = logger;
+            _fileWriteWrapper = fileWriteWrapper;
+
+            if (String.IsNullOrWhiteSpace(logFilePath))
             {
                 throw new ProcessOuputLoggerCreationFailedException($"LogFilePath cannot be null or empty.");
             }
 
             try
             {
-                _logWriter = new StreamWriter(File.OpenWrite(logFilePath));
+                _fileWriteWrapper.CreateFile(logFilePath);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Exception was thrown while creating a Process Log file under. {ex}");
-                throw new ProcessOuputLoggerCreationFailedException($"Process Output Logger failed to create a file. {ex}.");
+                _logger.LogException($"Exception was thrown while creating a file. Closing a file {logFilePath}.", ex);
+                Close();
             }
-
-            _logFilePath = logFilePath;
-            _logger = logger;
-
-            _logger.LogInformation($"Process Log file is created under {_logFilePath}");
         }
-
         public void Log(string message)
         {
-            if (_logWriter == null)
+            try
             {
-                _logger.LogInformation($"StreamWriter is null or not created yet.");
-                return;
+                _fileWriteWrapper.Write(message);
             }
-
-            string currentDate = DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
-
-            _logWriter.WriteLine($"{currentDate}\t{message}");
-            _logWriter.Flush();
+            catch(Exception ex)
+            {
+                _logger.LogException($"Exception was thrown while writing a log. Closing a file {GetProcessLogFilePath()}.", ex);
+                Close();
+            }
         }
 
         public string GetProcessLogFilePath()
         {
-            return _logFilePath;
+            return _fileWriteWrapper.GetProcessLogFilePath();
         }
 
         public void Close()
         {
             _logger.LogInformation($"Closing a Process Log file... Target File Path : {GetProcessLogFilePath()}. ");
 
-            if (_logWriter != null)
+            try
             {
-                _logWriter.Close();
-                _logWriter = null;
+                if (_fileWriteWrapper.Close())
+                {
+                    _logger.LogInformation($"File is successfully closed.");
+                }
+                else
+                {
+                    _logger.LogInformation($"File is already closed.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogInformation($"Cannot close {_logFilePath}. StreamWriter is already null.");
+                _logger.LogException($"Exception was thrown while closing a file..", ex);
             }
         }
 
@@ -86,14 +87,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             }
 
             Log(outLine.Data);
-            try
-            {
-                Close();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException($"Exception was thrown while closing a file.", ex);
-            }
+            Close();
         }
 
         public void StdOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

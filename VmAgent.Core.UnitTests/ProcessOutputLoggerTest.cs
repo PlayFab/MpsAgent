@@ -58,7 +58,7 @@ namespace VmAgent.Core.UnitTests
         [TestMethod, TestCategory("BVT")]
         public void FileWriteFailDoNotThrowException()
         {
-            _fileWriteWrapper.Setup(x => x.Write(It.IsAny<string>())).Throws(new Exception());
+            _fileWriteWrapper.Setup(x => x.Write(It.IsAny<string>(), It.IsAny<string>())).Throws(new InvalidOperationException());
 
             Action act = () => _processLogger.Log("test123");
             act.Should().NotThrow();

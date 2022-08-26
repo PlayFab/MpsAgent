@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Process.Start(startInfo).Id;
         }
 
-        public int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler)
+        public int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler, Action<object, EventArgs> ProcessExitedHanlder)
         {
             startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
@@ -43,6 +43,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             process.StartInfo = startInfo;
             process.OutputDataReceived += new DataReceivedEventHandler(StdOutputHandler);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorOutputHandler);
+            process.Exited += new EventHandler(ProcessExitedHanlder);
             process.EnableRaisingEvents = true;
             process.Start();
             process.BeginOutputReadLine();

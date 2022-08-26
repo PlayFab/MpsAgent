@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
     public class FileWriteWrapper : IFileWriteWrapper
     {
         private string _logFilePath;
-        private StreamWriter _logWriter;
+        private TextWriter _textWriter;
 
         public FileWriteWrapper()
         {
@@ -26,33 +26,33 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
         public void CreateFile(string logFilePath)
         {
             _logFilePath = logFilePath;
-            _logWriter = new StreamWriter(File.OpenWrite(logFilePath));
+            _textWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(logFilePath)));
         }
 
         public bool Close()
         {
-            if (_logWriter != null)
+            if (_textWriter != null)
             {
-                _logWriter.Close();
-                _logWriter = null;
+                _textWriter.Close();
+                _textWriter = null;
 
                 return true;
             }
             return false;
         }
 
-        public void Write(string message)
+        public void Write(string message, string streamType = "stdout")
         {
-            if (_logWriter != null)
+            if (_textWriter != null)
             {
                 string currentDate = DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
-                _logWriter.WriteLine($"{currentDate}\t{message}");
-                _logWriter.Flush();
+                _textWriter.Write($"{{\"log\":\"{message}\", \"stream\":{streamType}, \"time\":{currentDate}}}");
+                _textWriter.Flush();
             }
             else
             {
-                new Exception($"StreamWriter is null or already closed. Cannot write a log to a file {_logFilePath}");
+                new InvalidOperationException($"StreamWriter is null or already closed. Cannot write a log to a file {_logFilePath}");
             }
         }
 

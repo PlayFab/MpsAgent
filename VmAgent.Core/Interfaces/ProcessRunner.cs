@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             try
             {
                 int processId = processOutputLogger != null ? 
-                    _processWrapper.StartWithEventHandler(processStartInfo, processOutputLogger.StdOutputHandler, processOutputLogger.ErrorOutputHandler) : _processWrapper.Start(processStartInfo);
+                    _processWrapper.StartWithEventHandler(processStartInfo, processOutputLogger.StdOutputHandler, processOutputLogger.ErrorOutputHandler, processOutputLogger.ProcessExitedHanlder) : _processWrapper.Start(processStartInfo);
 
                 sessionHostManager.UpdateSessionHostTypeSpecificId(sessionHostUniqueId, processId.ToString());
                 _logger.LogInformation($"Started process for session host. Instance Number: {instanceNumber}, UniqueId: {sessionHostUniqueId}, ProcessId: {processId}");
@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 }
                 else
                 {
-                    _logger.LogVerbose($"processOutputlogger is not initialized. Failed to write failed start game error logs to {ConsoleLogCaptureFileName} for Process.");
+                    _logger.LogException($"processOutputlogger is not initialized. Failed to write failed start game error logs to {ConsoleLogCaptureFileName} for Process.", exception);
                 }
             }
             return Task.FromResult(sessionHost);
@@ -102,19 +102,18 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.CompletedTask;
         }
 
-        public void CreateStartGameExceptionLogs(ProcessOutputLogger processOutputlogger, string exceptionMessage)
+        public void CreateStartGameExceptionLogs(ProcessOutputLogger processOutputLogger, string exceptionMessage)
         {
             try
             {
                 _logger.LogVerbose("Collecting logs for failed start game process.");
-                _logger.LogVerbose($"Written logs for failed start game process to {processOutputlogger.GetProcessLogFilePath()}.");
-                processOutputlogger.Log(exceptionMessage);
+                _logger.LogVerbose($"Written logs for failed start game process to {processOutputLogger.GetProcessLogFilePath()}.");
+                processOutputLogger.Log(exceptionMessage);
 
             }
             catch (Exception ex)
             {
                 _logger.LogException($"Failed to write failed start game error logs for process", ex);
-                processOutputlogger.Log(ex.ToString());
             }
         }
 

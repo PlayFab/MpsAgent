@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         int Start(ProcessStartInfo startInfo);
 
-        int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler);
+        int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler, Action<object, EventArgs> ProcessExitedHanlder);
 
         IEnumerable<int> List();
 

@@ -7,8 +7,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies.Interfaces
 {
     public interface IProcessOutputLogger 
     {
-        void Log(string message);
-
+        void Log(string message, string streamType);
         string GetProcessLogFilePath();
 
         void Close();

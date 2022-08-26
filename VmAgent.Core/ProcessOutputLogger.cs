@@ -39,11 +39,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
                 Close();
             }
         }
-        public void Log(string message)
+        public void Log(string message, string streamType = "stdout")
         {
             try
             {
-                _fileWriteWrapper.Write(message);
+                _fileWriteWrapper.Write(message, streamType);
             }
             catch(Exception ex)
             {
@@ -80,19 +80,18 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         public void ErrorOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            Process p = sendingProcess as Process;
-            if (p != null)
-            {
-                _logger.LogInformation($"ErrorOutputHandler was triggered - ProcessId: {p.Id}");
-            }
-
-            Log(outLine.Data);
-            Close();
+            Log(outLine.Data, "stderr");
         }
 
         public void StdOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             Log(outLine.Data);
+        }
+
+        public void ProcessExitedHanlder(object sendingProcess, EventArgs outLine)
+        {
+            Log("Process is terminated.");
+            Close();
         }
     }
 }

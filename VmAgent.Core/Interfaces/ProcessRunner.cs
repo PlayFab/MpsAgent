@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             try
             {
                 int processId = processOutputLogger != null ? 
-                    _processWrapper.StartWithEventHandler(processStartInfo, processOutputLogger.StdOutputHandler, processOutputLogger.ErrorOutputHandler, processOutputLogger.ProcessExitedHanlder) : _processWrapper.Start(processStartInfo);
+                    _processWrapper.StartWithEventHandler(processStartInfo, processOutputLogger.StdOutputHandler, processOutputLogger.ErrorOutputHandler, processOutputLogger.ProcessExitedHandler) : _processWrapper.Start(processStartInfo);
 
                 sessionHostManager.UpdateSessionHostTypeSpecificId(sessionHostUniqueId, processId.ToString());
                 _logger.LogInformation($"Started process for session host. Instance Number: {instanceNumber}, UniqueId: {sessionHostUniqueId}, ProcessId: {processId}");

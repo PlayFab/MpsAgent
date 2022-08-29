@@ -88,9 +88,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             Log(outLine.Data);
         }
 
-        public void ProcessExitedHanlder(object sendingProcess, EventArgs outLine)
+        public void ProcessExitedHandler(object sendingProcess, EventArgs outLine)
         {
-            Log("Process is terminated.");
             Close();
         }
     }

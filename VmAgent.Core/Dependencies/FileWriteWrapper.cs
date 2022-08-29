@@ -45,9 +45,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Dependencies
         {
             if (_textWriter != null)
             {
-                string currentDate = DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+                string currentDate = DateTime.UtcNow.ToString("o");
+                string logMessage = $"{{\"log\":{JsonConvert.ToString(message)}, \"stream\":\"{streamType}\", \"time\":\"{currentDate}\"}}";
 
-                _textWriter.WriteLine($"{{\"log\":\"{message}\", \"stream\":{streamType}, \"time\":{currentDate}}}");
+                _textWriter.WriteLine(logMessage);
                 _textWriter.Flush();
             }
             else

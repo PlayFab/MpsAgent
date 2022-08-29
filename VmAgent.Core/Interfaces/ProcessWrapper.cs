@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Threading.Tasks;
 
     public class ProcessWrapper : IProcessWrapper
     {
@@ -33,6 +32,24 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         public int Start(ProcessStartInfo startInfo)
         {
             return Process.Start(startInfo).Id;
+        }
+
+        public int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler, Action<object, EventArgs> ProcessExitedHandler)
+        {
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+
+            Process process = new Process();
+            process.StartInfo = startInfo;
+            process.OutputDataReceived += new DataReceivedEventHandler(StdOutputHandler);
+            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorOutputHandler);
+            process.Exited += new EventHandler(ProcessExitedHandler);
+            process.EnableRaisingEvents = true;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            return process.Id;
         }
 
         public IEnumerable<int> List()

@@ -412,6 +412,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         public static string GetImageNameFromContainerImageDetails(ContainerImageDetails imageDetails)
         {
+            if (imageDetails == null)
+            {
+                throw new ArgumentNullException(nameof(imageDetails));
+            }
+
             string imageName;
             if (!string.IsNullOrEmpty(imageDetails.ImageDigest))
             {

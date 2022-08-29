@@ -21,6 +21,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string ImageTag { get; set; }
 
         /// <summary>
+        /// Digest of the container image. Takes precedence over the tag if present.
+        /// </summary>
+        public string ImageDigest { get; set; }
+
+        /// <summary>
         /// Username to use to authenticate to the container registry. 
         /// </summary>
         public string Username { get; set; }

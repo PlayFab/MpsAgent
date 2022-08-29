@@ -353,13 +353,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             // is the same as the remote image path.
             SessionHostsStartInfo sessionHostStartInfo = gameResourceDetails.SessionHostsStartInfo;
             ContainerImageDetails imageDetails = sessionHostStartInfo.ImageDetails;
-            string imageName = $"{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
 
-            // Support running local images with no explicit registry in the name.
-            if (!string.IsNullOrEmpty(imageDetails.Registry))
-            {
-                imageName = $"{imageDetails.Registry}/{imageName}";
-            }
+            string imageName = GetImageNameFromContainerImageDetails(imageDetails);
 
             // The game containers need a unique folder to write their logs. Ideally,
             // we would specify the containerId itself as the subfolder. However, we have to
@@ -413,6 +408,32 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
 
             return sessionHost;
+        }
+
+        public static string GetImageNameFromContainerImageDetails(ContainerImageDetails imageDetails)
+        {
+            if (imageDetails == null)
+            {
+                throw new ArgumentNullException(nameof(imageDetails));
+            }
+
+            string imageName;
+            if (!string.IsNullOrEmpty(imageDetails.ImageDigest))
+            {
+                imageName = $"{imageDetails.ImageName}@{imageDetails.ImageDigest}";
+            }
+            else
+            {
+                imageName = $"{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
+            }
+
+            // Support running local images with no explicit registry in the name.
+            if (!string.IsNullOrEmpty(imageDetails.Registry))
+            {
+                imageName = $"{imageDetails.Registry}/{imageName}";
+            }
+
+            return imageName;
         }
 
         private IList<string> GetVolumeBindings(SessionHostsStartInfo request, int sessionHostInstance, string logFolderId, VmAgentSettings agentSettings)

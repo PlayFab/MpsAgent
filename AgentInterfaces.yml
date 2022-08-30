@@ -29,6 +29,12 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
   displayName: 'dotnet test $(buildConfiguration)'
 
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 6.0.302
+
 - task: DotNetCoreCLI@2
   name: 'build'
   inputs:
@@ -36,6 +42,12 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
     projects: '$(projectName)/$(projectName).csproj'
   displayName: 'dotnet build $(buildConfiguration)'
+
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 6.0.302
   
 - task: DotNetCoreCLI@2
   displayName: dotnet pack

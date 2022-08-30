@@ -9,7 +9,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using Extensions.Configuration;
     using Extensions.DependencyInjection;
     using Extensions.Logging;
-    using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -29,7 +28,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc(options => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Latest)
+            services.AddMvc(options => options.EnableEndpointRouting = false)
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;

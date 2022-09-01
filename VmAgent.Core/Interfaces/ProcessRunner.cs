@@ -44,17 +44,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             string configFolderPathOnVm = _vmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber);
             _systemOperations.CreateDirectory(configFolderPathOnVm);
 
-            string processOutputFilePathOnVm = Path.Combine(logFolderPathOnVm, ConsoleLogCaptureFileName);
-            ProcessOutputLogger processOutputLogger = null;
-            try
-            {
-                processOutputLogger = new ProcessOutputLogger(processOutputFilePathOnVm, _logger);
-            }
-            catch(Exception exception)
-            {
-                _logger.LogException($"Failed to create ProcessOutputLogger with instance number {instanceNumber}", exception);
-            }
-
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             (string executableFileName, string arguments) = GetExecutableAndArguments(sessionHostStartInfo, instanceNumber);
             processStartInfo.FileName = executableFileName;
@@ -69,10 +58,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
             try
             {
-                int processId = processOutputLogger != null ? 
-                    _processWrapper.StartWithEventHandler(processStartInfo, processOutputLogger.StdOutputHandler, processOutputLogger.ErrorOutputHandler, processOutputLogger.ProcessExitedHandler) : _processWrapper.Start(processStartInfo);
-
-                sessionHostManager.UpdateSessionHostTypeSpecificId(sessionHostUniqueId, processId.ToString());
+                string processId = _processWrapper.Start(processStartInfo).ToString();
+                sessionHostManager.UpdateSessionHostTypeSpecificId(sessionHostUniqueId, processId);
                 _logger.LogInformation($"Started process for session host. Instance Number: {instanceNumber}, UniqueId: {sessionHostUniqueId}, ProcessId: {processId}");
             }
             catch (Exception exception)
@@ -81,16 +68,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 sessionHostManager.RemoveSessionHost(sessionHostUniqueId);
                 sessionHost = null;
                 string exceptionMessage = exception.ToString();
-
-                if (processOutputLogger != null)
-                {
-                    CreateStartGameExceptionLogs(processOutputLogger, exceptionMessage);
-                }
-                else
-                {
-                    _logger.LogException($"processOutputlogger is not initialized. Failed to write failed start game error logs to {ConsoleLogCaptureFileName} for Process.", exception);
-                }
+                CreateStartGameExceptionLogs(logFolderPathOnVm, exceptionMessage);
             }
+
             return Task.FromResult(sessionHost);
         }
 
@@ -102,19 +82,25 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.CompletedTask;
         }
 
-        public void CreateStartGameExceptionLogs(ProcessOutputLogger processOutputLogger, string exceptionMessage)
+        public override Task CreateStartGameExceptionLogs(string logsFolder, string exceptionMessage)
         {
             try
             {
                 _logger.LogVerbose("Collecting logs for failed start game process.");
-                _logger.LogVerbose($"Written logs for failed start game process to {processOutputLogger.GetProcessLogFilePath()}.");
-                processOutputLogger.Log(exceptionMessage);
+                string destinationFileName = Path.Combine(logsFolder, ConsoleLogCaptureFileName);
 
+                using (StreamWriter sw = File.AppendText(destinationFileName))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK"));
+                    sw.WriteLine($"{exceptionMessage}");
+                }
+                _logger.LogVerbose($"Written logs for failed start game process to {destinationFileName}.");
             }
             catch (Exception ex)
             {
                 _logger.LogException($"Failed to write failed start game error logs for process", ex);
             }
+            return Task.CompletedTask;
         }
 
         private (string, string) GetExecutableAndArguments(SessionHostsStartInfo sessionHostsStartInfo, int instanceNumber)

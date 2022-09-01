@@ -3,7 +3,6 @@
 
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
-    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
 
@@ -12,8 +11,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         void Kill(int id);
 
         int Start(ProcessStartInfo startInfo);
-
-        int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler, Action<object, EventArgs> ProcessExitedHandler);
 
         IEnumerable<int> List();
 

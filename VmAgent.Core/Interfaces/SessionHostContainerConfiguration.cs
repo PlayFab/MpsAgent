@@ -45,11 +45,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return VmConfiguration.VmDirectories.CertificateRootFolderContainer;
         }
 
-        protected override string GetSharedContentFolderPath()
-        {
-            return VmConfiguration.VmDirectories.GameSharedContentFolderContainer;
-        }
-
         protected override string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration)
         {
             // The VM host folder corresponding to the logFolderId gets mounted under this path for each container.

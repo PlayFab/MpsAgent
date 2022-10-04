@@ -28,11 +28,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return VmConfiguration.VmDirectories.CertificateRootFolderVm;
         }
 
-        protected override string GetSharedContentFolderPath()
-        {
-            return VmConfiguration.VmDirectories.GameSharedContentFolderVm;
-        }
-
         protected override string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration)
         {
             return Path.Combine(vmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);

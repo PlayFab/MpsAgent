@@ -42,6 +42,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         // should use `PF_SHARED_CONTENT_FOLDER` instead (which points to wherever the folder is mounted in the container)
         public const string SharedContentFolderVmVariable = "PF_SHARED_CONTENT_FOLDER_VM";
 
+        // Used by the games to share user generated content (and other files that are downloaded once, used multiple times).
+        // Also available to VM-level scripts for special cases (e.g. Watson needs to set the Kernel core dump path to this path
+        // so that container-based servers place their dump files in the path available to the container)
+        private const string SharedContentFolderEnvVariable = "PF_SHARED_CONTENT_FOLDER";
+
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
 
         public int ListeningPort { get; }
@@ -95,12 +100,29 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
                 },
                 {
                     FqdnEnvVariable, sessionHostsStartInfo.FQDN
+                },
+                {
+                    SharedContentFolderEnvVariable, GetSharedContentFolderPath(sessionHostsStartInfo, vmConfiguration)
                 }
             };
 
             sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => environmentVariables.Add(x.Key, x.Value));
 
             return environmentVariables;
+        }
+
+        private static string GetSharedContentFolderPath(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
+        {
+            switch (sessionHostsStartInfo.SessionHostType)
+            {
+                case SessionHostType.Container:
+                    return vmConfiguration.VmDirectories.GameSharedContentFolderContainer;
+                case SessionHostType.Process:
+                    return vmConfiguration.VmDirectories.GameSharedContentFolderVm;
+
+                default:
+                    throw new InvalidOperationException($"Unrecognized SessionHostType: {sessionHostsStartInfo.SessionHostType}");
+            }
         }
 
         /// <summary>

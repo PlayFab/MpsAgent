@@ -18,9 +18,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     {
         // The server instance number (1 to NumSessionsPerVm) for this session host.
         private const string ServerInstanceNumberEnvVariable = "PF_SERVER_INSTANCE_NUMBER";
-        
-        // Used by the games to share  user generated content (and other files that are downloaded once, used multiple times).
-        private const string SharedContentFolderEnvVariable = "PF_SHARED_CONTENT_FOLDER";
 
         // Used by the GSDK to find the configuration file
         private const string ConfigFileEnvVariable = "GSDK_CONFIG_FILE";
@@ -55,8 +52,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         protected abstract string GetCertificatesPath(string assignmentId);
 
-        protected abstract string GetSharedContentFolderPath();
-
         protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo)
         {
             _logger = logger;
@@ -78,9 +73,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 },
                 {
                     LogsDirectoryEnvVariable, GetLogFolder(logFolderId, VmConfiguration)
-                },
-                {
-                    SharedContentFolderEnvVariable, GetSharedContentFolderPath()
                 },
                 {
                     CertificateFolderEnvVariable, GetCertificatesPath(_sessionHostsStartInfo.AssignmentId)

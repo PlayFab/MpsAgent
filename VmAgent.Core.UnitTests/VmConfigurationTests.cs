@@ -43,6 +43,28 @@ namespace VmAgent.Core.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
+        public void GameSharedContentFolderWithProcess()
+        {
+            SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(sessionHostType: SessionHostType.Process);
+            IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
+            ValidateCommonEnvironmentVariables(envVariables, sessionHostsStartInfo);
+
+            Assert.AreEqual(VmConfiguration.VmDirectories.GameSharedContentFolderVm, envVariables[VmConfiguration.SharedContentFolderEnvVariable]);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void GameSharedContentFolderWithContainer()
+        {
+            SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(sessionHostType: SessionHostType.Container);
+            IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
+            ValidateCommonEnvironmentVariables(envVariables, sessionHostsStartInfo);
+
+            Assert.AreEqual(VmConfiguration.VmDirectories.GameSharedContentFolderContainer, envVariables[VmConfiguration.SharedContentFolderEnvVariable]);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
         public void VmStartupScriptEnvVariablesWithBuildMetadata()
         {
             var metadata = new Dictionary<string, string>() { { "key1", "value1" }, { "key2", "value2" } };
@@ -51,11 +73,14 @@ namespace VmAgent.Core.UnitTests
             ValidateVmScriptEnvironmentVariables(envVariables, sessionHostsStartInfo);
         }
 
-        private SessionHostsStartInfo CreateSessionHostStartInfo(IDictionary<string, string> buildMetadata = null)
+        private SessionHostsStartInfo CreateSessionHostStartInfo(IDictionary<string, string> buildMetadata = null, SessionHostType sessionHostType = SessionHostType.Process)
         {
             return new SessionHostsStartInfo
             {
-                AssignmentId = CreateAssignmentId(), DeploymentMetadata = buildMetadata, PublicIpV4Address = "42.42.42.42."
+                AssignmentId = CreateAssignmentId(),
+                DeploymentMetadata = buildMetadata,
+                PublicIpV4Address = "42.42.42.42.",
+                SessionHostType = sessionHostType
             };
         }
 

@@ -39,9 +39,17 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
         // Used by the games to share user generated content (and other files that are downloaded once, used multiple times).
         // This points to the folder on the VM, and should only be used by VM-level scripts. Game servers
-        // should use `PF_SHARED_CONTENT_FOLDER` instead (which points to wherever the folder is mounted in the container)
+        // should use `PF_SHARED_CONTENT_FOLDER` instead.
         public const string SharedContentFolderVmVariable = "PF_SHARED_CONTENT_FOLDER_VM";
 
+        // Used by the games to share user generated content (and other files that are downloaded once, used multiple times).
+        // This is the variable that points to the shared content folder as seen by the game server.
+        // Because of this, it is the same as PF_SHARED_CONTENT_FOLDER_VM if the server is process-based and it is different if
+        // the server is container-based.
+        // Typically this wouldn't be needed by VM startup scripts (since it might point to a path that only exists inside a container)
+        // but the Watson team found an edge case where the VM needs access to it so we made it available to the VM startup scripts as well.
+        public const string SharedContentFolderEnvVariable = "PF_SHARED_CONTENT_FOLDER";
+        
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
 
         public int ListeningPort { get; }
@@ -95,12 +103,29 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
                 },
                 {
                     FqdnEnvVariable, sessionHostsStartInfo.FQDN
+                },
+                {
+                    SharedContentFolderEnvVariable, GetSharedContentFolderPath(sessionHostsStartInfo, vmConfiguration)
                 }
             };
 
             sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => environmentVariables.Add(x.Key, x.Value));
 
             return environmentVariables;
+        }
+
+        private static string GetSharedContentFolderPath(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)
+        {
+            switch (sessionHostsStartInfo.SessionHostType)
+            {
+                case SessionHostType.Container:
+                    return vmConfiguration.VmDirectories.GameSharedContentFolderContainer;
+                case SessionHostType.Process:
+                    return vmConfiguration.VmDirectories.GameSharedContentFolderVm;
+
+                default:
+                    throw new InvalidOperationException($"Unrecognized SessionHostType: {sessionHostsStartInfo.SessionHostType}");
+            }
         }
 
         /// <summary>

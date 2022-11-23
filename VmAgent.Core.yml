@@ -48,7 +48,7 @@ steps:
     versioningScheme: byBuildNumber
     buildProperties: platform=anycpu
     
-- task: EsrpCodeSigning@1
+- task: EsrpCodeSigning@2
   inputs:
     FolderPath: '/home/vsts/work/1/a/'
     ConnectedServiceName: 'Thunderhead Code-Sign service'

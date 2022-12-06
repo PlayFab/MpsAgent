@@ -142,6 +142,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Configuration object for the monitoring application. 
         /// </summary>
         public MonitoringApplicationConfiguration MonitoringApplicationConfiguration { get; set; }
+
+        /// <summary>
+        /// Configuration object for the VM Startup Script. 
+        /// </summary>
+        public VmStartupScriptApplicationConfiguration VmStartupScriptApplicationConfiguration {get;set;}
     }
 
     public class LogUploadParameters
@@ -216,5 +221,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// null means that it should run until the vm gets unassigned.
         /// </summary>
         public TimeSpan? OnStartRuntime { get; set; }
+    }
+
+    public class VmStartupScriptApplicationConfiguration 
+    {
+        /// <summary>
+        /// Reference to the asset file that contains the necessary bits for the VM Startup Script
+        /// </summary>
+        public AssetDetail VmStartupScriptAssetReference { get; set; }
     }
 }

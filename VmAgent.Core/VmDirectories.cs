@@ -44,6 +44,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             MonitoringAssetInstallationFolder = Path.Combine(TempStorageRootVm, "MonitoringApplication");
             MonitoringOutputFolder = Path.Combine(TempStorageRootVm, "MonitoringApplicationOutput");
             MonitoringKillSentinelFolder = Path.Combine(TempStorageRootVm, "MonitoringSentinelFolder");
+            VmStartupScriptFolder = Path.Combine(TempStorageRootVm, "VmStartupScript");
         }
 
         public string AgentStateFile { get; }
@@ -94,5 +95,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public string MonitoringStateTempFile { get; set; }
 
         public string MonitoringKillSentinelFolder { get; set; }
+
+        public string VmStartupScriptFolder { get; set; }
     }
 }

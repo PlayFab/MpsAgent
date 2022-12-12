@@ -146,7 +146,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// <summary>
         /// Configuration object for the VM Startup Script. 
         /// </summary>
-        public VmStartupScriptApplicationConfiguration VmStartupScriptApplicationConfiguration {get;set;}
+        public VmStartupScriptConfiguration VmStartupScriptConfiguration {get;set;}
     }
 
     public class LogUploadParameters
@@ -223,7 +223,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public TimeSpan? OnStartRuntime { get; set; }
     }
 
-    public class VmStartupScriptApplicationConfiguration 
+    public class VmStartupScriptConfiguration 
     {
         /// <summary>
         /// Reference to the asset file that contains the necessary bits for the VM Startup Script

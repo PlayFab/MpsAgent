@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc(options => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Latest)
+            services.AddMvc(options => options.EnableEndpointRouting = false)
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;

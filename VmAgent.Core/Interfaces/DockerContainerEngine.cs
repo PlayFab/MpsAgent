@@ -25,8 +25,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
     public class DockerContainerEngine : BaseSessionHostRunner
     {
+        private const string ContainerLabelAttribute = "label";
         private const string ContainerLabelKey = "CREATED_BY";
-
         private const string ContainerLabelValue = "PF_MPS_VMAGENT";
         
         private const string DockerWindowsNamedPipe = "npipe://./pipe/docker_engine";
@@ -624,10 +624,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     Filters = new Dictionary<string, IDictionary<string, bool>>()
                     {
                         {
-                            ContainerLabelKey,
+                            ContainerLabelAttribute,
                             new Dictionary<string, bool>
                             {
-                                { ContainerLabelValue, true}
+                                { $"{ContainerLabelKey}={ContainerLabelValue}", true}
                             }
                         }
                     }

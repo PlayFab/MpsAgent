@@ -25,6 +25,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
     public class DockerContainerEngine : BaseSessionHostRunner
     {
+        private const string ContainerLabelAttribute = "label";
+        private const string ContainerLabelKey = "CREATED_BY";
+        private const string ContainerLabelValue = "PF_MPS_VMAGENT";
+        
         private const string DockerWindowsNamedPipe = "npipe://./pipe/docker_engine";
 
         private const string DockerUnixDomainSocket = "unix:///var/run/docker.sock";
@@ -167,7 +171,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 ExposedPorts = portMappings?.ToDictionary(p => $"{p.GamePort.Number}/{p.GamePort.Protocol}", p => new EmptyStruct()),
                 HostConfig = hostConfig,
                 WorkingDir = workingDirectory,
-                Cmd = startCmd
+                Cmd = startCmd,
+                Labels = new Dictionary<string, string>() { {ContainerLabelKey, ContainerLabelValue} }
             };
 
             _logger.LogInformation($"Creating container. Image='{imageName}'");
@@ -613,7 +618,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         public override async Task<IEnumerable<string>> List()
         {
-            return (await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters())).Select(x => x.ID);
+            return (await _dockerClient.Containers.ListContainersAsync(
+                new ContainersListParameters()
+                {
+                    Filters = new Dictionary<string, IDictionary<string, bool>>()
+                    {
+                        {
+                            ContainerLabelAttribute,
+                            new Dictionary<string, bool>
+                            {
+                                { $"{ContainerLabelKey}={ContainerLabelValue}", true}
+                            }
+                        }
+                    }
+                }
+                )).Select(x => x.ID);
         }
 
         /// <summary>

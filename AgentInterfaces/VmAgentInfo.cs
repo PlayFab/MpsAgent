@@ -44,46 +44,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         public ToSViolationRating ToSViolationRating { get; set; }
 
-        public IReadOnlyList<VmCondition> VmConditions => _vmConditions?.AsReadOnly();
-        private List<VmCondition> _vmConditions { get; set; }
+        public Dictionary<string, VmCondition> VmConditions { get; set; }
 
-        /// <summary>
-        /// used for single thread access when adding a new VmCondition
-        /// </summary>
-        private object lockerObject = new object();
-        
-        /// <summary>
-        /// Adds a new VmCondition to the underlying list
-        /// If a VmCondition with the same condition string already exists, it is replaced
-        /// </summary>
-        /// <param name="newVmCondition"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void AddVmCondition(VmCondition newVmCondition)
-        {
-            lock (lockerObject)
-            {
-                if (newVmCondition == null)
-                {
-                    throw new ArgumentNullException(nameof(newVmCondition));
-                }
-
-                // initialize the list if null
-                _vmConditions ??= new List<VmCondition>();
-
-                // check if condition already exists
-                if (_vmConditions.Count(x => x.Condition == newVmCondition.Condition) > 0)
-                {
-                    VmCondition existingCondition = _vmConditions.First(x => x.Condition == newVmCondition.Condition);
-                    existingCondition.Reason = newVmCondition.Reason;
-                    existingCondition.When = newVmCondition.When;
-                }
-                else
-                {
-                    _vmConditions.Add(newVmCondition);
-                }
-            }
-        }
-        
         public string ToLogString()
         {
             if (SessionHostHeartbeatMap?.Count > 10)

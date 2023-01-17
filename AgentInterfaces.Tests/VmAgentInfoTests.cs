@@ -60,21 +60,5 @@ namespace AgentInterfaces.Tests
             IReadOnlyList<string> newProperties = propertyNames.Except(knownProperties).ToList();
             Assert.IsFalse(newProperties.Any(), $"Please add new properties {string.Join(", ", newProperties)} to the list above and to the ToLogString method.");
         }
-
-        [TestMethod]
-        [TestCategory("BVT")]
-        public void VmConditions()
-        {
-            VmAgentInfo agentInfo = new VmAgentInfo();
-            Assert.IsNull(agentInfo.VmConditions);
-            agentInfo.AddVmCondition(new VmCondition(){ Condition = "Condition1", Reason = "Reason1", When = DateTime.Now});
-            Assert.AreEqual(1,agentInfo.VmConditions.Count());
-            agentInfo.AddVmCondition(new VmCondition(){ Condition = "Condition2", Reason = "Reason2", When = DateTime.Now});
-            Assert.AreEqual(2,agentInfo.VmConditions.Count());
-            agentInfo.AddVmCondition(new VmCondition(){ Condition = "Condition2", Reason = "Reason3", When = DateTime.Now});
-            Assert.AreEqual(2,agentInfo.VmConditions.Count());
-            agentInfo.AddVmCondition(new VmCondition(){ Condition = "Condition3", Reason = "Reason3", When = DateTime.Now});
-            Assert.AreEqual(3,agentInfo.VmConditions.Count());
-        }
     }
 }

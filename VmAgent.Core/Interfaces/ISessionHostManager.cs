@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Concurrent;
+
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using System.Collections.Generic;
@@ -31,6 +33,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         SessionHostInfo AddNewSessionHost(string sessionHostId, string assignmentId, int containerInstanceNumber, string logFolderId, SessionHostType type = SessionHostType.Container);
 
+        public IReadOnlyList<VmCondition> GetVmConditions();
+        
         void UpdateSessionHostTypeSpecificId(string sessionHostId, string typeSpecificId);
 
         void RemoveSessionHost(string sessionHostId);
@@ -65,7 +69,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         bool IsAssigned();
 
-        void SetStartupScriptExecutionComplete();
+        void SetStartupScriptExecutionComplete(VmStartupScriptCompletionResult result);
 
         bool IsStartupScriptExecutionComplete();
 
@@ -82,5 +86,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         void MarkForMaintenance(MaintenanceSchedule schedule);
 
         bool IsMarkedForMaintenance();
+    }
+    
+    public enum VmStartupScriptCompletionResult
+    {
+        Success,
+        Failure,
+        NoNeedToRun
     }
 }

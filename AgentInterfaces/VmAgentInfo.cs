@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         public ToSViolationRating ToSViolationRating { get; set; }
 
-        public Dictionary<string, VmCondition> VmConditions { get; set; }
+        public IReadOnlyList<VmCondition> VmConditions { get; set; } 
 
         public string ToLogString()
         {

@@ -9,7 +9,7 @@
         [Required] 
         public string Condition { get; set; }
         [Required] 
-        public DateTime When { get; set; }
-        public string Reason { get; set; }
+        public DateTime LastStateTransitionTimestamp { get; set; }
+        public string Details { get; set; }
     }
 }

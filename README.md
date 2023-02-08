@@ -21,19 +21,19 @@ These two helper libraries are used by LocalMultiplayerAgent and the production 
 
 ## Building
 
-You need to have [.NET Core](https://dotnet.microsoft.com/download) installed and then just run ...
+1. Have [.NET Core](https://dotnet.microsoft.com/download) installed.
+
+2. [Download a release](https://github.com/PlayFab/MpsAgent/releases) and unzip the parent `LocalMultiplayerAgentPublish` dir under the root `MpsAgent/` parent dir.
+
+3. Run the following in Powershell (without admin):
 
 ```bash
 git clone https://github.com/PlayFab/MpsAgent.git
 cd ./MpsAgent/LocalMultiplayerAgent 
-# replace the LocalMultiplayerAgentPublishFolder with the folder of your choice
+# replace the LocalMultiplayerAgentPublish with the folder of your choice
 dotnet publish --runtime win-x64 -c Release -o LocalMultiplayerAgentPublishFolder -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
 # you can read here about .NET publish CLI options https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
 ```
-
-## Downloading
-
-You can download the latest release of LocalMultiplayerAgent by navigating to the Releases section [here](https://github.com/PlayFab/MpsAgent/releases).
 
 ## Contributing
 

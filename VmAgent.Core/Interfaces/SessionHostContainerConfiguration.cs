@@ -35,38 +35,33 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             _shouldPublicPortMatchGamePort = shouldPublicPortMatchGamePort;
         }
         
-        protected override string GetGsdkConfigFilePath(string assignmentId, int instanceNumber)
+        protected override string GetGsdkConfigFilePath(int instanceNumber)
         {
             return VmConfiguration.VmDirectories.GsdkConfigFilePathContainer;
         }
 
-        protected override string GetCertificatesPath(string assignmentId)
-        {
-            return VmConfiguration.VmDirectories.CertificateRootFolderContainer;
-        }
-
-        protected override string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration)
+        protected override string GetLogFolder(string logFolderId)
         {
             // The VM host folder corresponding to the logFolderId gets mounted under this path for each container.
             // So the logFolderId itself isn't of much significance within the container.
             if (_isRunningLinuxContainersOnWindows)
             {
-                return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.AltDirectorySeparatorChar;
+                return VmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.AltDirectorySeparatorChar;
             }
             else
             {
-                return vmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.DirectorySeparatorChar;
+                return VmConfiguration.VmDirectories.GameLogsRootFolderContainer + Path.DirectorySeparatorChar;
             }
         }
 
-        protected override string GetSharedContentFolder(VmConfiguration vmConfiguration)
+        protected override string GetSharedContentFolder()
         {
-            return vmConfiguration.VmDirectories.GameSharedContentFolderContainer;
+            return VmConfiguration.VmDirectories.GameSharedContentFolderContainer;
         }
 
-        protected override string GetCertificateFolder(VmConfiguration vmConfiguration)
+        protected override string GetCertificateFolder()
         {
-            return vmConfiguration.VmDirectories.CertificateRootFolderContainer;
+            return VmConfiguration.VmDirectories.CertificateRootFolderContainer;
         }
 
         /// <summary>

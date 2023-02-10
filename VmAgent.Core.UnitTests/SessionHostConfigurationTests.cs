@@ -15,6 +15,7 @@ using FluentAssertions;
 using Microsoft.Azure.Gaming.VmAgent.Model;
 using Newtonsoft.Json;
 using System.Linq;
+using ISystemOperations = Microsoft.Azure.Gaming.VmAgent.Core.Interfaces.ISystemOperations;
 
 namespace VmAgent.Core.UnitTests
 {
@@ -22,7 +23,7 @@ namespace VmAgent.Core.UnitTests
     public class SessionHostContainerConfigurationUnitTests
     {
         // Directory Variables
-        private string _root = "C:\\";
+        private string _root = "D:\\";
         private string _VmDirectoryRoot = "root";
         private string _VmDirectoryContainerRoot = "/data";
     
@@ -43,7 +44,7 @@ namespace VmAgent.Core.UnitTests
 
         private VmConfiguration _vmConfiguration;
         private MultiLogger _logger;
-        private SystemOperations _systemOperations;
+        private Mock<ISystemOperations> _systemOperations;
         private Mock<ISessionHostManager> _sessionHostManager;
         private Mock<IDockerClient> _dockerClient;
         private SessionHostsStartInfo _sessionHostsStartInfo;
@@ -54,7 +55,7 @@ namespace VmAgent.Core.UnitTests
             string AssignmentId = $"{TestTitleIdUlong}:{TestBuildId}:{TestRegion}";
 
             _logger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
-            _systemOperations = new SystemOperations();
+            _systemOperations = new Mock<ISystemOperations>();
             _dockerClient = new Mock<IDockerClient>();
             _sessionHostManager = new Mock<ISessionHostManager>();
             _vmConfiguration = new VmConfiguration(56001, TestVmId, new VmDirectories(_VmDirectoryRoot), true);
@@ -73,7 +74,7 @@ namespace VmAgent.Core.UnitTests
             _sessionHostsStartInfo.SessionHostType = SessionHostType.Process;
 
             SessionHostProcessConfiguration sessionHostProcessConfiguration =
-                new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations, _sessionHostsStartInfo);
+                new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _sessionHostsStartInfo);
             IDictionary<string, string> envVariables =
                 sessionHostProcessConfiguration.GetEnvironmentVariablesForSessionHost(0, TestLogFolderId, _sessionHostManager.Object.VmAgentSettings);
 
@@ -94,7 +95,7 @@ namespace VmAgent.Core.UnitTests
             _sessionHostsStartInfo.SessionHostType = SessionHostType.Container;
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
-                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, isRunningLinuxContainersOnWindows: true);
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _dockerClient.Object, _sessionHostsStartInfo, isRunningLinuxContainersOnWindows: true);
 
             IDictionary<string, string> envVariables =
                 sessionHostContainerConfiguration.GetEnvironmentVariablesForSessionHost(0, TestLogFolderId, _sessionHostManager.Object.VmAgentSettings);
@@ -140,9 +141,7 @@ namespace VmAgent.Core.UnitTests
             List<PortMapping> mockPortMapping = _sessionHostsStartInfo.PortMappingsList[0];
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
-                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, true);
-
-            sessionHostContainerConfiguration.Create(0, TestdDockerId, TestAgentIPaddress, _vmConfiguration, TestLogFolderId);
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _dockerClient.Object, _sessionHostsStartInfo, true);
 
             string gsdkConfigFilePath = Path.Combine(_root, "Config", "SH0", "gsdkConfig.json");
 
@@ -171,9 +170,61 @@ namespace VmAgent.Core.UnitTests
                 }
             };
 
-            GsdkConfiguration gsdkConfig = JsonConvert.DeserializeObject<GsdkConfiguration>(File.ReadAllText(gsdkConfigFilePath));
+            _systemOperations.Setup(x => x.FileWriteAllText(gsdkConfigFilePath, It.IsAny<string>())).Callback(
+                (string _, string content) =>
+                {
+                    GsdkConfiguration gsdkConfig = JsonConvert.DeserializeObject<GsdkConfiguration>(content);
 
-            gsdkConfig.Should().BeEquivalentTo(gsdkConfigExpected);
+                    gsdkConfig.Should().BeEquivalentTo(gsdkConfigExpected);
+
+                });
+
+            sessionHostContainerConfiguration.Create(0, TestdDockerId, TestAgentIPaddress, _vmConfiguration, TestLogFolderId);
+
+            _systemOperations.Verify(x => x.FileWriteAllText(gsdkConfigFilePath, It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        [DataRow(SessionHostType.Process)]
+        [DataRow(SessionHostType.Container)]
+        public void GsdkConfig_VerifyFolderMappings(SessionHostType sessionHostType)
+        {
+            _vmConfiguration = new VmConfiguration(56001, TestVmId, new VmDirectories(_root), false);
+            _sessionHostsStartInfo.SessionHostType = sessionHostType;
+            _sessionHostsStartInfo.PortMappingsList = new List<List<PortMapping>>() {
+                new List<PortMapping>()
+                {
+                    new PortMapping()
+                    {
+                        GamePort= new Port() {
+                            Name="port",
+                            Number=80,
+                            Protocol= "TCP"
+                        },
+                        PublicPort= 1234,
+                        NodePort = 56001
+                    }
+                }
+            };
+            SessionHostConfigurationBase sessionHostConfiguration = sessionHostType == SessionHostType.Container
+                ? new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _dockerClient.Object, _sessionHostsStartInfo, false)
+                : new SessionHostProcessConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _sessionHostsStartInfo);
+            
+            string gsdkConfigFilePath = Path.Combine(_root, "Config", "SH0", "gsdkConfig.json");
+
+            _systemOperations.Setup(x => x.FileWriteAllText(gsdkConfigFilePath, It.IsAny<string>())).Callback(
+                (string _, string content) =>
+                {
+                    GsdkConfiguration configuration = JsonConvert.DeserializeObject<GsdkConfiguration>(content);
+                    string expectedCertificateFolder = sessionHostType == SessionHostType.Container
+                        ? _vmConfiguration.VmDirectories.CertificateRootFolderContainer
+                        : _vmConfiguration.VmDirectories.CertificateRootFolderVm;
+                    configuration.CertificateFolder.Should().Be(expectedCertificateFolder);
+                });
+
+            sessionHostConfiguration.Create(0, TestdDockerId, TestAgentIPaddress, _vmConfiguration, TestLogFolderId);
+            _systemOperations.Verify(x => x.FileWriteAllText(gsdkConfigFilePath, It.IsAny<string>()), Times.Once);
         }
 
         /// <summary>
@@ -207,7 +258,7 @@ namespace VmAgent.Core.UnitTests
             };
 
             SessionHostContainerConfiguration sessionHostContainerConfiguration =
-                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations, _dockerClient.Object, _sessionHostsStartInfo, shouldPublicPortMatchGamePort: true);
+                new SessionHostContainerConfiguration(_vmConfiguration, _logger, _systemOperations.Object, _dockerClient.Object, _sessionHostsStartInfo, shouldPublicPortMatchGamePort: true);
 
             IList<PortMapping> result = sessionHostContainerConfiguration.GetPortMappings(0);
             result[0].PublicPort.Should().Be(_sessionHostsStartInfo.PortMappingsList[0][0].PublicPort);

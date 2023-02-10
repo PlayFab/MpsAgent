@@ -16,31 +16,26 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
         }
 
-        protected override string GetGsdkConfigFilePath(string assignmentId, int instanceNumber)
+        protected override string GetGsdkConfigFilePath(int instanceNumber)
         {
             return Path.Combine(
                 VmConfiguration.GetConfigRootFolderForSessionHost(instanceNumber),
                 VmDirectories.GsdkConfigFilename);
         }
 
-        protected override string GetCertificatesPath(string assignmentId)
+        protected override string GetLogFolder(string logFolderId)
+        {
+            return Path.Combine(VmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);
+        }
+
+        protected override string GetSharedContentFolder()
+        {
+            return VmConfiguration.VmDirectories.GameSharedContentFolderVm;
+        }
+
+        protected override string GetCertificateFolder()
         {
             return VmConfiguration.VmDirectories.CertificateRootFolderVm;
-        }
-
-        protected override string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration)
-        {
-            return Path.Combine(vmConfiguration.VmDirectories.GameLogsRootFolderVm, logFolderId);
-        }
-
-        protected override string GetSharedContentFolder(VmConfiguration vmConfiguration)
-        {
-            return vmConfiguration.VmDirectories.GameSharedContentFolderVm;
-        }
-
-        protected override string GetCertificateFolder(VmConfiguration vmConfiguration)
-        {
-            return vmConfiguration.VmDirectories.CertificateRootFolderVm;
         }
 
         /// <summary>

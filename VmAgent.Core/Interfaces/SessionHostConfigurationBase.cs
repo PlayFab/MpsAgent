@@ -48,9 +48,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         protected readonly SessionHostsStartInfo _sessionHostsStartInfo;
 
-        protected abstract string GetGsdkConfigFilePath(string assignmentId, int instanceNumber);
-
-        protected abstract string GetCertificatesPath(string assignmentId);
+        protected abstract string GetGsdkConfigFilePath(int instanceNumber);
 
         protected SessionHostConfigurationBase(VmConfiguration vmConfiguration, MultiLogger logger, ISystemOperations systemOperations, SessionHostsStartInfo sessionHostsStartInfo)
         {
@@ -66,19 +64,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             var environmentVariables = new Dictionary<string, string>()
             {
                 {
-                    ConfigFileEnvVariable, GetGsdkConfigFilePath(_sessionHostsStartInfo.AssignmentId, instanceNumber)
+                    ConfigFileEnvVariable, GetGsdkConfigFilePath(instanceNumber)
                 },
                 {
                     ServerInstanceNumberEnvVariable, instanceNumber.ToString()
                 },
                 {
-                    LogsDirectoryEnvVariable, GetLogFolder(logFolderId, VmConfiguration)
+                    LogsDirectoryEnvVariable, GetLogFolder(logFolderId)
                 },
                 {
-                    CertificateFolderEnvVariable, GetCertificatesPath(_sessionHostsStartInfo.AssignmentId)
+                    CertificateFolderEnvVariable, GetCertificateFolder()
                 },
                 {
-                    DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId, VmConfiguration)
+                    DumpsDirectoryEnvVariable, GetDumpFolder(logFolderId)
                 }
             };
 
@@ -112,9 +110,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                 HeartbeatEndpoint = $"{agentEndpoint}:{VmConfiguration.ListeningPort}",
                 SessionHostId = sessionHostUniqueId,
                 VmId = vmConfiguration.VmId,
-                LogFolder = GetLogFolder(logFolderId, vmConfiguration),
-                CertificateFolder = vmConfiguration.VmDirectories.CertificateRootFolderContainer,
-                SharedContentFolder = vmConfiguration.VmDirectories.GameSharedContentFolderContainer,
+                LogFolder = GetLogFolder(logFolderId),
+                CertificateFolder = GetCertificateFolder(),
+                SharedContentFolder = GetSharedContentFolder(),
                 GameCertificates = certThumbprints,
                 BuildMetadata = _sessionHostsStartInfo.DeploymentMetadata,
                 GamePorts = portMappings,
@@ -130,16 +128,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             _systemOperations.FileWriteAllText(configFilePath, outputJson);
         }
 
-        protected abstract string GetLogFolder(string logFolderId, VmConfiguration vmConfiguration);
+        protected abstract string GetLogFolder(string logFolderId);
 
-        protected string GetDumpFolder(string logFolderId, VmConfiguration vmConfiguration)
+        protected string GetDumpFolder(string logFolderId)
         {
-            return Path.Combine(GetLogFolder(logFolderId, vmConfiguration), VmDirectories.GameDumpsFolderName);
+            return Path.Combine(GetLogFolder(logFolderId), VmDirectories.GameDumpsFolderName);
         }
 
-        protected abstract string GetSharedContentFolder(VmConfiguration vmConfiguration);
+        protected abstract string GetSharedContentFolder();
 
-        protected abstract string GetCertificateFolder(VmConfiguration vmConfiguration);
+        protected abstract string GetCertificateFolder();
 
         private void CreateLegacyGSDKConfigFile(int instanceNumber, string sessionHostUniqueId, Dictionary<string, string> certThumbprints, IDictionary<string, string> portMappings)
         {

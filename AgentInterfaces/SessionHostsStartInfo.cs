@@ -229,5 +229,18 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Reference to the asset file that contains the necessary bits for the VM Startup Script
         /// </summary>
         public AssetDetail VmStartupScriptAssetReference { get; set; }
+        
+        /// <summary>
+        /// Array containing ports that are exposed on the VM/Load Balancer for the StartupScript
+        /// </summary>
+        public VmStartupScriptPort[] Ports { get; set; }
+    }
+
+    public class VmStartupScriptPort
+    {
+        public string Name { get; set; }
+        public int PublicPort { get; set; }
+        public int NodePort { get; set; }
+        public string Protocol { get; set; }
     }
 }

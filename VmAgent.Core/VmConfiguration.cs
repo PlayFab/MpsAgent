@@ -148,6 +148,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
             environmentVariables.AddRange(GetCommonEnvironmentVariables(sessionHostsStartInfo, vmConfiguration));
 
+            if (sessionHostsStartInfo.VmStartupScriptConfiguration?.Ports != null)
+            {
+                int index = 0;
+                foreach (VmStartupScriptPort port in sessionHostsStartInfo.VmStartupScriptConfiguration.Ports)
+                {
+                    environmentVariables.Add($"PF_STARTUP_SCRIPT_PORT_NAME_{index}", port.Name);
+                    environmentVariables.Add($"PF_STARTUP_SCRIPT_PORT_EXTERNAL_{index}", port.PublicPort.ToString());
+                    environmentVariables.Add($"PF_STARTUP_SCRIPT_PORT_PROTOCOL_{index}", port.Protocol);
+                    environmentVariables.Add($"PF_STARTUP_SCRIPT_PORT_INTERNAL_{index}", port.NodePort.ToString());
+                    index++;
+                }
+            }
+            
             return environmentVariables;
         }
 

@@ -26,7 +26,7 @@ namespace VmAgent.Core.UnitTests
         [TestCategory("BVT")]
         public void EnvVariablesWithBuildMetadata()
         {
-            var metadata = new Dictionary<string, string>() {{"key1", "value1"}, {"key2", "value2"}};
+            var metadata = new Dictionary<string, string>() { { "key1", "value1" }, { "key2", "value2" } };
             SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(metadata);
             IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
             ValidateCommonEnvironmentVariables(envVariables, sessionHostsStartInfo);
@@ -72,6 +72,31 @@ namespace VmAgent.Core.UnitTests
             IDictionary<string, string> envVariables = VmConfiguration.GetEnvironmentVariablesForVmStartupScripts(sessionHostsStartInfo, VmConfiguration);
             ValidateVmScriptEnvironmentVariables(envVariables, sessionHostsStartInfo);
         }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void VmStartupScriptEnvVariablesWithPorts()
+        {
+            SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(new Dictionary<string, string>());
+            sessionHostsStartInfo.VmStartupScriptConfiguration = new VmStartupScriptConfiguration()
+            {
+                Ports = new VmStartupScriptPort[]
+                {
+                    new VmStartupScriptPort() { Name="port0", PublicPort = 20010, NodePort=20000, Protocol = "TCP" },
+                    new VmStartupScriptPort() { Name="port1", PublicPort = 20011, NodePort=20001, Protocol = "UDP" },
+                }
+            };
+            IDictionary<string, string> envVariables = VmConfiguration.GetEnvironmentVariablesForVmStartupScripts(sessionHostsStartInfo, VmConfiguration);
+            ValidateVmScriptEnvironmentVariables(envVariables, sessionHostsStartInfo);
+            for (int i = 0; i < 2; i++)
+            {
+                envVariables.Should().Contain($"PF_STARTUP_SCRIPT_PORT_NAME_{i}", $"port{i}");
+                envVariables.Should().Contain($"PF_STARTUP_SCRIPT_PORT_EXTERNAL_{i}", (20010+i).ToString());
+                envVariables.Should().Contain($"PF_STARTUP_SCRIPT_PORT_PROTOCOL_{i}", i == 0 ? "TCP" : "UDP");
+                envVariables.Should().Contain($"PF_STARTUP_SCRIPT_PORT_INTERNAL_{i}", (20000+i).ToString());
+            }
+        }
+
 
         private SessionHostsStartInfo CreateSessionHostStartInfo(IDictionary<string, string> buildMetadata = null, SessionHostType sessionHostType = SessionHostType.Process)
         {

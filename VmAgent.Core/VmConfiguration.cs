@@ -150,8 +150,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
             if (sessionHostsStartInfo.VmStartupScriptConfiguration?.Ports != null)
             {
+                // order them by NodePort (VmPort) so that the lowest port is always the first one
                 int index = 0;
-                foreach (VmStartupScriptPort port in sessionHostsStartInfo.VmStartupScriptConfiguration.Ports)
+                foreach (VmStartupScriptPort port in sessionHostsStartInfo.VmStartupScriptConfiguration.Ports.OrderBy(x => x.NodePort))
                 {
                     environmentVariables.Add($"PF_STARTUP_SCRIPT_PORT_NAME_{index}", port.Name);
                     environmentVariables.Add($"PF_STARTUP_SCRIPT_PORT_EXTERNAL_{index}", port.PublicPort.ToString());

@@ -88,6 +88,7 @@ namespace VmAgent.Core.UnitTests
             };
             IDictionary<string, string> envVariables = VmConfiguration.GetEnvironmentVariablesForVmStartupScripts(sessionHostsStartInfo, VmConfiguration);
             ValidateVmScriptEnvironmentVariables(envVariables, sessionHostsStartInfo);
+            envVariables.Should().Contain("PF_STARTUP_SCRIPT_PORT_COUNT", "2");
             for (int i = 0; i < 2; i++)
             {
                 envVariables.Should().Contain($"PF_STARTUP_SCRIPT_PORT_NAME_{i}", $"port{i}");

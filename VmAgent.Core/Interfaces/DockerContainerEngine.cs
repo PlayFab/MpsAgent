@@ -415,7 +415,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return sessionHost;
         }
 
-        public static string GetImageNameFromContainerImageDetails(ContainerImageDetails imageDetails)
+        private static string GetImageNameFromContainerImageDetails(ContainerImageDetails imageDetails)
         {
             if (imageDetails == null)
             {
@@ -433,7 +433,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             return imageName;
         }
 
-        public static string GetTagFromContainerImageDetails(ContainerImageDetails imageDetails)
+        private static string GetTagFromContainerImageDetails(ContainerImageDetails imageDetails)
         {
             if (imageDetails == null)
             {

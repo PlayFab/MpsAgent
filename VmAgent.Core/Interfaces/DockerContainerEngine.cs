@@ -359,7 +359,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             SessionHostsStartInfo sessionHostStartInfo = gameResourceDetails.SessionHostsStartInfo;
             ContainerImageDetails imageDetails = sessionHostStartInfo.ImageDetails;
 
-            string imageName = GetImageNameFromContainerImageDetails(imageDetails);
+            string imageNameAndTag = GetImageNameAndTagFromContainerImageDetails(imageDetails);
 
             // The game containers need a unique folder to write their logs. Ideally,
             // we would specify the containerId itself as the subfolder. However, we have to
@@ -374,7 +374,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 .Select(x => $"{x.Key}={x.Value}").ToList();
 
             string dockerId = await CreateContainer(
-                imageName,
+                imageNameAndTag,
                 environmentValues,
                 GetVolumeBindings(sessionHostStartInfo, instanceNumber, logFolderId, sessionHostManager.VmAgentSettings),
                 portMappings,
@@ -422,15 +422,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 throw new ArgumentNullException(nameof(imageDetails));
             }
 
-            string imageName;
-            if (!string.IsNullOrEmpty(imageDetails.ImageDigest))
-            {
-                imageName = $"{imageDetails.ImageName}@{imageDetails.ImageDigest}";
-            }
-            else
-            {
-                imageName = $"{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
-            }
+            string imageName = imageDetails.ImageName;
 
             // Support running local images with no explicit registry in the name.
             if (!string.IsNullOrEmpty(imageDetails.Registry))
@@ -439,6 +431,26 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             }
 
             return imageName;
+        }
+
+        public static string GetTagFromContainerImageDetails(ContainerImageDetails imageDetails)
+        {
+            if (imageDetails == null)
+            {
+                throw new ArgumentNullException(nameof(imageDetails));
+            }
+
+            return imageDetails.ImageTag ?? "latest";
+        }
+
+        public static string GetImageNameAndTagFromContainerImageDetails(ContainerImageDetails imageDetails)
+        {
+            if (imageDetails == null)
+            {
+                throw new ArgumentNullException(nameof(imageDetails));
+            }
+
+            return $"{GetImageNameFromContainerImageDetails(imageDetails)}:{GetTagFromContainerImageDetails(imageDetails)}";
         }
 
         private IList<string> GetVolumeBindings(SessionHostsStartInfo request, int sessionHostInstance, string logFolderId, VmAgentSettings agentSettings)
@@ -556,31 +568,30 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         public override async Task DeleteResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
             ContainerImageDetails imageDetails = sessionHostsStartInfo.ImageDetails;
-            string imageName = $"{imageDetails.Registry}/{imageDetails.ImageName}:{imageDetails.ImageTag ?? "latest"}";
-            _logger.LogInformation($"Starting deletion of container image {imageName}");
+            string imageNameAndTag = GetImageNameAndTagFromContainerImageDetails(imageDetails);
+
+            _logger.LogInformation($"Starting deletion of container image {imageNameAndTag}");
             try
             {
-                await _dockerClient.Images.DeleteImageAsync(imageName, new ImageDeleteParameters() { Force = true });
-                _logger.LogInformation($"Deleted container image {imageName}");
+                await _dockerClient.Images.DeleteImageAsync(imageNameAndTag, new ImageDeleteParameters() { Force = true });
+                _logger.LogInformation($"Deleted container image {imageNameAndTag}");
             }
             catch (DockerImageNotFoundException)
             {
-                _logger.LogInformation($"Image {imageName} not found.");
+                _logger.LogInformation($"Image {imageNameAndTag} not found.");
             }
         }
 
         public override async Task RetrieveResources(SessionHostsStartInfo sessionHostsStartInfo)
         {
-            string registryWithImageName = $"{sessionHostsStartInfo.ImageDetails.Registry}/{sessionHostsStartInfo.ImageDetails.ImageName}";
-            string imageTag = sessionHostsStartInfo.ImageDetails.ImageTag;
+            string imageName = GetImageNameFromContainerImageDetails(sessionHostsStartInfo.ImageDetails);
+            string tag = GetTagFromContainerImageDetails(sessionHostsStartInfo.ImageDetails);
+            string imageNameAndTag = GetImageNameAndTagFromContainerImageDetails(sessionHostsStartInfo.ImageDetails);
+
             string username = sessionHostsStartInfo.ImageDetails.Username;
             string password = sessionHostsStartInfo.ImageDetails.Password;
-            if (string.IsNullOrEmpty(imageTag))
-            {
-                imageTag = "latest";
-            }
 
-            _logger.LogInformation($"Starting image pull for: {registryWithImageName}:{imageTag}.");
+            _logger.LogInformation($"Starting image pull for: {imageNameAndTag}.");
             LogReporter logReporter = new LogReporter(_logger);
 
             Polly.Retry.AsyncRetryPolicy retryPolicy = Policy
@@ -594,14 +605,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             await retryPolicy.ExecuteAsync(async () =>
             {
                 await _dockerClient.Images.CreateImageAsync(
-                    new ImagesCreateParameters {FromImage = registryWithImageName, Tag = imageTag},
+                    new ImagesCreateParameters {FromImage = imageName, Tag = tag},
                     new AuthConfig() {Username = username, Password = password},
                     logReporter);
 
                 // Making sure that the image was actually downloaded properly
                 // We have seen some cases where Docker Registry API returns 'success' on pull while the image has not been properly downloaded
                 IEnumerable<ImagesListResponse> images = await _dockerClient.Images.ListImagesAsync(new ImagesListParameters { All = true });
-                if (images.All(image => !image.RepoTags.Contains($"{registryWithImageName}:{imageTag}")))
+                if (images.All(image => !image.RepoTags.Contains($"{imageNameAndTag}")))
                 {
                     throw new ApplicationException("CreateImageAsync is completed but the image doesn't exist");
                 }

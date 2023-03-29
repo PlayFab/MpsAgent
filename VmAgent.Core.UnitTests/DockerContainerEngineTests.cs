@@ -24,27 +24,10 @@ namespace VmAgent.Core.UnitTests
                 ImageDigest = null,
                 Registry = null,
             };
-            Assert.AreEqual("name:tag", DockerContainerEngine.GetImageNameFromContainerImageDetails(imageDetails));
+            Assert.AreEqual("name:tag", DockerContainerEngine.GetImageNameAndTagFromContainerImageDetails(imageDetails));
 
             imageDetails.Registry = "registry";
-            Assert.AreEqual("registry/name:tag", DockerContainerEngine.GetImageNameFromContainerImageDetails(imageDetails));
-        }
-
-        [TestMethod]
-        [TestCategory("BVT")]
-        public void TestGetImageNameWithDigest()
-        {
-            var imageDetails = new ContainerImageDetails
-            {
-                ImageName = "name",
-                ImageTag = "tag",
-                ImageDigest = "digest",
-                Registry = null,
-            };
-            Assert.AreEqual("name@digest", DockerContainerEngine.GetImageNameFromContainerImageDetails(imageDetails));
-
-            imageDetails.Registry = "registry";
-            Assert.AreEqual("registry/name@digest", DockerContainerEngine.GetImageNameFromContainerImageDetails(imageDetails));
+            Assert.AreEqual("registry/name:tag", DockerContainerEngine.GetImageNameAndTagFromContainerImageDetails(imageDetails));
         }
     }
 }

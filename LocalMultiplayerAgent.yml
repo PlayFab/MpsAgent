@@ -15,7 +15,7 @@ variables:
   buildPlatform: 'win-x64'
   buildConfiguration: 'Debug'
   projectName: 'LocalMultiplayerAgent'
-  framework: 'netcoreapp3.1'
+  framework: 'net7.0'
 
 steps:
 - task: DotNetCoreCLI@2

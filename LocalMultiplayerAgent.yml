@@ -45,7 +45,7 @@ steps:
     TargetFolder: '$(projectName)Publish\'
     flattenFolders: true
 
-- task: EsrpCodeSigning@1
+- task: EsrpCodeSigning@3
   inputs: 
     FolderPath: '$(projectName)Publish\'
     ConnectedServiceName: 'Thunderhead Code-Sign service'

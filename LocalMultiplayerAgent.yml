@@ -84,7 +84,6 @@ steps:
     archiveFile: '$(projectName).publish.zip'
 
 - task: GitHubRelease@1
-  enabled: false
   inputs:
     gitHubConnection: 'github.com_dgkanatsios2'
     repositoryName: '$(Build.Repository.Name)'

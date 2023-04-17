@@ -24,6 +24,11 @@
     public class Endpoint
     {
         /// <summary>
+        /// The frontend IP address for the endpoint.
+        /// </summary>
+        public string FrontendIpAddress { get; set; }
+
+        /// <summary>
         /// The publicly accessible port exposed on the software load balancer.
         /// </summary>
         public int FrontEndPort { get; set; }

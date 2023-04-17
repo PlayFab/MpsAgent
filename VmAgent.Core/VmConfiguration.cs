@@ -7,6 +7,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using AgentInterfaces;
     using VmAgent.Extensions;
 
@@ -49,7 +50,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         // Typically this wouldn't be needed by VM startup scripts (since it might point to a path that only exists inside a container)
         // but the Watson team found an edge case where the VM needs access to it so we made it available to the VM startup scripts as well.
         public const string SharedContentFolderEnvVariable = "PF_SHARED_CONTENT_FOLDER";
-        
+
+        /// Prefix used for all the Public Ip Addresses environment variables (count, ip addresss, fqdn, routing type)
+        public const string PublicIpAddressesEnvVariablePrefix = "PF_PUBLIC_IP_ADDRESSES";
+
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
 
         public int ListeningPort { get; }
@@ -111,7 +115,37 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
             sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => environmentVariables.Add(x.Key, x.Value));
 
+            environmentVariables.AddRange(GetPublicIpAddressesEnvironmentVariables(sessionHostsStartInfo));
+
             return environmentVariables;
+        }
+
+        private static IDictionary<string, string> GetPublicIpAddressesEnvironmentVariables(SessionHostsStartInfo sessionHostsStartInfo)
+        {
+            var publicIPAddressesEnvironmentVariables = new Dictionary<string, string>
+            {
+                { $"{PublicIpAddressesEnvVariablePrefix}_COUNT", sessionHostsStartInfo.PublicIpAddresses?.Count().ToString() ?? "1" }
+            };
+
+            if (sessionHostsStartInfo.PublicIpAddresses != null)
+            {
+                int index = 0;
+                foreach (PublicIpAddress publicIpAddress in sessionHostsStartInfo.PublicIpAddresses)
+                {
+                    publicIPAddressesEnvironmentVariables.Add($"{PublicIpAddressesEnvVariablePrefix}_IP_ADDRESS_{index}", publicIpAddress.IpAddress);
+                    publicIPAddressesEnvironmentVariables.Add($"{PublicIpAddressesEnvVariablePrefix}_FQDN_{index}", publicIpAddress.FQDN);
+                    publicIPAddressesEnvironmentVariables.Add($"{PublicIpAddressesEnvVariablePrefix}_ROUTING_TYPE_{index}", publicIpAddress.RoutingType.ToString());
+                    index++;
+                }
+            }
+            else
+            {
+                publicIPAddressesEnvironmentVariables.Add($"{PublicIpAddressesEnvVariablePrefix}_IP_ADDRESS_0", sessionHostsStartInfo.PublicIpV4Address);
+                publicIPAddressesEnvironmentVariables.Add($"{PublicIpAddressesEnvVariablePrefix}_FQDN_0", sessionHostsStartInfo.FQDN);
+                publicIPAddressesEnvironmentVariables.Add($"{PublicIpAddressesEnvVariablePrefix}_ROUTING_TYPE_0", RoutingType.Microsoft.ToString());
+            }    
+
+            return publicIPAddressesEnvironmentVariables;
         }
 
         private static string GetSharedContentFolderPath(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)

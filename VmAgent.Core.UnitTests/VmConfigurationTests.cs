@@ -98,6 +98,37 @@ namespace VmAgent.Core.UnitTests
             }
         }
 
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void EnvironmentVariablesWithMultipleIpAddresses()
+        {
+            SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(new Dictionary<string, string>());
+            sessionHostsStartInfo.PublicIpAddresses = new List<PublicIpAddress>()
+            {
+                new PublicIpAddress()
+                {
+                    IpAddress = "127.0.0.1",
+                    FQDN = "myFQDN",
+                    RoutingType = RoutingType.Internet
+                },
+                new PublicIpAddress()
+                {
+                    IpAddress = "127.0.0.2",
+                    FQDN = "myFQDN2",
+                    RoutingType = RoutingType.Microsoft
+                },
+            };
+
+            IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_COUNT", "2");
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_IP_ADDRESS_0", "127.0.0.1");
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_FQDN_0", "myFQDN");
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_ROUTING_TYPE_0", "Internet");
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_IP_ADDRESS_1", "127.0.0.2");
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_FQDN_1", "myFQDN2");
+            envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_ROUTING_TYPE_1", "Microsoft");
+        }
+
 
         private SessionHostsStartInfo CreateSessionHostStartInfo(IDictionary<string, string> buildMetadata = null, SessionHostType sessionHostType = SessionHostType.Process)
         {
@@ -105,12 +136,12 @@ namespace VmAgent.Core.UnitTests
             {
                 AssignmentId = CreateAssignmentId(),
                 DeploymentMetadata = buildMetadata,
-                PublicIpV4Address = "42.42.42.42.",
+                PublicIpV4Address = "42.42.42.42",
                 SessionHostType = sessionHostType
             };
         }
 
-        private void ValidateCommonEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo)
+        private void ValidateCommonEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo, bool containsMultipleIps = false)
         {
             envVariables.Should().Contain(VmConfiguration.PublicIPv4AddressEnvVariable, sessionHostsStartInfo.PublicIpV4Address);
             envVariables.Should().Contain(VmConfiguration.PublicIPv4AddressEnvVariableV2, sessionHostsStartInfo.PublicIpV4Address);
@@ -119,6 +150,14 @@ namespace VmAgent.Core.UnitTests
             envVariables.Should().Contain(VmConfiguration.BuildIdEnvVariable, DeploymentId.ToString());
             envVariables.Should().Contain(VmConfiguration.RegionEnvVariable, Region);
             sessionHostsStartInfo.DeploymentMetadata?.ForEach(x => envVariables.Should().Contain(x.Key, x.Value));
+
+            if (!containsMultipleIps)
+            {
+                envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_COUNT", "1");
+                envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_IP_ADDRESS_0", sessionHostsStartInfo.PublicIpV4Address);
+                envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_FQDN_0", sessionHostsStartInfo.FQDN);
+                envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_ROUTING_TYPE_0", "Microsoft");
+            }
         }
 
         private void ValidateVmScriptEnvironmentVariables(IDictionary<string, string> envVariables, SessionHostsStartInfo sessionHostsStartInfo)

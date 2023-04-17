@@ -5,7 +5,10 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Docker.DotNet.Models;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json;
 
     public class SessionHostsStartInfo
     {
@@ -58,6 +61,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// The fully qualified domain name for the Vm.
         /// </summary>
         public string FQDN { get; set; }
+
+        /// <summary>
+        /// List of Public IP Addresses
+        /// </summary>
+        public List<PublicIpAddress> PublicIpAddresses { get; set; }
 
         /// <summary>
         /// Indicates how the game server is hosted on the VM.
@@ -246,5 +254,24 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public int NodePort { get; set; }
         // TCP or UDP
         public string Protocol { get; set; }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum RoutingType
+    {
+        Microsoft,
+        Internet
+    }
+
+    public class PublicIpAddress
+    {
+        // Frontend IP Address
+        public string IpAddress { get; set; }
+
+        // FQDN for the Public IP
+        public string FQDN { get; set; }
+
+        // Public IP Routing Type (Microsoft or Internet Routing)
+        public RoutingType RoutingType { get; set;}
     }
 }

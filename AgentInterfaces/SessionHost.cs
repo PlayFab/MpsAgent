@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Gaming.AgentInterfaces
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// The host of a game session
@@ -82,5 +83,10 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Used by some legacy games such as Forza 5 for security handshake with the game client.
         /// </summary>
         public string SecureDeviceAddress { get; set; }
+
+        /// <summary>
+        /// List of Public IP Addresses working with the session
+        /// </summary>
+        public List<PublicIpAddress> PublicIpAddresses { get; set; }
     }
 }

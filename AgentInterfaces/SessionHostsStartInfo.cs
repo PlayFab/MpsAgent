@@ -263,6 +263,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         Internet
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum IpVersion
+    {
+        Ipv4,
+        Ipv6
+    }
+
     public class PublicIpAddress
     {
         // Frontend IP Address
@@ -273,5 +280,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         // Public IP Routing Type (Microsoft or Internet Routing)
         public RoutingType RoutingType { get; set;}
+
+        // Ip Version
+        public IpVersion IpVersion { get; set; }
     }
 }

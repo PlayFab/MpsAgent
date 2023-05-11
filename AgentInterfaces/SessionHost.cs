@@ -85,8 +85,14 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string SecureDeviceAddress { get; set; }
 
         /// <summary>
-        /// List of Public IP Addresses working with the session
+        /// TODO: Remove this one once this is deployed in all VMAgents and CP
+        /// List of All Public IP Addresses working with the session
         /// </summary>
         public List<PublicIpAddress> PublicIpAddresses { get; set; }
+
+        /// <summary>
+        /// List of Public IPv4 Addresses working with the session
+        /// </summary>
+        public List<PublicIpAddress> PublicIpv4Addresses { get; set; }
     }
 }

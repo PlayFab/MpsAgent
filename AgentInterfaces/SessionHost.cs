@@ -85,14 +85,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string SecureDeviceAddress { get; set; }
 
         /// <summary>
-        /// TODO: Remove this once the other IPV4 version is used
         /// List of All Public IP Addresses working with the session
         /// </summary>
         public List<PublicIpAddress> PublicIpAddresses { get; set; }
-
-        /// <summary>
-        /// List of Public IPv4 Addresses working with the session
-        /// </summary>
-        public List<PublicIpAddress> PublicIpv4Addresses { get; set; }
     }
 }

@@ -21,9 +21,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         {
             _logger = logger ?? throw new ArgumentException("logger cannot be null");
 
-			// To enable both GenevaAgentChannel and OpenTelemetry, we have 2 ILogger parameters here.
+            // To enable both GenevaAgentChannel and OpenTelemetry, we have 2 ILogger parameters here.
             // We will replace GenevaAgentchannel with Opentelemetry, once we verify all logs both in test and prod environments.
-			_genevaTelemetryClient = genevaTelemetryClient ?? throw new ArgumentException("genevaTelemetryClient cannot be null");
+            _genevaTelemetryClient = genevaTelemetryClient ?? throw new ArgumentException("genevaTelemetryClient cannot be null");
             _genevaOTelLogger = genevaLogger;
         }
 

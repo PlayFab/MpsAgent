@@ -4,8 +4,8 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core
 {
     using System;
-	using System.Collections.Generic;
-	using ApplicationInsights;
+    using System.Collections.Generic;
+    using ApplicationInsights;
     using ApplicationInsights.DataContracts;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         private readonly TelemetryClient _genevaTelemetryClient;
         private readonly ILogger _genevaOtelLogger;
 
-		public MultiLogger(ILogger logger, TelemetryClient genevaTelemetryClient, ILogger genevaOpenTelemetryLogger = null)
+        public MultiLogger(ILogger logger, TelemetryClient genevaTelemetryClient, ILogger genevaOpenTelemetryLogger = null)
         {
             _logger = logger ?? throw new ArgumentException("logger cannot be null");
 
@@ -24,9 +24,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             // We will replace GenevaAgentchannel with OpenTelemetry, once we verify all logs both in test and prod environments.
             _genevaTelemetryClient = genevaTelemetryClient ?? throw new ArgumentException("genevaTelemetryClient cannot be null");
             _genevaOtelLogger = genevaOpenTelemetryLogger;
-		}
+        }
 
-		public void LogVerbose(string message)
+        public void LogVerbose(string message)
         {
             _logger.LogInformation(message);
         }
@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         {
             _logger.LogInformation(message);
             _genevaTelemetryClient.TrackTrace(message, SeverityLevel.Information);
-			_genevaOtelLogger?.LogInformation(message);
+            _genevaOtelLogger?.LogInformation(message);
         }
 
         public void LogWarning(string message)

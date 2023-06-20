@@ -4,8 +4,8 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core
 {
     using System;
-    using System.Collections.Generic;
-    using ApplicationInsights;
+	using System.Collections.Generic;
+	using ApplicationInsights;
     using ApplicationInsights.DataContracts;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
@@ -14,25 +14,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
     {
         private readonly ILogger _logger;
         private readonly TelemetryClient _genevaTelemetryClient;
-        private ILogger _genevaOTelLogger;
-        private const string VmAgentLoggerName = "VmAgentLogger";
+        private readonly ILogger _genevaOtelLogger;
 
-        public MultiLogger(ILogger logger, TelemetryClient genevaTelemetryClient, ILogger genevaLogger = null)
+		public MultiLogger(ILogger logger, TelemetryClient genevaTelemetryClient, ILogger genevaOpenTelemetryLogger = null)
         {
             _logger = logger ?? throw new ArgumentException("logger cannot be null");
 
-            // To enable both GenevaAgentChannel and OpenTelemetry, we have 2 ILogger parameters here.
-            // We will replace GenevaAgentchannel with Opentelemetry, once we verify all logs both in test and prod environments.
+            // We have 2 ILogger parameters (1. Logger to write logs to local file. 2.Geneva OpenTelemetry Logger)
+            // We will replace GenevaAgentchannel with OpenTelemetry, once we verify all logs both in test and prod environments.
             _genevaTelemetryClient = genevaTelemetryClient ?? throw new ArgumentException("genevaTelemetryClient cannot be null");
-            _genevaOTelLogger = genevaLogger;
-        }
+            _genevaOtelLogger = genevaOpenTelemetryLogger;
+		}
 
-        public void SetUpLogger(ILoggerFactory loggerFactory)
-        {
-            _genevaOTelLogger = loggerFactory.CreateLogger(VmAgentLoggerName);
-        }
-
-        public void LogVerbose(string message)
+		public void LogVerbose(string message)
         {
             _logger.LogInformation(message);
         }
@@ -41,21 +35,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         {
             _logger.LogInformation(message);
             _genevaTelemetryClient.TrackTrace(message, SeverityLevel.Information);
-            _genevaOTelLogger?.LogInformation(message);
+			_genevaOtelLogger?.LogInformation(message);
         }
 
         public void LogWarning(string message)
         {
             _logger.LogWarning(message);
             _genevaTelemetryClient.TrackTrace(message, SeverityLevel.Warning);
-            _genevaOTelLogger?.LogWarning(message);
+            _genevaOtelLogger?.LogWarning(message);
         }
 
         public void LogError(string message)
         {
             _logger.LogError(message);
             _genevaTelemetryClient.TrackTrace(message, SeverityLevel.Error);
-            _genevaOTelLogger?.LogError(message);
+            _genevaOtelLogger?.LogError(message);
         }
 
         public void LogException(Exception exception)
@@ -63,7 +57,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             string message = exception.ToString();
             _logger.LogError(message);
             _genevaTelemetryClient.TrackTrace(message, SeverityLevel.Error);
-            _genevaOTelLogger?.LogError(message);
+            _genevaOtelLogger?.LogError(message);
         }
 
         public void LogException(string message, Exception exception)
@@ -71,7 +65,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             string logMessage = $"{message}. Exception: {exception}";
             _logger.LogError(logMessage);
             _genevaTelemetryClient.TrackTrace(logMessage, SeverityLevel.Error);
-            _genevaOTelLogger?.LogError(logMessage);
+            _genevaOtelLogger?.LogError(logMessage);
         }
 
         public void LogEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> metrics)
@@ -80,7 +74,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             string metricsString = metrics == null ? CommonSettings.NullStringValue : JsonConvert.SerializeObject(metrics, CommonSettings.JsonSerializerSettings);
             string message = $"Event: {eventName}. Properties: {propertiesString}, Metrics: {metricsString}";
             _logger.LogInformation(message);
-            _genevaOTelLogger?.LogInformation(message);
+            _genevaOtelLogger?.LogInformation(message);
             // this used to be TrackEvent in AppInsights
             // we converted it to a trace since dgrep columns could increase significantly
             _genevaTelemetryClient.TrackTrace(message, SeverityLevel.Information);

@@ -25,10 +25,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public void LogVerbose(string message)
         {
             _logger.LogInformation(message);
-			_genevaOtelLogger?.LogInformation(message);
-		}
+            _genevaOtelLogger?.LogInformation(message);
+        }
 
-		public void LogInformation(string message)
+        public void LogInformation(string message)
         {
             _logger.LogInformation(message);
             _genevaOtelLogger?.LogInformation(message);

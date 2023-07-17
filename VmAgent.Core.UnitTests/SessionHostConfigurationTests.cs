@@ -54,7 +54,7 @@ namespace VmAgent.Core.UnitTests
         {
             string AssignmentId = $"{TestTitleIdUlong}:{TestBuildId}:{TestRegion}";
 
-            _logger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
+            _logger = new MultiLogger(NullLogger.Instance);
             _systemOperations = new Mock<ISystemOperations>();
             _dockerClient = new Mock<IDockerClient>();
             _sessionHostManager = new Mock<ISessionHostManager>();

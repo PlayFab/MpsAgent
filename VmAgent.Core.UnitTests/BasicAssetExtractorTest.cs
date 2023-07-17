@@ -38,7 +38,7 @@ namespace VmAgent.Core.UnitTests
         [TestInitialize]
         public void BeforeEachTest()
         {
-            _multiLogger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));      
+            _multiLogger = new MultiLogger(NullLogger.Instance);      
             _mockSystemOperations = new Mock<ISystemOperations>();
             _basicAssetExtractor = new BasicAssetExtractor(_mockSystemOperations.Object, _multiLogger);
         }

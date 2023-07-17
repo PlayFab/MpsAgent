@@ -51,7 +51,7 @@ namespace VmAgent.Core.UnitTests
 
             _mockFileSystemOperations = new Mock<IFileSystemOperations>();
             _vmConfiguration = new VmConfiguration(56001, "vmid", new VmDirectories("root"), true);
-            _logger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
+            _logger = new MultiLogger(NullLogger.Instance);
             _systemOperations = new SystemOperations(_vmConfiguration, _logger, _mockFileSystemOperations.Object);
 
             _mockFileSystemOperations.Setup(x => x.IsDirectory(_root)).Returns(true);

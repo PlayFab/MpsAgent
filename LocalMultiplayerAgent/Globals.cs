@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             .CreateLogger("PlayFabLocalMultiplayerAgent");
 
         public static MultiLogger MultiLogger =
-            new MultiLogger(Logger, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
+            new MultiLogger(Logger);
 
         public static GameServerEnvironment GameServerEnvironment { get; set; }
     }

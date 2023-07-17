@@ -24,7 +24,7 @@ namespace VmAgent.Core.UnitTests
         [TestInitialize]
         public void BeforeEachTest()
         {
-            _multiLogger = new MultiLogger(NullLogger.Instance, new TelemetryClient(TelemetryConfiguration.CreateDefault()));
+            _multiLogger = new MultiLogger(NullLogger.Instance);
             _fileWriteWrapper = new Mock<IFileWriteWrapper>();
 
             Mock<ProcessOutputLogger> mockProcessLogger = new Mock<ProcessOutputLogger>(

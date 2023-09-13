@@ -94,7 +94,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             Console.WriteLine($"Local Multiplayer Agent is listening on port {settings.AgentListeningPort}");
 
             Globals.SessionConfig = settings.SessionConfig ?? new SessionConfig() { SessionId = Guid.NewGuid() };
-            Console.WriteLine($"{string.Join(", ", Globals.SessionConfig.InitialPlayers)}");
+            if (Globals.SessionConfig.InitialPlayers != null)
+            {
+                Console.WriteLine($"{string.Join(", ", Globals.SessionConfig.InitialPlayers)}");
+            }
             await new MultiplayerServerManager(SystemOperations.Default, Globals.VmConfiguration, Globals.MultiLogger, SessionHostRunnerFactory.Instance)
                 .CreateAndStartContainerWaitForExit(settings.ToSessionHostsStartInfo());
 

@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     public class SecretDetail
     {
         /// <summary>
-        /// Identifier secret
+        /// Secret identifier
         /// </summary>
         public string Name { get; set; }
 
@@ -26,4 +26,5 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Expiration date of this secret
         /// </summary>
         public string ExpirationDate { get; set; }
+    }
 }

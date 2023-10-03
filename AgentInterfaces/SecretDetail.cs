@@ -26,10 +26,4 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Expiration date of this secret
         /// </summary>
         public string ExpirationDate { get; set; }
-
-        /// <summary>
-        /// Expiration date of the secret.
-        /// </summary>
-        public DateTime ExpirationTimeUtc { get; set; }
-    }
 }

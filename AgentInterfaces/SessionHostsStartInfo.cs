@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public CertificateDetail[] GameCertificates { get; set; }
 
         /// <summary>
-        /// List of secrets we want to deploy on each container
+        /// List of secrets we want to deploy on each VM
         /// </summary>
         public SecretDetail[] GameSecrets { get; set; }
 

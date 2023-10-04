@@ -35,6 +35,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string Thumbprint { get; set; }
 
         /// <summary>
+        /// The version of this certificate
+        /// </summary>
+        public string Version { get; set; }
+
+        /// <summary>
         /// Expiration date of this certificate
         /// </summary>
         public string ExpirationDate { get; set; }

@@ -87,6 +87,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public CertificateDetail[] GameCertificates { get; set; }
 
         /// <summary>
+        /// List of secrets we want to deploy on each VM
+        /// </summary>
+        public SecretDetail[] GameSecrets { get; set; }
+
+        /// <summary>
         /// The XBLC certificate, required by legacy titles that use Xbox Live
         /// </summary>
         public CertificateDetail XblcCertificate { get; set; }

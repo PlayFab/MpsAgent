@@ -79,5 +79,5 @@ AddFirewallRules $AgentPort;
 
 # Pull the docker image for playfab windows container image.
 Write-Host "Pulling docker image.."
-docker pull mcr.microsoft.com/playfab/multiplayer:wsc-10.0.17763.3046
+docker pull mcr.microsoft.com/playfab/multiplayer:wsc-10.0.17763.4851
 

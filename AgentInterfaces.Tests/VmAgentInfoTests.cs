@@ -49,6 +49,7 @@ namespace AgentInterfaces.Tests
                 nameof(VmAgentInfo.AssignmentId),
                 nameof(VmAgentInfo.SequenceNumber),
                 nameof(VmAgentInfo.IsUnassignable),
+                nameof(VmAgentInfo.PortMappings),
                 nameof(VmAgentInfo.NetworkConfiguration),
                 nameof(VmAgentInfo.VmMonitoringOutputId),
                 nameof(VmAgentInfo.ToSViolationRating)

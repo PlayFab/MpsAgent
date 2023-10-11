@@ -33,6 +33,11 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public bool? IsUnassignable { get; set; }
 
         /// <summary>
+        /// Port mappings at the vm level for VmStartupScript
+        /// </summary>
+        public List<PortMapping> PortMappings { get; set; }
+
+        /// <summary>
         /// The network configuration of the agent, describing the endpoints available on the VM.
         /// </summary>
         public VmNetworkConfiguration NetworkConfiguration { get; set; }
@@ -51,8 +56,9 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
                 string maintenanceSchedule = MaintenanceSchedule?.ToJsonString() ?? string.Empty;
                 string networkConfiguration = NetworkConfiguration?.ToJsonString() ?? string.Empty;
                 string sessionHostSummary = SessionHostHeartbeatMap.Values.GroupBy(x => x.CurrentGameState).ToDictionary(y => y.Key, y => y.Count()).ToJsonString();
+                string portMappings = PortMappings?.ToJsonString() ?? string.Empty;
                 return
-                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutputId}, ToSViolationRating: {ToSViolationRating}";
+                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, PortMappings: {portMappings}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutputId}, ToSViolationRating: {ToSViolationRating}";
             }
 
             return this.ToJsonString();

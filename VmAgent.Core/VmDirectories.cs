@@ -16,6 +16,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             ? @"C:\"
             : "/data/";
 
+        public static readonly string PlayFabFolderOnPrimaryDrive = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? @"C:\playfab\"
+                : "/playfab/";
+
         public VmDirectories(string rootPath)
         {
             TempStorageRootVm = rootPath;

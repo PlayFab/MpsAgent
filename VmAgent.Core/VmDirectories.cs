@@ -39,8 +39,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             GsdkConfigRootFolderContainer = Path.Combine(TempStorageRootContainer, "Config");
             GsdkConfigFilePathContainer = Path.Combine(GsdkConfigRootFolderContainer, GsdkConfigFilename);
 
-            AgentStateFile = Path.Combine(TempStorageRootVm, "PlayFabVmAgentState");
-            AgentStateTempFile = Path.Combine(TempStorageRootVm, "PlayFabVmAgentState.tmp");
+            AgentStateFile = Path.Combine(PlayFabFolderOnPrimaryDrive, "PlayFabVmAgentState");
+            AgentStateTempFile = Path.Combine(PlayFabFolderOnPrimaryDrive, "PlayFabVmAgentState.tmp");
             MonitoringStateFile = Path.Combine(TempStorageRootVm, "PlayFabMonitoringState");
             MonitoringStateTempFile = Path.Combine(TempStorageRootVm, "PlayFabMonitoringState.tmp");
             HostConfigOverrideFile = Path.Combine(TempStorageRootVm, "HostConfigOverride.json");

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <!-- Allows latest features to be made available such as async Main method.-->
     <LangVersion>latest</LangVersion>
     <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>

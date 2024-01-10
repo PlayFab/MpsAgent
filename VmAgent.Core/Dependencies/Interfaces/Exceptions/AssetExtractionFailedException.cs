@@ -13,6 +13,9 @@ namespace VmAgent.Core.Dependencies.Interfaces.Exceptions
           
         }
 
+        #if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")] 
+        #endif
         protected AssetExtractionFailedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

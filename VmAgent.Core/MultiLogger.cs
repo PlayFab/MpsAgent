@@ -13,7 +13,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
     public class MultiLogger : ILogger
     {
         private readonly ILogger _logger;
-        private readonly TelemetryClient _genevaTelemetryClient;
         private readonly ILogger _genevaOtelLogger;
 
         public MultiLogger(ILogger logger, ILogger genevaOpenTelemetryLogger = null)

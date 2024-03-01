@@ -31,8 +31,6 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
             MaintenanceEvents = other.MaintenanceEvents.Select((e) => new MaintenanceEvent(e)).ToList();
             ReportingVmId = other.ReportingVmId;
         }
-
-        public string MaintenanceSource { get; set; }
     }
 
     // https://docs.microsoft.com/en-us/azure/virtual-machines/windows/scheduled-events#query-for-events

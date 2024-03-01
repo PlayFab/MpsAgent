@@ -7,8 +7,10 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     using System.Collections.Generic;
     using System.Linq;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
-    // Data Format: https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-scheduled-events
+    // Data Format: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/scheduled-events
+    [Serializable]
     public class MaintenanceSchedule
     {
         public string DocumentIncarnation { get; set; }
@@ -29,9 +31,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
             MaintenanceEvents = other.MaintenanceEvents.Select((e) => new MaintenanceEvent(e)).ToList();
             ReportingVmId = other.ReportingVmId;
         }
+
+        public string MaintenanceSource { get; set; }
     }
 
     // https://docs.microsoft.com/en-us/azure/virtual-machines/windows/scheduled-events#query-for-events
+    [Serializable]
     public class MaintenanceEvent
     {
         public string EventId { get; set; }

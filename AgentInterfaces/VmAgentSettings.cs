@@ -23,6 +23,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public HashSet<string> TitlesUsingExternalAllocations { get; set; }
 
         /// <summary>
+        /// Titles that are using MaintenanceV2 - essentially, getting the full maintenance schedule details on the
+        /// GSDK maintenance callback
+        /// </summary>
+        public HashSet<string> TitlesUsingMaintenanceV2 { get; set; } 
+
+        /// <summary>
         ///  Whether the maintenance schedule time should be passed to GSDK.
         /// </summary>
         public bool ShouldPassMaintenanceInfoToGsdk { get; set; }

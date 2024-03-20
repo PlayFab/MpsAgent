@@ -11,7 +11,7 @@ namespace LocalMultiplayerAgent.Controllers
     using Microsoft.Azure.Gaming.LocalMultiplayerAgent;
     using Microsoft.Azure.Gaming.VmAgent.Model;
     using Microsoft.Extensions.Hosting;
-    using Newtonsoft.Json;
+    using Instrumentation;
 
     public class SessionHostController : Controller
     {
@@ -94,6 +94,29 @@ namespace LocalMultiplayerAgent.Controllers
                 Operation = op,
                 SessionConfig = config
             });
+        }
+
+        private static bool _wasGsdkVersionLogged = false;
+        [HttpPost]
+        [Route("v1/metrics/{sessionHostId}/gsdkinfo")]
+        public IActionResult ReportGsdkVersion(string sessionHostId, [FromBody] GsdkVersionInfo vi)
+        {
+            if (string.IsNullOrEmpty(vi.Version))
+            {
+                return BadRequest($"{nameof(GsdkVersionInfo.Version)} should not be an empty string");
+            }
+            if (string.IsNullOrEmpty(vi.Flavor))
+            {
+                return BadRequest($"{nameof(GsdkVersionInfo.Flavor)} should not be an empty string");
+            }
+
+            if (!_wasGsdkVersionLogged)
+            {
+                Globals.MultiLogger.LogInformation($"GSDK flavor/version: {vi.Flavor}/{vi.Version} from session host {sessionHostId}");
+                _wasGsdkVersionLogged = true;
+            }
+
+            return Ok();
         }
 
         [HttpPatch]

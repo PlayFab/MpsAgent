@@ -15,10 +15,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     {
         public string DocumentIncarnation { get; set; }
 
-        [JsonProperty("Events")]
         public IList<MaintenanceEvent> MaintenanceEvents { get; set; }
-
-        public string ReportingVmId { get; set; }
 
         public MaintenanceSchedule() { }
 
@@ -29,7 +26,15 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         {
             DocumentIncarnation = other.DocumentIncarnation;
             MaintenanceEvents = other.MaintenanceEvents.Select((e) => new MaintenanceEvent(e)).ToList();
-            ReportingVmId = other.ReportingVmId;
+        }
+
+        public MaintenanceSchedule(string eventType, string eventStatus, string eventSource)
+        {
+            DocumentIncarnation = "1";
+            MaintenanceEvents = new List<MaintenanceEvent>()
+            {
+                new MaintenanceEvent(eventType, eventStatus, eventSource)
+            };
         }
     }
 
@@ -43,12 +48,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         public string ResourceType { get; set; }
 
-        [JsonProperty("Resources")]
-        public IList<string> AffectedResources { get; set; }
+        public IList<string> Resources { get; set; }
 
         public string EventStatus { get; set; }
 
         public DateTime? NotBefore { get; set; }
+
+        public string Description { get; set; }
 
         public string EventSource { get; set; }
 
@@ -64,11 +70,24 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
             EventId = other.EventId;
             EventType = other.EventType;
             ResourceType = other.ResourceType;
-            AffectedResources = other.AffectedResources.ToList();
+            Resources = other.Resources.ToList();
             EventStatus = other.EventStatus;
             NotBefore = other.NotBefore;
             EventSource = other.EventSource;
             DurationInSeconds = other.DurationInSeconds;
+        }
+
+        public MaintenanceEvent(string eventType, string eventStatus, string eventSource)
+        {
+            EventId = Guid.NewGuid().ToString();
+            EventType = eventType;
+            ResourceType = "VirtualMachine";
+            Resources = new List<string>() { "vmId" };
+            EventStatus = eventStatus;
+            NotBefore = DateTime.UtcNow.AddMinutes(5);
+            Description = $"Scheduled {eventType} event for VM";
+            EventSource = eventSource;
+            DurationInSeconds = 300;
         }
     }
 }

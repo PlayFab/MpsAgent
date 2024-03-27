@@ -104,6 +104,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                     Console.WriteLine("NumHeartBeatsForTerminateResponse must be greater than NumHeartBeatsForActivateResponse. Ideally more than 1, since you would like the server to be alive for a few seconds");
                     isSuccess = false;
                 }
+
+                if (_settings.NumHeartBeatsForTerminateResponse < _settings.NumHeartBeatsForMaintenanceEventResponse)
+                {
+                    Console.WriteLine("NumHeartBeatsForMaintenanceEventResponse must be less than or equal to NumHeartBeatsForTerminateResponse.");
+                    isSuccess = false;
+                }
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

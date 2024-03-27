@@ -19,7 +19,7 @@ namespace AgentInterfaces.Tests
             MaintenanceSchedule schedule = JsonConvert.DeserializeObject<MaintenanceSchedule>(payload);
             Assert.AreEqual("1", schedule.DocumentIncarnation);
             Assert.AreEqual(1, schedule.MaintenanceEvents.Count);
-            Assert.AreEqual(1, schedule.MaintenanceEvents[0].AffectedResources.Count);
+            Assert.AreEqual(1, schedule.MaintenanceEvents[0].Resources.Count);
             Assert.AreEqual(10, schedule.MaintenanceEvents[0].DurationInSeconds);
             AssertNonNullProperties(schedule);
         }
@@ -32,7 +32,7 @@ namespace AgentInterfaces.Tests
             MaintenanceSchedule schedule = JsonConvert.DeserializeObject<MaintenanceSchedule>(payload);
             Assert.AreEqual("1", schedule.DocumentIncarnation);
             Assert.AreEqual(2, schedule.MaintenanceEvents.Count);
-            Assert.AreEqual(1, schedule.MaintenanceEvents[0].AffectedResources.Count);
+            Assert.AreEqual(1, schedule.MaintenanceEvents[0].Resources.Count);
             Assert.AreEqual(9, schedule.MaintenanceEvents[0].DurationInSeconds);
             Assert.AreEqual(-1, schedule.MaintenanceEvents[1].DurationInSeconds);
             AssertNonNullProperties(schedule);
@@ -50,13 +50,13 @@ namespace AgentInterfaces.Tests
 
         [TestMethod]
         [TestCategory("BVT")]
-        public void TestParseSingleMaintenanceEventMultipleAffectedResources()
+        public void TestParseSingleMaintenanceEventMultipleResources()
         {
-            string payload = File.ReadAllText("SingleMaintenanceEventMultipleAffectedResources.json");
+            string payload = File.ReadAllText("SingleMaintenanceEventMultipleResources.json");
             MaintenanceSchedule schedule = JsonConvert.DeserializeObject<MaintenanceSchedule>(payload);
             Assert.AreEqual("1", schedule.DocumentIncarnation);
             Assert.AreEqual(1, schedule.MaintenanceEvents.Count);
-            Assert.AreEqual(2, schedule.MaintenanceEvents[0].AffectedResources.Count);
+            Assert.AreEqual(2, schedule.MaintenanceEvents[0].Resources.Count);
             AssertNonNullProperties(schedule);
         }
 

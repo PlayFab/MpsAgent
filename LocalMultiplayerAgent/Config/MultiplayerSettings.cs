@@ -30,6 +30,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
         public int NumHeartBeatsForTerminateResponse { get; set; }
 
+        public int NumHeartBeatsForMaintenanceEventResponse { get; set; }
+
         public bool RunContainer { get; set; }
 
         public string OutputFolder { get; set; }
@@ -48,6 +50,12 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
         public bool ForcePullFromAcrOnLinuxContainersOnWindows { get; set; }
 
         public IDictionary<string, string> DeploymentMetadata { get; set; }
+
+        public string MaintenanceEventType { get; set; }
+
+        public string MaintenanceEventStatus { get; set; }
+
+        public string MaintenanceEventSource { get; set; }
 
         public SessionHostsStartInfo ToSessionHostsStartInfo()
         {

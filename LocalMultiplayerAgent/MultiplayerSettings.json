@@ -2,8 +2,13 @@
     "RunContainer": false,
     "OutputFolder": "",
     "NumHeartBeatsForActivateResponse": 10,
+    "NumHeartBeatsForMaintenanceEventResponse": 0, // a value < 1 will disable the maintenance event
     "NumHeartBeatsForTerminateResponse": 60,
     "AgentListeningPort": 56001,
+    // Valid maintenance event values are explained here: https://learn.microsoft.com/azure/virtual-machines/windows/scheduled-events#event-properties
+    "MaintenanceEventType": "Reboot",
+    "MaintenanceEventStatus": "Scheduled",
+    "MaintenanceEventSource": "Platform",
     "AssetDetails": [
         {
             "MountPath": "C:\\Assets",

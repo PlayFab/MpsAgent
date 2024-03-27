@@ -54,6 +54,7 @@ namespace LocalMultiplayerAgent.Controllers
             Operation op = Operation.Continue;
             SessionConfig config = null;
             Console.WriteLine($"CurrentGameState: {heartbeatRequest.CurrentGameState}");
+            bool sendMaintenanceEvent = false;
 
             if(!ValidateSessionHostStatusTransition(previousSessionHostStatus, currentGameState))
             {
@@ -78,22 +79,32 @@ namespace LocalMultiplayerAgent.Controllers
                     config = Globals.SessionConfig;
                 }
 
+                sendMaintenanceEvent = (numHeartBeats == Globals.Settings.NumHeartBeatsForMaintenanceEventResponse);
+
                 HeartBeatsCount[sessionHostId]++;
             }
             else
             {
+                sendMaintenanceEvent = (numHeartBeats == 1);
                 HeartBeatsCount.TryAdd(sessionHostId, 1);
             }
 
             previousSessionHostStatus = currentGameState;
 
-            return Ok(new SessionHostHeartbeatInfo
+            SessionHostHeartbeatInfo heartbeatResponse = new SessionHostHeartbeatInfo
             {
                 CurrentGameState = currentGameState,
                 NextHeartbeatIntervalMs = DefaultHeartbeatIntervalMs,
                 Operation = op,
                 SessionConfig = config
-            });
+            };
+
+            if (_wasGsdkVersionLogged && sendMaintenanceEvent)
+            {
+                heartbeatResponse.MaintenanceSchedule = new(Globals.Settings.MaintenanceEventType, Globals.Settings.MaintenanceEventStatus, Globals.Settings.MaintenanceEventSource);
+            }
+
+            return Ok(heartbeatResponse);
         }
 
         private static bool _wasGsdkVersionLogged = false;

@@ -12,6 +12,7 @@ namespace LocalMultiplayerAgent.Controllers
     using Microsoft.Azure.Gaming.VmAgent.Model;
     using Microsoft.Extensions.Hosting;
     using Instrumentation;
+    using System.Collections.Generic;
 
     public class SessionHostController : Controller
     {
@@ -85,7 +86,7 @@ namespace LocalMultiplayerAgent.Controllers
             }
             else
             {
-                sendMaintenanceEvent = (numHeartBeats == 1);
+                sendMaintenanceEvent = (Globals.Settings.NumHeartBeatsForMaintenanceEventResponse == 1);
                 HeartBeatsCount.TryAdd(sessionHostId, 1);
             }
 
@@ -101,7 +102,25 @@ namespace LocalMultiplayerAgent.Controllers
 
             if (_wasGsdkVersionLogged && sendMaintenanceEvent)
             {
-                heartbeatResponse.MaintenanceSchedule = new(Globals.Settings.MaintenanceEventType, Globals.Settings.MaintenanceEventStatus, Globals.Settings.MaintenanceEventSource);
+                heartbeatResponse.MaintenanceSchedule = new()
+                {
+                    DocumentIncarnation = "1",
+                    MaintenanceEvents = new List<MaintenanceEvent>()
+                    {
+                        new()
+                        {
+                            EventId = Guid.NewGuid().ToString(),
+                            EventType = Globals.Settings.MaintenanceEventType,
+                            ResourceType = "VirtualMachine",
+                            AffectedResources = new List<string>() { "vmId" },
+                            EventStatus = Globals.Settings.MaintenanceEventStatus,
+                            NotBefore = DateTime.UtcNow.AddMinutes(5),
+                            Description = $"Scheduled {Globals.Settings.MaintenanceEventType} event for VM",
+                            EventSource = Globals.Settings.MaintenanceEventSource,
+                            DurationInSeconds = 300
+                        }
+                    }
+                };
             }
 
             return Ok(heartbeatResponse);

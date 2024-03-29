@@ -15,6 +15,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     {
         public string DocumentIncarnation { get; set; }
 
+        [JsonProperty("Events")]
         public IList<MaintenanceEvent> MaintenanceEvents { get; set; }
 
         public MaintenanceSchedule() { }

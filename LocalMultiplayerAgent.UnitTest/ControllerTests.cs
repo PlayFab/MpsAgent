@@ -30,6 +30,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
             string sessionHostId = "testSessionHostId";
 
+            Globals.Settings = new();
+
             // send the first heartbeat with "StandingBy"
             SessionHostHeartbeatInfo heartbeat = new SessionHostHeartbeatInfo()
             {

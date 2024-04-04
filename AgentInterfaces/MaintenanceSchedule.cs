@@ -50,6 +50,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         public DateTime? NotBefore { get; set; }
 
+        public string Description { get; set; }
+
         public string EventSource { get; set; }
 
         public int DurationInSeconds { get; set; }

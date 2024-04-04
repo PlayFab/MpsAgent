@@ -12,6 +12,7 @@ namespace LocalMultiplayerAgent.Controllers
     using Microsoft.Azure.Gaming.VmAgent.Model;
     using Microsoft.Extensions.Hosting;
     using Instrumentation;
+    using System.Collections.Generic;
 
     public class SessionHostController : Controller
     {
@@ -54,6 +55,7 @@ namespace LocalMultiplayerAgent.Controllers
             Operation op = Operation.Continue;
             SessionConfig config = null;
             Console.WriteLine($"CurrentGameState: {heartbeatRequest.CurrentGameState}");
+            bool sendMaintenanceEvent = false;
 
             if(!ValidateSessionHostStatusTransition(previousSessionHostStatus, currentGameState))
             {
@@ -78,22 +80,50 @@ namespace LocalMultiplayerAgent.Controllers
                     config = Globals.SessionConfig;
                 }
 
+                sendMaintenanceEvent = (numHeartBeats == Globals.Settings.NumHeartBeatsForMaintenanceEventResponse);
+
                 HeartBeatsCount[sessionHostId]++;
             }
             else
             {
+                sendMaintenanceEvent = (Globals.Settings.NumHeartBeatsForMaintenanceEventResponse == 1);
                 HeartBeatsCount.TryAdd(sessionHostId, 1);
             }
 
             previousSessionHostStatus = currentGameState;
 
-            return Ok(new SessionHostHeartbeatInfo
+            SessionHostHeartbeatInfo heartbeatResponse = new SessionHostHeartbeatInfo
             {
                 CurrentGameState = currentGameState,
                 NextHeartbeatIntervalMs = DefaultHeartbeatIntervalMs,
                 Operation = op,
                 SessionConfig = config
-            });
+            };
+
+            if (_wasGsdkVersionLogged && sendMaintenanceEvent)
+            {
+                heartbeatResponse.MaintenanceSchedule = new()
+                {
+                    DocumentIncarnation = "1",
+                    MaintenanceEvents = new List<MaintenanceEvent>()
+                    {
+                        new()
+                        {
+                            EventId = Guid.NewGuid().ToString(),
+                            EventType = Globals.Settings.MaintenanceEventType,
+                            ResourceType = "VirtualMachine",
+                            AffectedResources = new List<string>() { "vmId" },
+                            EventStatus = Globals.Settings.MaintenanceEventStatus,
+                            NotBefore = DateTime.UtcNow.AddMinutes(5),
+                            Description = $"Scheduled {Globals.Settings.MaintenanceEventType} event for VM",
+                            EventSource = Globals.Settings.MaintenanceEventSource,
+                            DurationInSeconds = 300
+                        }
+                    }
+                };
+            }
+
+            return Ok(heartbeatResponse);
         }
 
         private static bool _wasGsdkVersionLogged = false;

@@ -15,8 +15,10 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     {
         public string DocumentIncarnation { get; set; }
 
-        [JsonProperty("events")]
+        [JsonProperty("Events")]
         public IList<MaintenanceEvent> MaintenanceEvents { get; set; }
+
+        public string ReportingVmId { get; set; }
 
         public MaintenanceSchedule() { }
 
@@ -27,6 +29,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         {
             DocumentIncarnation = other.DocumentIncarnation;
             MaintenanceEvents = other.MaintenanceEvents.Select((e) => new MaintenanceEvent(e)).ToList();
+            ReportingVmId = other.ReportingVmId;
         }
     }
 
@@ -40,7 +43,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         public string ResourceType { get; set; }
 
-        [JsonProperty("resources")]
+        [JsonProperty("Resources")]
         public IList<string> AffectedResources { get; set; }
 
         public string EventStatus { get; set; }

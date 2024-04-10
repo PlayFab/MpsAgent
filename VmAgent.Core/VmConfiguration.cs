@@ -54,6 +54,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         /// Prefix used for all the Public Ip Addresses environment variables (count, ip addresss, fqdn, routing type)
         public const string PublicIpAddressesEnvVariablePrefix = "PF_PUBLIC_IP_ADDRESSES";
 
+        // Prefix for each secret configured in PlayFab MPS and saved as environment variable
+        public const string PlayfabMpsSecretEnvVariablePrefix = "PF_MPS_SECRET";
+
         private static readonly byte[] PlayFabTitleIdPrefix = BitConverter.GetBytes(0xFFFFFFFFFFFFFFFF);
 
         public int ListeningPort { get; }
@@ -117,6 +120,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
 
             environmentVariables.AddRange(GetPublicIpAddressesEnvironmentVariables(sessionHostsStartInfo));
 
+            environmentVariables.AddRange(GetEnvironmentVariablesWithPlayFabMpsSecrets(sessionHostsStartInfo));
+
             return environmentVariables;
         }
 
@@ -146,6 +151,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             }    
 
             return publicIPAddressesEnvironmentVariables;
+        }
+
+        private static IDictionary<string, string> GetEnvironmentVariablesWithPlayFabMpsSecrets(SessionHostsStartInfo sessionHostsStartInfo)
+        {
+            return sessionHostsStartInfo.GameSecrets?.ToDictionary(
+                secretDetail => $"{PlayfabMpsSecretEnvVariablePrefix}_{secretDetail.Name}", secretDetail => secretDetail.Value) ?? new Dictionary<string, string>();
         }
 
         private static string GetSharedContentFolderPath(SessionHostsStartInfo sessionHostsStartInfo, VmConfiguration vmConfiguration)

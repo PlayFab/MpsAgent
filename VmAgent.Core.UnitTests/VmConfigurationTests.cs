@@ -129,6 +129,30 @@ namespace VmAgent.Core.UnitTests
             envVariables.Should().Contain("PF_PUBLIC_IP_ADDRESSES_ROUTING_TYPE_1", "Microsoft");
         }
 
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void EnvironmentVariablesWithMpsSecrets()
+        {
+            SessionHostsStartInfo sessionHostsStartInfo = CreateSessionHostStartInfo(new Dictionary<string, string>());
+            sessionHostsStartInfo.GameSecrets = new SecretDetail[]
+            {
+                new SecretDetail()
+                {
+                    Name = "secret1",
+                    Value = "value1"
+                },
+                new SecretDetail()
+                {
+                    Name = "secret2",
+                    Value = "value2"
+                }
+            };
+
+            IDictionary<string, string> envVariables = VmConfiguration.GetCommonEnvironmentVariables(sessionHostsStartInfo, VmConfiguration);
+            envVariables.Should().Contain("PF_MPS_SECRET_secret1", "value1");
+            envVariables.Should().Contain("PF_MPS_SECRET_secret2", "value2");
+        }
+
 
         private SessionHostsStartInfo CreateSessionHostStartInfo(IDictionary<string, string> buildMetadata = null, SessionHostType sessionHostType = SessionHostType.Process)
         {

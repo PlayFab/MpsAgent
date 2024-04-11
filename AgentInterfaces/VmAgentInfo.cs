@@ -44,6 +44,8 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
 
         public ToSViolationRating ToSViolationRating { get; set; }
 
+        public IReadOnlyList<VmCondition> VmConditions { get; set; } 
+
         public string ToLogString()
         {
             if (SessionHostHeartbeatMap?.Count > 10)
@@ -51,8 +53,9 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
                 string maintenanceSchedule = MaintenanceSchedule?.ToJsonString() ?? string.Empty;
                 string networkConfiguration = NetworkConfiguration?.ToJsonString() ?? string.Empty;
                 string sessionHostSummary = SessionHostHeartbeatMap.Values.GroupBy(x => x.CurrentGameState).ToDictionary(y => y.Key, y => y.Count()).ToJsonString();
+                string vmConditions = VmConditions?.ToJsonString() ?? string.Empty;
                 return
-                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutputId}, ToSViolationRating: {ToSViolationRating}";
+                    $"VmState: {VmState}, AssignmentId: {AssignmentId ?? string.Empty}, AgentProcessGuid : {AgentProcessGuid}, SequenceNumber {SequenceNumber}, MaintenanceSchedule : {maintenanceSchedule}, IsUnassignable: {IsUnassignable ?? false}, NetworkConfiguration: {networkConfiguration}, SessionHostSummary: {sessionHostSummary}, VmMonitoringOutput: {VmMonitoringOutputId}, ToSViolationRating: {ToSViolationRating}, VmConditions: {vmConditions}";
             }
 
             return this.ToJsonString();

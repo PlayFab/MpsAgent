@@ -11,6 +11,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::VmAgent.Core.Interfaces;
 
     public interface ISystemOperations
     {
@@ -82,6 +83,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         IEnumerable<FileInfo> GetFiles(DirectoryInfo source, bool recursive);
 
-        IReadOnlyCollection<string> ListProcesses();
+        ProcessSummary[] ListProcesses();
     }
 }

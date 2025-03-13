@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
     using VmAgent.Core;
 
     /// <summary>
-    ///     Simple class to keep track of global values for the agent
+    /// Simple class to keep track of global values for the agent
     /// </summary>
     public static class Globals
     {

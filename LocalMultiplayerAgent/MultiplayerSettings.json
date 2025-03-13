@@ -5,10 +5,11 @@
     "NumHeartBeatsForMaintenanceEventResponse": 0, // a value < 1 will disable the maintenance event
     "NumHeartBeatsForTerminateResponse": 60,
     "AgentListeningPort": 56001,
+    // Uncomment the following values if you want to test for the Azure maintenance event
     // Valid maintenance event values are explained here: https://learn.microsoft.com/azure/virtual-machines/windows/scheduled-events#event-properties
-    "MaintenanceEventType": "Reboot",
-    "MaintenanceEventStatus": "Scheduled",
-    "MaintenanceEventSource": "Platform",
+    //"MaintenanceEventType": "Reboot",
+    //"MaintenanceEventStatus": "Scheduled",
+    //"MaintenanceEventSource": "Platform",
     "AssetDetails": [
         {
             "MountPath": "C:\\Assets",
@@ -44,7 +45,7 @@
         "ImageDetails": {
             "Registry": "mcr.microsoft.com",
             "ImageName": "playfab/multiplayer",
-            "ImageTag": "wsc-10.0.17763.5576",
+            "ImageTag": "wsc-10.0.20348.3207",
             "Username": "",
             "Password": ""
         }

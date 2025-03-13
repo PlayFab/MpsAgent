@@ -3,10 +3,10 @@
 
 <#
 .DESCRIPTION
-This script sets up your computer to run the Playfab Multiplayer Server LocalMultiplayerAgent
+This script sets up your computer to run the PlayFab Multiplayer Server LocalMultiplayerAgent
 
 .PARAMETER AgentPort
-When specified, override the port that will be used by the agent.
+When specified, override the port that will be used by the agent. Do not modify it unless necessary.
 
 #>
 param
@@ -67,7 +67,7 @@ function AddFirewallRules
 }
 
 # Make sure any errors by default would stop the execution of the script and show as start task failure.
-# This can be overriden explicitly for cmdlets where we don't care about the error.
+# This can be overridden explicitly for cmdlets where we don't care about the error.
 $ErrorActionPreference = "Stop"
 
 # Start-Service is idempotent. If the service is already running, it is ignored without error.
@@ -77,7 +77,7 @@ CreateDockerNetwork;
 Write-Host "Verifying firewall rules."
 AddFirewallRules $AgentPort;
 
-# Pull the docker image for playfab windows container image.
+# Pull the docker image for PlayFab windows container image.
 Write-Host "Pulling docker image.."
-docker pull mcr.microsoft.com/playfab/multiplayer:wsc-10.0.17763.5576
+docker pull mcr.microsoft.com/playfab/multiplayer:wsc-10.0.20348.3207
 

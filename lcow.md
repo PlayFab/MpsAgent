@@ -36,7 +36,7 @@ To run your containerized Linux game servers on Windows, you'll need to perform 
             {
                 "NodePort": 56100,
                 "GamePort": {
-                    "Name": "game_port",
+                    "Name": "gameport",
                     "Number": 7777,
                     "Protocol": "TCP"
                 }

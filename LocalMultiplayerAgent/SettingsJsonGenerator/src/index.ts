@@ -19,7 +19,7 @@ let SessionGuId = crypto.randomUUID();
 const WINDOWS_DEFAULT_CONTAINER_DETAILS = {
 	registry: "mcr.microsoft.com",
 	imagename: "playfab/multiplayer",
-	imagetag: "wsc-10.0.17763.973.1",
+	imagetag: "wsc-10.0.20348.3207",
 	username: "",
 	password: "",
 };

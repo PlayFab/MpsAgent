@@ -2,17 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <!-- Allows latest features to be made available such as async Main method.-->
     <LangVersion>latest</LangVersion>
     <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
     <RootNamespace>Microsoft.Azure.Gaming.LocalMultiplayerAgent</RootNamespace>
-    <!-- Temporary, for getting a successful build -->
-    <RunCodeAnalysis>false</RunCodeAnalysis>  
-  </PropertyGroup>
-
-  <!-- Property Group for Assembly Info attributes. -->
-  <PropertyGroup>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,9 +12,9 @@
     <PackageReference Include="Docker.DotNet" Version="3.125.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.0.0" />
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.2.3" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview5.19227.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-    <PackageReference Include="PlayFabAllSDK" Version="1.108.220118" />
+    <PackageReference Include="PlayFabAllSDK" Version="1.196.250228" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.1" />

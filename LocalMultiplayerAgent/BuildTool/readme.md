@@ -30,7 +30,7 @@ Technically, you can just run game server deployment without testing with LMA **
             "ImageDetails": {
                 "Registry": "mcr.microsoft.com",
                 "ImageName": "playfab/multiplayer",
-                "ImageTag": "wsc-10.0.17763.2458",
+                "ImageTag": "wsc-10.0.20348.3207",
                 "Username": "",
                 "Password": ""
              }

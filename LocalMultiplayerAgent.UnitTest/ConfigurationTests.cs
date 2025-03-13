@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
             {
                 ""NodePort"": 56100,
                 ""GamePort"": {
-                    ""Name"": ""game_port"",
+                    ""Name"": ""gameport"",
                     ""Number"": 3600,
                     ""Protocol"": ""TCP""
                 }

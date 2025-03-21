@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             processStartInfo.WorkingDirectory = sessionHostStartInfo.GameWorkingDirectory ?? Path.GetDirectoryName(executableFileName);
             processStartInfo.Environment.AddRange(sessionHostConfiguration.GetEnvironmentVariablesForSessionHost(instanceNumber, sessionHostUniqueId, sessionHostManager.VmAgentSettings));
 
-            _logger.LogInformation($"Starting process for session host with instance number {instanceNumber} and process info: FileName - {executableFileName}, Args - {arguments}.", true);
+            _logger.LogInformation($"Starting process for session host with instance number {instanceNumber} and process info: FileName - {executableFileName}, Args - {arguments}.", sanitize: true);
 
             SessionHostInfo sessionHost = sessionHostManager.AddNewSessionHost(sessionHostUniqueId, sessionHostStartInfo.AssignmentId, instanceNumber, sessionHostUniqueId, SessionHostType.Process);
             sessionHostConfiguration.Create(instanceNumber, sessionHostUniqueId, GetVmAgentIpAddress(), _vmConfiguration, sessionHostUniqueId);

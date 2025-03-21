@@ -1,15 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System;
+
 namespace Microsoft.Azure.Gaming.VmAgent.Core
 {
-    using System;
-    using System.Collections.Generic;
-    using ApplicationInsights;
-    using ApplicationInsights.DataContracts;
-    using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-
     public class MultiLogger : ILogger
     {
         private readonly ILogger _logger;
@@ -21,56 +19,61 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             _genevaOtelLogger = genevaOpenTelemetryLogger;
         }
 
-        public void LogVerbose(string message)
+        public void LogVerbose(string message, bool sanitize = false)
         {
+            message = SanitizeMessage(message, sanitize);
             _logger.LogInformation(message);
             _genevaOtelLogger?.LogInformation(message);
         }
 
-        public void LogInformation(string message)
+        public void LogInformation(string message, bool sanitize = false)
         {
+            message = SanitizeMessage(message, sanitize);
             _logger.LogInformation(message);
             _genevaOtelLogger?.LogInformation(message);
         }
 
-        public void LogWarning(string message)
+        public void LogWarning(string message, bool sanitize = false)
         {
+            message = SanitizeMessage(message, sanitize);
             _logger.LogWarning(message);
             _genevaOtelLogger?.LogWarning(message);
         }
 
-        public void LogError(string message)
+        public void LogError(string message, bool sanitize = false)
         {
+            message = SanitizeMessage(message, sanitize);
             _logger.LogError(message);
             _genevaOtelLogger?.LogError(message);
         }
 
-        public void LogException(Exception exception)
+        public void LogException(Exception exception, bool sanitize = false)
         {
-            string message = exception.ToString();
+            string message = SanitizeMessage(exception.ToString(), sanitize);
             _logger.LogError(message);
             _genevaOtelLogger?.LogError(message);
         }
 
-        public void LogException(string message, Exception exception)
+        public void LogException(string message, Exception exception, bool sanitize = false)
         {
-            string logMessage = $"{message}. Exception: {exception}";
+            string logMessage = SanitizeMessage($"{message}. Exception: {exception}", sanitize);
             _logger.LogError(logMessage);
             _genevaOtelLogger?.LogError(logMessage);
         }
 
-        public void LogEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> metrics)
+        public void LogEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> metrics, bool sanitize = false)
         {
             string propertiesString = properties == null ? CommonSettings.NullStringValue : JsonConvert.SerializeObject(properties, CommonSettings.JsonSerializerSettings);
             string metricsString = metrics == null ? CommonSettings.NullStringValue : JsonConvert.SerializeObject(metrics, CommonSettings.JsonSerializerSettings);
-            string message = $"Event: {eventName}. Properties: {propertiesString}, Metrics: {metricsString}";
+            string message = SanitizeMessage($"Event: {eventName}. Properties: {propertiesString}, Metrics: {metricsString}", sanitize);
             _logger.LogInformation(message);
             _genevaOtelLogger?.LogInformation(message);
         }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            _logger.Log(logLevel, eventId, state, exception, formatter);
+            string message = formatter(state, exception);
+            _logger.Log(logLevel, eventId, state, exception, (s, e) => message);
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -81,6 +84,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
         public IDisposable BeginScope<TState>(TState state)
         {
             return _logger.BeginScope(state);
+        }
+
+        private string SanitizeMessage(string message, bool sanitize)
+        {
+            return sanitize ? LogSanitizer.Sanitize(message) : message;
         }
     }
 }

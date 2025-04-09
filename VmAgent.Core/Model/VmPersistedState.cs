@@ -4,10 +4,12 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Model
 {
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using AgentInterfaces;
 
-    public class VmPersistedState
+    public class VmPersistedState: IPersistedState
     {
         public VmState VmState { get; set; } = VmState.Unassigned;
 
@@ -46,6 +48,43 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
                     new ConcurrentDictionary<string, SessionHostHeartbeatInfo>(SessionHostsMap.ToDictionary(x => x.Key,
                         x => x.Value.SessionHostHeartbeatRequest))
             };
+        }
+
+        public string ToRedactedString()
+        {
+            IDictionary<string, SessionHostInfo> t = SessionHostsMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            return JsonSerializer.Serialize(
+                new {
+                    this.VmState,
+                    // create a new SessionHostsMap that doesn't have SessionHostHeartbeatInfo or SessionHostGoalStateInfo
+                    SessionHostsMap = SessionHostsMap.ToDictionary(
+                        (KeyValuePair<string, SessionHostInfo> kvp) => { return kvp.Key; },
+                        (KeyValuePair<string, SessionHostInfo> kvp) =>
+                        {
+                            SessionHostInfo sessionHostInfo = kvp.Value;
+                            return new SessionHostInfo(
+                                sessionHostInfo.UniqueId,
+                                sessionHostInfo.AssignmentId,
+                                sessionHostInfo.InstanceNumber,
+                                sessionHostInfo.LogFolderId,
+                                sessionHostInfo.Type);
+                        }),
+                    this.AssetRetrievalResult,
+                    this.ImageRetrievalResult,
+                    GameResourceDetails = new SessionHostsStartInfo()
+                    {
+                        AssetDetails = GameResourceDetails.AssetDetails,
+                        AssignmentId = GameResourceDetails.AssignmentId,
+                        Count = GameResourceDetails.Count,
+                        DeploymentMetadata = null,
+                        DownloadAssetsInStreaming = GameResourceDetails.DownloadAssetsInStreaming,
+                        FQDN = GameResourceDetails.FQDN,
+
+                    },
+                    this.MaintenanceSchedule,
+                    this.IsSessionHostStartupScriptExecutionComplete,
+                });
         }
     }
 }

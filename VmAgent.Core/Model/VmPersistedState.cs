@@ -6,8 +6,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.Json;
     using AgentInterfaces;
+    using Newtonsoft.Json;
 
     public class VmPersistedState: IPersistedState
     {
@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
         {
             IDictionary<string, SessionHostInfo> t = SessionHostsMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            return JsonSerializer.Serialize(
+            return JsonConvert.SerializeObject(
                 new
                 {
                     this.VmState,

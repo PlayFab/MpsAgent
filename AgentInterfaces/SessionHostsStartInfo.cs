@@ -165,14 +165,15 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public SessionHostsStartInfo ToRedacted()
         {
             SessionHostsStartInfo clone = (SessionHostsStartInfo)this.MemberwiseClone();
-            clone.GameCertificates = clone.GameCertificates.Select(cert => cert.ToRedacted()).ToArray();
-            clone.GameSecrets = clone.GameSecrets.Select(cert => cert.ToRedacted()).ToArray();
-            clone.ImageDetails = clone.ImageDetails.ToRedacted();
-            clone.ImageReplicationDetails = clone.ImageReplicationDetails.ToRedacted();
-            clone.IpSecCertificate = clone.IpSecCertificate.ToRedacted();
-            clone.XblcCertificate = clone.XblcCertificate.ToRedacted();
-            clone.LogUploadParameters = clone.LogUploadParameters.ToRedacted();
-            clone.MonitoringApplicationConfiguration = clone.MonitoringApplicationConfiguration.ToRedacted();
+            clone.AssetDetails = clone.AssetDetails?.Select(asset => asset.ToRedacted()).ToArray();
+            clone.GameCertificates = clone.GameCertificates?.Select(cert => cert.ToRedacted()).ToArray();
+            clone.GameSecrets = clone.GameSecrets?.Select(cert => cert.ToRedacted()).ToArray();
+            clone.ImageDetails = clone.ImageDetails?.ToRedacted();
+            clone.ImageReplicationDetails = clone.ImageReplicationDetails?.ToRedacted();
+            clone.IpSecCertificate = clone.IpSecCertificate?.ToRedacted();
+            clone.XblcCertificate = clone.XblcCertificate?.ToRedacted();
+            clone.LogUploadParameters = clone.LogUploadParameters?.ToRedacted();
+            clone.MonitoringApplicationConfiguration = clone.MonitoringApplicationConfiguration?.ToRedacted();
 
             return clone;
         }
@@ -261,7 +262,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public MonitoringApplicationConfiguration ToRedacted()
         {
             MonitoringApplicationConfiguration clone = (MonitoringApplicationConfiguration)this.MemberwiseClone();
-            clone.AssetReference = AssetReference.ToRedacted();
+            clone.AssetReference = clone.AssetReference?.ToRedacted();
             return clone;
         }
     }

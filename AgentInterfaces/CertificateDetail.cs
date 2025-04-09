@@ -48,5 +48,14 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Expiration date of the certificate.
         /// </summary>
         public DateTime ExpirationTimeUtc { get; set; }
+
+        public CertificateDetail ToRedacted()
+        {
+            CertificateDetail clone = (CertificateDetail)this.MemberwiseClone();
+            clone.PfxContents = null;
+            clone.PemContents = null;
+
+            return clone;
+        }
     }
 }

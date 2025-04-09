@@ -35,5 +35,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// </summary>
         public string Password { get; set; }
 
+        public ContainerImageDetails ToRedacted()
+        {
+            ContainerImageDetails clone = (ContainerImageDetails)this.MemberwiseClone();
+            clone.Username = null;
+            clone.Password = null;
+
+            return clone;
+        }
     }
 }

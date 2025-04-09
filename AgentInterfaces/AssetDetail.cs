@@ -22,5 +22,12 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// For developer testing, specify a file path accessible locally.
         /// </summary>
         public string LocalFilePath { get; set; }
+
+        public AssetDetail ToRedacted()
+        {
+            AssetDetail clone = (AssetDetail)this.MemberwiseClone();
+            clone.SasTokens = null;
+            return clone;
+        }
     }
 }

@@ -55,33 +55,16 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
             IDictionary<string, SessionHostInfo> t = SessionHostsMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return JsonSerializer.Serialize(
-                new {
+                new
+                {
                     this.VmState,
                     // create a new SessionHostsMap that doesn't have SessionHostHeartbeatInfo or SessionHostGoalStateInfo
                     SessionHostsMap = SessionHostsMap.ToDictionary(
-                        (KeyValuePair<string, SessionHostInfo> kvp) => { return kvp.Key; },
-                        (KeyValuePair<string, SessionHostInfo> kvp) =>
-                        {
-                            SessionHostInfo sessionHostInfo = kvp.Value;
-                            return new SessionHostInfo(
-                                sessionHostInfo.UniqueId,
-                                sessionHostInfo.AssignmentId,
-                                sessionHostInfo.InstanceNumber,
-                                sessionHostInfo.LogFolderId,
-                                sessionHostInfo.Type);
-                        }),
+                        (KeyValuePair<string, SessionHostInfo> kvp) => kvp.Key,
+                        (KeyValuePair<string, SessionHostInfo> kvp) => kvp.Value.ToRedacted()),
                     this.AssetRetrievalResult,
                     this.ImageRetrievalResult,
-                    GameResourceDetails = new SessionHostsStartInfo()
-                    {
-                        AssetDetails = GameResourceDetails.AssetDetails,
-                        AssignmentId = GameResourceDetails.AssignmentId,
-                        Count = GameResourceDetails.Count,
-                        DeploymentMetadata = null,
-                        DownloadAssetsInStreaming = GameResourceDetails.DownloadAssetsInStreaming,
-                        FQDN = GameResourceDetails.FQDN,
-
-                    },
+                    GameResourceDetails = GameResourceDetails.ToRedacted(),
                     this.MaintenanceSchedule,
                     this.IsSessionHostStartupScriptExecutionComplete,
                 });

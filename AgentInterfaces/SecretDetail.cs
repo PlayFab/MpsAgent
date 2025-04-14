@@ -26,5 +26,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Expiration date of this secret
         /// </summary>
         public string ExpirationDate { get; set; }
+
+        public SecretDetail ToRedacted()
+        {
+            SecretDetail clone = (SecretDetail)this.MemberwiseClone();
+            clone.Value = null;
+
+            return clone;
+        }
     }
 }

@@ -4,10 +4,12 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Model
 {
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using AgentInterfaces;
+    using Newtonsoft.Json;
 
-    public class VmPersistedState
+    public class VmPersistedState: IPersistedState
     {
         public VmState VmState { get; set; } = VmState.Unassigned;
 
@@ -46,6 +48,26 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
                     new ConcurrentDictionary<string, SessionHostHeartbeatInfo>(SessionHostsMap.ToDictionary(x => x.Key,
                         x => x.Value.SessionHostHeartbeatRequest))
             };
+        }
+
+        public string ToRedactedString()
+        {
+            IDictionary<string, SessionHostInfo> t = SessionHostsMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            return JsonConvert.SerializeObject(
+                new
+                {
+                    this.VmState,
+                    // create a new SessionHostsMap that doesn't have SessionHostHeartbeatInfo or SessionHostGoalStateInfo
+                    SessionHostsMap = SessionHostsMap.ToDictionary(
+                        (KeyValuePair<string, SessionHostInfo> kvp) => kvp.Key,
+                        (KeyValuePair<string, SessionHostInfo> kvp) => kvp.Value.ToRedacted()),
+                    this.AssetRetrievalResult,
+                    this.ImageRetrievalResult,
+                    GameResourceDetails = GameResourceDetails.ToRedacted(),
+                    this.MaintenanceSchedule,
+                    this.IsSessionHostStartupScriptExecutionComplete,
+                });
         }
     }
 }

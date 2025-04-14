@@ -9,6 +9,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     using Docker.DotNet.Models;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json;
+    using System.Linq;
 
     public class SessionHostsStartInfo
     {
@@ -160,6 +161,22 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// Configuration object for the VM Startup Script. 
         /// </summary>
         public VmStartupScriptConfiguration VmStartupScriptConfiguration {get;set;}
+
+        public SessionHostsStartInfo ToRedacted()
+        {
+            SessionHostsStartInfo clone = (SessionHostsStartInfo)this.MemberwiseClone();
+            clone.AssetDetails = clone.AssetDetails?.Select(asset => asset.ToRedacted()).ToArray();
+            clone.GameCertificates = clone.GameCertificates?.Select(cert => cert.ToRedacted()).ToArray();
+            clone.GameSecrets = clone.GameSecrets?.Select(cert => cert.ToRedacted()).ToArray();
+            clone.ImageDetails = clone.ImageDetails?.ToRedacted();
+            clone.ImageReplicationDetails = clone.ImageReplicationDetails?.ToRedacted();
+            clone.IpSecCertificate = clone.IpSecCertificate?.ToRedacted();
+            clone.XblcCertificate = clone.XblcCertificate?.ToRedacted();
+            clone.LogUploadParameters = clone.LogUploadParameters?.ToRedacted();
+            clone.MonitoringApplicationConfiguration = clone.MonitoringApplicationConfiguration?.ToRedacted();
+
+            return clone;
+        }
     }
 
     public class LogUploadParameters
@@ -168,6 +185,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         public string BlobServiceEndpoint { get; set; }
 
         public string SharedAccessSignatureToken { get; set; }
+
+        public LogUploadParameters ToRedacted()
+        {
+            LogUploadParameters clone = (LogUploadParameters)this.MemberwiseClone();
+            clone.SharedAccessSignatureToken = null;
+            return clone;
+        }
     }
     
     public class LinuxInstrumentationConfiguration
@@ -234,6 +258,13 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// null means that it should run until the vm gets unassigned.
         /// </summary>
         public TimeSpan? OnStartRuntime { get; set; }
+
+        public MonitoringApplicationConfiguration ToRedacted()
+        {
+            MonitoringApplicationConfiguration clone = (MonitoringApplicationConfiguration)this.MemberwiseClone();
+            clone.AssetReference = clone.AssetReference?.ToRedacted();
+            return clone;
+        }
     }
 
     public class VmStartupScriptConfiguration 

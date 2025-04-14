@@ -48,5 +48,14 @@ namespace Microsoft.Azure.Gaming.VmAgent.Model
         /// Guid that specifies the subfolder under C:/Logs where this session is logging to
         /// </summary>
         public string LogFolderId { get; set; }
+
+        public SessionHostInfo ToRedacted()
+        {
+            SessionHostInfo clone = (SessionHostInfo)this.MemberwiseClone();
+            clone.SessionHostHeartbeatRequest = null;
+            clone.GoalStateInfo = null;
+
+            return clone;
+        }
     }
 }

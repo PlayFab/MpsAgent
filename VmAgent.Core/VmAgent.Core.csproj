@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.6.3</PackageVersion>
+    <PackageVersion>1.6.4</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageDescription>Helper library for LocalMultiplayerAgent, part of Azure PlayFab Multiplayer Servers</PackageDescription>
     <PackageProjectUrl>https://github.com/PlayFab/MpsAgent</PackageProjectUrl>

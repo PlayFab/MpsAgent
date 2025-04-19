@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     public class CertificateDetail
     {
         /// <summary>
-        /// Identifier for the certificate. When we save it
+        /// Identifier for the certificate. LastStateTransitionTimestamp we save it
         /// to the VM, the filename will be [Name].pfx
         /// </summary>
         public string Name { get; set; }

@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
     using System.Collections.Generic;
     using System.Linq;
 
+    [Serializable]
     public class AssignmentData
     {
         public ConcurrentDictionary<string, SessionHostHeartbeatInfo> SessionHostHeartbeatMap { get; set; }

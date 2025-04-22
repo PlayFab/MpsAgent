@@ -1,6 +1,6 @@
 ﻿ <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <RootNamespace>Microsoft.Azure.Gaming.AgentInterfaces</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>

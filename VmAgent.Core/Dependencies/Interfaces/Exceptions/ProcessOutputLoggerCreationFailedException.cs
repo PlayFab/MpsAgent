@@ -5,7 +5,6 @@ using System.Text;
 
 namespace VmAgent.Core.Dependencies.Interfaces.Exceptions
 {
-    [Serializable]
     public class ProcessOuputLoggerCreationFailedException : Exception
     {
         public ProcessOuputLoggerCreationFailedException(string message) : base(message)

@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         private const string DockerUnixDomainSocket = "unix:///var/run/docker.sock";
 
-        private const string DockerApiVersion = "1.25";
+        private const string DockerApiVersion = "1.44";
         private static readonly ContainerStartParameters DefaultStartParameters = new ContainerStartParameters();
 
         private readonly double _createImageRetryTimeMins = 5.0;

@@ -16,10 +16,10 @@
     <PackageProjectUrl>https://github.com/PlayFab/MpsAgent</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PlayFab/MpsAgent</RepositoryUrl>
     <Authors>Microsoft</Authors>
-    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Docker.DotNet" Version="3.125.4" />
+    <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />

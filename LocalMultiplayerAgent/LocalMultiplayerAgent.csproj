@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Microsoft.Azure.Gaming.LocalMultiplayerAgent</RootNamespace>
   </PropertyGroup>
 
@@ -12,7 +10,6 @@
     <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.0.0" />
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.2.3" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
     <PackageReference Include="PlayFabAllSDK" Version="1.196.250228" />
   </ItemGroup>

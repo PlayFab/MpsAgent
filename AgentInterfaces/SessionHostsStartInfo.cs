@@ -184,6 +184,7 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         // For example: https://account.blob.core.windows.net/
         public string BlobServiceEndpoint { get; set; }
 
+        [Obsolete]
         public string SharedAccessSignatureToken { get; set; }
 
         public LogUploadParameters ToRedacted()

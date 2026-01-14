@@ -3,7 +3,6 @@ using Microsoft.Azure.Gaming.VmAgent.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace VmAgent.Core.UnitTests
 {
@@ -23,12 +22,14 @@ namespace VmAgent.Core.UnitTests
                         new AssetDetail()
                         {
                             LocalFilePath = @"C:\Assets\myAsset.zip",
-                            SasTokens = ["SECRET", "ANOTHER_SECRET"]
+                            SasTokens = ["SECRET", "ANOTHER_SECRET"],
+                            DownloadUris = ["https://storage.azure.com/file1", "https://storage.azure.com/file2" ]
                         },
                         new AssetDetail()
                         {
                             LocalFilePath = @"C:\Assets\myAsset2.zip",
-                            SasTokens = ["SECRET", "ANOTHER_SECRET"]
+                            SasTokens = ["SECRET", "ANOTHER_SECRET"],
+                            DownloadUris = ["https://storage.azure.com/file3", "https://storage.azure.com/file4" ]
                         }
                     ],
                     AssignmentId = "id",
@@ -79,6 +80,7 @@ namespace VmAgent.Core.UnitTests
             string redactedString = persistedState.ToRedactedString();
             Assert.IsFalse(redactedString.Contains("SECRET"));
             Assert.IsTrue(redactedString.Contains("hi.com")); // sanity check
+            Assert.IsTrue(redactedString.Contains("https://storage.azure.com/file1")); // sanity check
         }
     }
 }

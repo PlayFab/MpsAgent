@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Gaming.AgentInterfaces
 {
+    using System;
     using System.Collections.Generic;
 
     public class AssetDetail
@@ -16,7 +17,14 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// A prioritized list of shared access signature tokens one per region. The first token is for the storage account in the local region.
         /// The next few tokens should be for the nearby regions in case some accounts are unavailable.
         /// </summary>
+        [Obsolete("This property is deprecated. Please use DownloadUris instead.")]
         public IList<string> SasTokens { get; set; }
+
+        /// <summary>
+        /// A prioritized list of download URIs one per region. The first URI is for the storage account in the local region.
+        /// The next few URIs should be for the nearby regions in case some accounts are unavailable.
+        /// </summary>
+        public IList<string> DownloadUris { get; set; }
 
         /// <summary>
         /// For developer testing, specify a file path accessible locally.

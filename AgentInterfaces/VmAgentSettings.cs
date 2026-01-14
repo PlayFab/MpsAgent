@@ -54,5 +54,15 @@ namespace Microsoft.Azure.Gaming.AgentInterfaces
         /// to send heartbeats to endpoints that don't exist.
         /// </summary>
         public string[] HeartbeatUrls { get; set; }
+
+        /// <summary>
+        /// If true, use MSI authentication to download assets instead of SAS tokens.
+        /// </summary>
+        public bool UseMsiAuthForAssetDownloads { get; set; }
+
+        /// <summary>
+        /// If true, use MSI authentication to upload session host logs instead of SAS tokens.
+        /// </summary>
+        public bool UseMsiAuthForLogUploads { get; set; }
     }
 }

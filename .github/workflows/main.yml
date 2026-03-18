@@ -18,10 +18,11 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: windows-2022
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         dotnet-version: [ '10.x' ]
+        os: [windows-2022, macos-14]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -37,4 +38,22 @@ jobs:
         run: dotnet build --configuration Release --no-restore 
       - name: dotnet test 
         run: dotnet test --no-restore --verbosity normal 
+      - name: Publish LocalMultiplayerAgent (Windows)
+        if: matrix.os == 'windows-2022'
+        run: dotnet publish LocalMultiplayerAgent --runtime win-x64 -c Release -o LocalMultiplayerAgentPublishFolder-win -p:PublishSingleFile=true --self-contained true
+      - name: Publish LocalMultiplayerAgent (MacOS ARM)
+        if: matrix.os == 'macos-14'
+        run: dotnet publish LocalMultiplayerAgent --runtime osx-arm64 -c Release -o LocalMultiplayerAgentPublishFolder-macos -p:PublishSingleFile=true --self-contained true
+      - name: Upload Windows artifact
+        if: matrix.os == 'windows-2022'
+        uses: actions/upload-artifact@v4
+        with:
+          name: LocalMultiplayerAgent-win-x64
+          path: LocalMultiplayerAgentPublishFolder-win
+      - name: Upload MacOS artifact
+        if: matrix.os == 'macos-14'
+        uses: actions/upload-artifact@v4
+        with:
+          name: LocalMultiplayerAgent-osx-arm64
+          path: LocalMultiplayerAgentPublishFolder-macos
      

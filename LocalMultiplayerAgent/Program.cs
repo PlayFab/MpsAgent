@@ -34,8 +34,16 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             Console.WriteLine($"Check this page for debugging tips: {debuggingUrl}");
 
             // lcow stands for Linux Containers On Windows => https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
-            Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? GameServerEnvironment.Linux : GameServerEnvironment.Windows; // LocalMultiplayerAgent is running only on Windows for the time being
+            // On MacOS, we only support Linux containers, so -lcow is not needed
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Globals.GameServerEnvironment = GameServerEnvironment.Linux;
+            }
+            else
+            {
+                Globals.GameServerEnvironment = args.Contains("-lcow") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? GameServerEnvironment.Linux : GameServerEnvironment.Windows;
+            }
             bool createBuild = args.Contains("-build");
 
             MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(File.ReadAllText("MultiplayerSettings.json"));
@@ -77,6 +85,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(Globals.VmConfiguration);  // Linux Containers on Windows requires special folder mapping
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                VmPathHelper.AdaptFolderPathsForLinuxContainersOnMacOS(Globals.VmConfiguration);  // Linux Containers on MacOS requires special folder mapping
             }
 
             Directory.CreateDirectory(rootOutputFolder);

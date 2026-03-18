@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             get
             {
                 return Globals.GameServerEnvironment == GameServerEnvironment.Linux &&
-                       RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                       (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
             }
         }
 

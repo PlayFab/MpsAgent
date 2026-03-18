@@ -3,6 +3,7 @@
 
 namespace VmAgent.Core.UnitTests
 {
+    using System.Runtime.InteropServices;
     using FluentAssertions;
     using Microsoft.Azure.Gaming.VmAgent.Core;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -217,8 +218,7 @@ namespace VmAgent.Core.UnitTests
 
             // On non-Windows (Linux/MacOS), TempStorageRootContainer is "/data/"
             // On Windows, TempStorageRootContainer is "C:\"
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                    System.Runtime.InteropServices.OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 VmDirectories.TempStorageRootContainer.Should().Be(@"C:\");
             }

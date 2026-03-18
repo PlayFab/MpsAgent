@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 {
     using System;
     using System.Reflection;
+    using System.Runtime.InteropServices;
     using AgentInterfaces;
     using Core.Interfaces;
     using FluentAssertions;
@@ -158,6 +159,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [TestCategory("BVT")]
         public void SessionHostStartWithContainer()
         {
+            // Container mode is not supported on Linux OS, so this test only applies on Windows/MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Assert.Inconclusive("Container mode validation is not supported on Linux OS");
+            }
+
             dynamic config = GetValidConfig();
             config.RunContainer = true;
 
@@ -304,6 +311,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [DataRow("C:\\Assets\\GameServer.bat")]
         public void StartGameCommandThatContainsMountPathShouldSucceed(string startGameCommand)
         {
+            // Container mode is not supported on Linux OS, so this test only applies on Windows/MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Assert.Inconclusive("Container mode validation is not supported on Linux OS");
+            }
+
             dynamic config = GetValidConfig();
             config.RunContainer = true;
             config.AssetDetails[0].MountPath = "C:\\Assets";

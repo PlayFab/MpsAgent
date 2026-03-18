@@ -103,6 +103,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [TestCategory("BVT")]
         public void ValidConfigReturnsValid()
         {
+            // Process mode (RunContainer=false) is not supported on MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Inconclusive("Process mode validation is not supported on MacOS");
+            }
+
             dynamic config = GetValidConfig();
             MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
             settings.SetDefaultsIfNotSpecified();
@@ -139,6 +145,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [TestCategory("BVT")]
         public void SessionHostStartWithProcess()
         {
+            // Process mode (RunContainer=false) is not supported on MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Inconclusive("Process mode validation is not supported on MacOS");
+            }
+
             dynamic config = GetValidConfig();
             config.RunContainer = false;
 
@@ -218,6 +230,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [TestCategory("BVT")]
         public void CertsWithDifferentPathAndNameSucceeds()
         {
+            // Process mode (RunContainer=false) is not supported on MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Inconclusive("Process mode validation is not supported on MacOS");
+            }
+
             dynamic config = GetValidConfig();
             MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
             settings.SetDefaultsIfNotSpecified();
@@ -356,11 +374,18 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         /// <summary>
         /// When Globals.GameServerEnvironment is Windows and RunContainer is false (process mode),
         /// validation should succeed — this is the standard Windows process scenario.
+        /// This test is skipped on MacOS because the validator rejects RunContainer=false on MacOS.
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
         public void WindowsProcessModeIsValid()
         {
+            // Process mode (RunContainer=false) is not supported on MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Inconclusive("Process mode validation is not supported on MacOS");
+            }
+
             var previousEnv = Globals.GameServerEnvironment;
             try
             {

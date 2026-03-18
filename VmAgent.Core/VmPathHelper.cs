@@ -24,14 +24,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core
             vmd.GsdkConfigFilePathContainer = replacePathForLinuxContainersOnWindows(vmd.GsdkConfigFilePathContainer);
         }
 
-        public static void AdaptFolderPathsForLinuxContainersOnMacOS(VmConfiguration VmConfiguration)
-        {
-            // running Linux containers with Docker for Mac requires path mapping
-            // Container paths already use Linux-style /data/ prefix which is correct for Linux containers
-            // No additional adaptation is needed since MacOS host paths use forward slashes natively
-            // and VmDirectories already sets container paths correctly for non-Windows platforms
-        }
-
         private static string replacePathForLinuxContainersOnWindows(string windowspath)
         {
             return windowspath.Replace("\\", "/").Replace("C:/", "/data/");

@@ -86,10 +86,6 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             {
                 VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(Globals.VmConfiguration);  // Linux Containers on Windows requires special folder mapping
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                VmPathHelper.AdaptFolderPathsForLinuxContainersOnMacOS(Globals.VmConfiguration);  // Linux Containers on MacOS - container paths use forward slashes natively, no adaptation needed
-            }
 
             Directory.CreateDirectory(rootOutputFolder);
             Directory.CreateDirectory(vmDirectories.GameLogsRootFolderVm);

@@ -6,7 +6,7 @@
 # This script sets up your Mac to run the PlayFab Multiplayer Server LocalMultiplayerAgent
 # Prerequisites: Docker Desktop for Mac must be installed and running
 
-set -e
+set -euo pipefail
 
 AGENT_PORT=${1:-56001}
 

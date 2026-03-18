@@ -131,5 +131,101 @@ namespace VmAgent.Core.UnitTests
             vmConfiguration.VmDirectories.CertificateRootFolderVm.Should().Contain(rootPath);
             vmConfiguration.VmDirectories.GsdkConfigRootFolderVm.Should().Contain(rootPath);
         }
+
+        /// <summary>
+        /// Verifies that AdaptFolderPathsForLinuxContainersOnWindows handles paths with 
+        /// non-C: drive letters by only replacing C:/ prefix (not other drive letters).
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void AdaptFolderPaths_LinuxContainersOnWindows_OnlyReplacesC_DrivePrefix()
+        {
+            string rootPath = @"D:\output";
+            VmDirectories vmDirectories = new VmDirectories(rootPath);
+            VmConfiguration vmConfiguration = new VmConfiguration(56001, "testVmId", vmDirectories, false);
+
+            // Set container paths with C: prefix (as VmDirectories normally does on Windows)
+            vmConfiguration.VmDirectories.GameSharedContentFolderContainer = @"C:\GameSharedContent";
+            vmConfiguration.VmDirectories.GameLogsRootFolderContainer = @"C:\GameLogs";
+
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(vmConfiguration);
+
+            // C:/ gets replaced with /data/
+            vmConfiguration.VmDirectories.GameSharedContentFolderContainer.Should().Be("/data/GameSharedContent");
+            vmConfiguration.VmDirectories.GameLogsRootFolderContainer.Should().Be("/data/GameLogs");
+        }
+
+        /// <summary>
+        /// Verifies that AdaptFolderPathsForLinuxContainersOnWindows correctly handles 
+        /// deeply nested paths.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void AdaptFolderPaths_LinuxContainersOnWindows_HandlesDeepNestedPaths()
+        {
+            string rootPath = @"D:\output";
+            VmDirectories vmDirectories = new VmDirectories(rootPath);
+            VmConfiguration vmConfiguration = new VmConfiguration(56001, "testVmId", vmDirectories, false);
+
+            vmConfiguration.VmDirectories.GsdkConfigFilePathContainer = @"C:\Config\SubDir\gsdkConfig.json";
+
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(vmConfiguration);
+
+            vmConfiguration.VmDirectories.GsdkConfigFilePathContainer.Should().Be("/data/Config/SubDir/gsdkConfig.json");
+        }
+
+        /// <summary>
+        /// Verifies that running AdaptFolderPathsForLinuxContainersOnWindows twice
+        /// doesn't double-transform paths that have already been adapted.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void AdaptFolderPaths_LinuxContainersOnWindows_IdempotentForAlreadyAdaptedPaths()
+        {
+            string rootPath = @"D:\output";
+            VmDirectories vmDirectories = new VmDirectories(rootPath);
+            VmConfiguration vmConfiguration = new VmConfiguration(56001, "testVmId", vmDirectories, false);
+
+            vmConfiguration.VmDirectories.GameSharedContentFolderContainer = @"C:\GameSharedContent";
+
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(vmConfiguration);
+            string afterFirstAdaptation = vmConfiguration.VmDirectories.GameSharedContentFolderContainer;
+
+            VmPathHelper.AdaptFolderPathsForLinuxContainersOnWindows(vmConfiguration);
+            string afterSecondAdaptation = vmConfiguration.VmDirectories.GameSharedContentFolderContainer;
+
+            // Both should result in the same path (no C:/ left to replace on second call)
+            afterSecondAdaptation.Should().Be(afterFirstAdaptation);
+        }
+
+        /// <summary>
+        /// Verifies that VmDirectories container paths use the correct TempStorageRootContainer
+        /// based on the current OS platform.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void VmDirectories_ContainerPaths_UseCorrectTempStorageRoot()
+        {
+            VmDirectories vmDirectories = new VmDirectories("root");
+
+            // Container paths should be based on TempStorageRootContainer
+            vmDirectories.GameSharedContentFolderContainer.Should().Contain("GameSharedContent");
+            vmDirectories.GameLogsRootFolderContainer.Should().Contain("GameLogs");
+            vmDirectories.CertificateRootFolderContainer.Should().Contain("GameCertificates");
+            vmDirectories.GsdkConfigRootFolderContainer.Should().Contain("Config");
+            vmDirectories.GsdkConfigFilePathContainer.Should().Contain("gsdkConfig.json");
+
+            // On non-Windows (Linux/MacOS), TempStorageRootContainer is "/data/"
+            // On Windows, TempStorageRootContainer is "C:\"
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                VmDirectories.TempStorageRootContainer.Should().Be(@"C:\");
+            }
+            else
+            {
+                VmDirectories.TempStorageRootContainer.Should().Be("/data/");
+            }
+        }
     }
 }

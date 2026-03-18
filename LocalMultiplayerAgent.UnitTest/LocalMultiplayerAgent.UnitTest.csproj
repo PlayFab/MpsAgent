@@ -3,6 +3,7 @@
   <PropertyGroup>    
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests</RootNamespace>
+    <IsPackable>false</IsPackable>
 
     <!-- Temporary, for getting a successful build -->
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -11,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.14" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.8.2" />

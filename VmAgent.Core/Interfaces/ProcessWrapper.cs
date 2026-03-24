@@ -57,11 +57,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Process.GetProcesses().Select(x => x.Id);
         }
 
-        public void WaitForProcessExit(int id)
+        public int WaitForProcessExit(int id)
         {
             // TODO: this may need a bit more polish, it is currently only used by LocalMultiplayerAgent.
             Process process = Process.GetProcessById(id);
             process.WaitForExit();
+            return process.ExitCode;
         }
     }
 }

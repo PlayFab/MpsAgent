@@ -23,7 +23,7 @@ namespace VmAgent.Core.UnitTests
     public class SessionHostContainerConfigurationUnitTests
     {
         // Directory Variables
-        private string _root = "D:\\";
+        private string _root = Path.GetPathRoot(Path.GetTempPath());
         private string _VmDirectoryRoot = "root";
         private string _VmDirectoryContainerRoot = "/data";
     

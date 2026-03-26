@@ -18,7 +18,7 @@ namespace VmAgent.Core.UnitTests
     [TestClass]
     public class SystemOperationTests
     {
-        private string _root = "C:\\";
+        private string _root = Path.GetPathRoot(Path.GetTempPath());
         private string _directoryPath;
         private string _subdirectoryPath;
         private string _directoryFilePath;

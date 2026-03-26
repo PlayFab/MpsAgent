@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.IO;
 using VmAgent.Core.Dependencies.Interfaces.Exceptions;
 
 namespace VmAgent.Core.UnitTests
@@ -16,7 +17,7 @@ namespace VmAgent.Core.UnitTests
     [TestClass]
     public class ProcessOutputLoggerTest
     {
-        private string _validPath = "C:\\PF_Consolelog.txt";
+        private string _validPath = Path.Combine(Path.GetTempPath(), "PF_Consolelog.txt");
         private MultiLogger _multiLogger;
         private Mock<IFileWriteWrapper> _fileWriteWrapper;
         private ProcessOutputLogger _processLogger;
@@ -48,11 +49,10 @@ namespace VmAgent.Core.UnitTests
         }
 
         [TestMethod, TestCategory("BVT")]
-        [DataRow("C:\\PF_Consolelog.txt")]
-        public void ValidLogFileNameReturnFilePath(string validFilePath)
+        public void ValidLogFileNameReturnFilePath()
         {
-            ProcessOutputLogger processLogger = new ProcessOutputLogger(validFilePath, _multiLogger);
-            processLogger.GetProcessLogFilePath().Should().Equals(validFilePath);
+            ProcessOutputLogger processLogger = new ProcessOutputLogger(_validPath, _multiLogger);
+            processLogger.GetProcessLogFilePath().Should().Equals(_validPath);
         }
 
         [TestMethod, TestCategory("BVT")]

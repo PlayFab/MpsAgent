@@ -17,7 +17,7 @@ namespace VmAgent.Core.UnitTests
     [TestClass]
     public class ProcessOutputLoggerTest
     {
-        private string _validPath = Path.Combine(Path.GetTempPath(), "PF_Consolelog.txt");
+        private readonly string _validPath = Path.Join(Path.GetTempPath(), "PF_Consolelog.txt");
         private MultiLogger _multiLogger;
         private Mock<IFileWriteWrapper> _fileWriteWrapper;
         private ProcessOutputLogger _processLogger;

@@ -21,7 +21,7 @@ namespace VmAgent.Core.UnitTests
 
         private static readonly string Region = "SouthCentralUs";
 
-        private static readonly VmConfiguration VmConfiguration = new VmConfiguration(56001, Guid.NewGuid().ToString(), new VmDirectories(Path.Combine(Path.GetTempPath(), "testroot")));
+        private static readonly VmConfiguration VmConfiguration = new VmConfiguration(56001, Guid.NewGuid().ToString(), new VmDirectories(Path.Join(Path.GetTempPath(), "testroot")));
 
         [TestMethod]
         [TestCategory("BVT")]

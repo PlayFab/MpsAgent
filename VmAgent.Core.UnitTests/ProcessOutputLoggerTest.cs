@@ -52,7 +52,7 @@ namespace VmAgent.Core.UnitTests
         public void ValidLogFileNameReturnFilePath()
         {
             ProcessOutputLogger processLogger = new ProcessOutputLogger(_validPath, _multiLogger);
-            processLogger.GetProcessLogFilePath().Should().Equals(_validPath);
+            processLogger.GetProcessLogFilePath().Should().Be(_validPath);
         }
 
         [TestMethod, TestCategory("BVT")]

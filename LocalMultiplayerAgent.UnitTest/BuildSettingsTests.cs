@@ -91,10 +91,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
         [TestMethod]
         [TestCategory("BVT")]
         [DataRow("BrazilSouth")]
-        [DataRow("WestCentralUS")]
-        [DataRow("USDoDCentral")]
-        [DataRow("EastUS2EUAP")]
-        public void InvalidRegionConfigReturnsFalse(string reg)
+        [DataRow("WestCentralUs")]
+        [DataRow("SwedenCentral")]
+        [DataRow("MexicoCentral")]
+        public void ValidRegionConfigReturnsTrue(string reg)
         {
             BuildSettings settings = GetTestDeploymentSettings();
 

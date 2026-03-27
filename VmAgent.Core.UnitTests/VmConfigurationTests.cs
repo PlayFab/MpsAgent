@@ -5,6 +5,7 @@ using System.Text;
 namespace VmAgent.Core.UnitTests
 {
     using System.Globalization;
+    using System.IO;
     using FluentAssertions;
     using Microsoft.Azure.Gaming.AgentInterfaces;
     using Microsoft.Azure.Gaming.VmAgent.Core;
@@ -20,7 +21,7 @@ namespace VmAgent.Core.UnitTests
 
         private static readonly string Region = "SouthCentralUs";
 
-        private static readonly VmConfiguration VmConfiguration = new VmConfiguration(56001, Guid.NewGuid().ToString(), new VmDirectories("C:\\windows\\temp"));
+        private static readonly VmConfiguration VmConfiguration = new VmConfiguration(56001, Guid.NewGuid().ToString(), new VmDirectories(Path.Join(Path.GetTempPath(), "testroot")));
 
         [TestMethod]
         [TestCategory("BVT")]

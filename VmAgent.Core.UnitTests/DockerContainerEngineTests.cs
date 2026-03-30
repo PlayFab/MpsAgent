@@ -155,5 +155,22 @@ namespace VmAgent.Core.UnitTests
 
             Assert.AreEqual(@"C:\GameServer", result);
         }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void GetGameWorkingDir_LinuxHost_ShouldReturnNull()
+        {
+            _mockSystemOperations.Setup(x => x.IsOSPlatform(OSPlatform.Windows)).Returns(false);
+
+            var request = new SessionHostsStartInfo
+            {
+                StartGameCommand = "/app/gameserver",
+                GameWorkingDirectory = "/app"
+            };
+
+            string result = _dockerContainerEngine.GetGameWorkingDir(request, isLinuxContainersOnWindows: false);
+
+            Assert.IsNull(result);
+        }
     }
 }

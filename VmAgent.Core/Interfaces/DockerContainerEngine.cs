@@ -378,9 +378,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                 environmentValues,
                 GetVolumeBindings(sessionHostStartInfo, instanceNumber, logFolderId, sessionHostManager.VmAgentSettings),
                 portMappings,
-                GetStartGameCmd(sessionHostStartInfo),
+                GetStartGameCmd(sessionHostStartInfo, sessionHostManager.LinuxContainersOnWindows),
                 sessionHostStartInfo.HostConfigOverrides,
-                GetGameWorkingDir(sessionHostStartInfo));
+                GetGameWorkingDir(sessionHostStartInfo, sessionHostManager.LinuxContainersOnWindows));
 
             SessionHostInfo sessionHost = sessionHostManager.AddNewSessionHost(dockerId, sessionHostStartInfo.AssignmentId, instanceNumber, logFolderId);
 
@@ -652,11 +652,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        private IList<string> GetStartGameCmd(SessionHostsStartInfo request)
+        internal IList<string> GetStartGameCmd(SessionHostsStartInfo request, bool isLinuxContainersOnWindows)
         {
             if (!string.IsNullOrEmpty(request.StartGameCommand))
             {
-                if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
+                if (_systemOperations.IsOSPlatform(OSPlatform.Windows) && !isLinuxContainersOnWindows)
                 {
                     var windowsStartCommand = new List<string>();
 
@@ -688,10 +688,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        private string GetGameWorkingDir(SessionHostsStartInfo request)
+        internal string GetGameWorkingDir(SessionHostsStartInfo request, bool isLinuxContainersOnWindows)
         {
             // Only set the working directory for managed containers (aka. Windows)
-            if (_systemOperations.IsOSPlatform(OSPlatform.Windows))
+            if (_systemOperations.IsOSPlatform(OSPlatform.Windows) && !isLinuxContainersOnWindows)
             {
                 if (!string.IsNullOrEmpty(request.GameWorkingDirectory))
                 {

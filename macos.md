@@ -73,3 +73,11 @@ chmod +x setup_macos.sh
 ```
 
 The agent will automatically detect that it is running on MacOS and configure itself for Linux containers. No additional command-line flags are needed.
+
+## Troubleshooting
+
+If MacOS prevents you from running LocalMultiplayerAgent, run the following command to remove the quarantine attribute:
+
+```bash
+xattr -d com.apple.quarantine ./LocalMultiplayerAgent
+```

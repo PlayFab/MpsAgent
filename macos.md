@@ -1,4 +1,4 @@
-# Linux Containers on MacOS
+# Linux Containers on MacOS (beta)
 
 You can use LocalMultiplayerAgent to debug your Linux game server by running it on a container on MacOS using [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/). LocalMultiplayerAgent automatically detects MacOS and configures itself for Linux containers — no additional flags are needed.
 

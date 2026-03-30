@@ -1,6 +1,6 @@
 # Development instructions for LocalMultiplayerAgent
 
-LocalMultiplayerAgent runs on **Windows** and **MacOS (Apple Silicon)**. Please see the start up scripts for each platform for setting up firewalls and installing additional dependencies.
+LocalMultiplayerAgent runs on **Windows** and **MacOS (Apple Silicon) (beta)**. Please see the start up scripts for each platform for setting up firewalls and installing additional dependencies.
 
 Instructions for using LocalMultiplayerAgent can be found in the [LocalMultiplayerAgent documentation](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview).
 

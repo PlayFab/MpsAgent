@@ -1,6 +1,6 @@
 # Development instructions for LocalMultiplayerAgent
 
-Please see start up script for Linux and Windows for setting up firewalls and installing additional dependencies.
+LocalMultiplayerAgent runs on **Windows** and **MacOS (Apple Silicon)**. Please see the start up scripts for each platform for setting up firewalls and installing additional dependencies.
 
 Instructions for using LocalMultiplayerAgent can be found in the [LocalMultiplayerAgent documentation](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview).
 
@@ -21,6 +21,27 @@ dotnet publish VMAgent.csproj -c release -o outputFolder
 
 The "outputFolder" in the directory containing the csproj file will have the dlls and executable.
 Once the files are copied over, the LocalMultiplayerAgent file will need to be converted to executable - chmod +X LocalMultiplayerAgent
+
+## Build For MacOS (Apple Silicon):
+
+In a terminal, navigate to the directory containing the csproj file and run the following command:
+
+```bash
+dotnet publish LocalMultiplayerAgent.csproj --runtime osx-arm64 -c Release -o outputFolder -p:PublishSingleFile=true --self-contained true
+```
+
+The "outputFolder" in the directory containing the csproj file will have the executable.
+
+MacOS only supports Linux containers. Before running, make sure Docker Desktop for Mac is installed and run the setup script:
+
+```bash
+chmod +x setup_macos.sh
+./setup_macos.sh
+```
+
+Configure `MultiplayerSettings.json` with `RunContainer: true` (see `MultiplayerSettingsLinuxContainersOnMacOSSample.json` for a reference configuration). The agent automatically detects MacOS and configures for Linux containers — no additional flags are needed.
+
+For detailed instructions, see [Linux Containers on MacOS](../macos.md).
 
 ## MultiplayerSettings.json
 

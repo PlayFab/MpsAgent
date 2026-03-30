@@ -114,8 +114,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Console.WriteLine("Running LocalMultiplayerAgent is not yet supported on MacOS. We would be happy to accept PRs to make it work!");
-                return false;
+                if (!_settings.RunContainer)
+                {
+                    Console.WriteLine("Running LocalMultiplayerAgent on MacOS requires container mode. Please set RunContainer to true in MultiplayerSettings.json");
+                    return false;
+                }
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && _settings.RunContainer)

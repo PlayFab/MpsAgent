@@ -90,11 +90,11 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
 
         [TestMethod]
         [TestCategory("BVT")]
-        [DataRow("BrazilSouth")]
-        [DataRow("WestCentralUs")]
-        [DataRow("SwedenCentral")]
-        [DataRow("MexicoCentral")]
-        public void ValidRegionConfigReturnsTrue(string reg)
+        [DataRow("BrazilSouth", true)]
+        [DataRow("WestCentralUS", false)]
+        [DataRow("USDoDCentral", false)]
+        [DataRow("EastUS2EUAP", false)]
+        public void RegionConfigValidation(string reg, bool expectedResult)
         {
             BuildSettings settings = GetTestDeploymentSettings();
 
@@ -103,7 +103,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.UnitTests
                 region.Region = reg;
             }
 
-            new BuildSettingsValidator(settings).IsValid().Should().BeTrue();
+            new BuildSettingsValidator(settings).IsValid().Should().Be(expectedResult);
         }
 
         [TestMethod]

@@ -9,7 +9,7 @@ This repository contains source code for the following projects:
 
 - LocalMultiplayerAgent
 
-An executable that mimics PlayFab Multiplayer Servers (MPS) operations to aid in local debugging. See [PlayFab documentation - LocalMultiplayerAgent Overview](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview) to learn how to debug your game servers using LocalMultiplayerAgent. If you want to develop for Linux Containers on Windows, check out [this document](lcow.md). If you want to run on MacOS (Apple Silicon), check out [this document](macos.md).
+An executable that mimics PlayFab Multiplayer Servers (MPS) operations to aid in local debugging. It runs on **Windows** and **MacOS (Apple Silicon)**. See [PlayFab documentation - LocalMultiplayerAgent Overview](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview) to learn how to debug your game servers using LocalMultiplayerAgent. If you want to develop for Linux Containers on Windows, check out [this document](lcow.md). If you want to run on MacOS (Apple Silicon), check out [this document](macos.md).
 
 > This repository replaces and deprecates the project in [this GitHub repo](https://github.com/PlayFab/LocalMultiplayerAgent). The executable produced by that project was called `MockAgent`. This has been renamed to `LocalMultiplayerAgent` for consistency. 
 

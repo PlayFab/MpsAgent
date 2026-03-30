@@ -1,6 +1,6 @@
 # Linux Containers on Windows
 
-You can use LocalMultiplayerAgent to debug your Linux game server by running it on a container in Windows using [Docker for Windows](https://docs.docker.com/docker-for-windows/). You can see more information abour running Linux containers on Windows [here](https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers). If you are new to the container world, you can check an intro [here](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction/). In essense, all you need to is run the agent with the *-lcow* parameter as well as properly configure your *LocalMultiplayerSettings.json* file.
+You can use LocalMultiplayerAgent to debug your Linux game server by running it on a container in Windows using [Docker for Windows](https://docs.docker.com/docker-for-windows/). You can see more information abour running Linux containers on Windows [here](https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers). If you are new to the container world, you can check an intro [here](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction/). In essence, all you need to do is run the agent with the *-lcow* parameter as well as properly configure your *MultiplayerSettings.json* file.
 
 To run your containerized Linux game servers on Windows, you'll need to perform the following steps:
 
@@ -10,7 +10,7 @@ To run your containerized Linux game servers on Windows, you'll need to perform 
 - You should mount one of your hard drives, instructions [here](https://docs.docker.com/docker-for-windows/#file-sharing)
 - Your game server image can be published on a container registry or can be locally built.
 - You should run `SetupLinuxContainersOnWindows.ps1` Powershell file which will create a Docker network called "PlayFab"
-- You should properly configure your *LocalMultiplayerSettings.json* file. Below you can see a sample, included in `MultiplayerSettingsLinuxContainersOnWindowsSample.json`:
+- You should properly configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `MultiplayerSettingsLinuxContainersOnWindowsSample.json`:
 
 ```json
 {

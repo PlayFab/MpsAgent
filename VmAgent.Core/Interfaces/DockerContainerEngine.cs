@@ -509,22 +509,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
                     // we do this for lcow since containers are running on a Hyper-V Linux machine
                     // which the host Windows machine does not have "copy" access to, to get the logs with a FileCopy
                     // this is only supposed to run on LocalMultiplayerAgent running on lcow
-                    StringBuilder sb = new StringBuilder();
                     Stream logsStream = await _dockerClient.Containers.GetContainerLogsAsync(containerId,
                         new ContainerLogsParameters() {ShowStdout = true, ShowStderr = true});
-                    using (StreamReader sr = new StreamReader(logsStream))
+
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    await DemuxDockerStream(logsStream, (content) =>
                     {
-                        Stopwatch sw = new Stopwatch();
-                        while (!sr.EndOfStream)
+                        if (sw.Elapsed.TotalSeconds > 3) // don't flood STDOUT with messages, output one every 3 seconds if logs are too many
                         {
-                            if (sw.Elapsed.Seconds > 3) // don't flood STDOUT with messages, output one every 3 seconds if logs are too many
-                            {
-                                _logger.LogVerbose($"Gathering logs for container {containerId}, please wait...");
-                                sw.Restart();
-                            }
-                            _systemOperations.FileAppendAllText(destinationFileName, sr.ReadLine() + Environment.NewLine);
+                            _logger.LogVerbose($"Gathering logs for container {containerId}, please wait...");
+                            sw.Restart();
                         }
-                    }
+                        _systemOperations.FileAppendAllText(destinationFileName, content);
+                    });
+
                     _logger.LogVerbose($"Written logs for container {containerId} to {destinationFileName}.");
                 }
                 else
@@ -542,6 +541,60 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             {
                 _logger.LogInformation($"Docker container {containerId} not found.");
             }
+        }
+
+        /// <summary>
+        /// Reads a Docker multiplexed stream and extracts the log content, stripping the 8-byte binary headers.
+        /// Docker uses a multiplexed stream format for container logs when TTY is not enabled:
+        /// - Bytes 0: stream type (1=stdout, 2=stderr)
+        /// - Bytes 1-3: padding (zeros)
+        /// - Bytes 4-7: payload size as big-endian uint32
+        /// - Followed by payload bytes of the specified size
+        /// </summary>
+        internal static async Task DemuxDockerStream(Stream multiplexedStream, Action<string> writeContent)
+        {
+            byte[] header = new byte[8];
+            while (true)
+            {
+                int headerBytesRead = await ReadExactAsync(multiplexedStream, header, 0, 8);
+                if (headerBytesRead < 8)
+                {
+                    break;
+                }
+
+                int payloadSize = (header[4] << 24) | (header[5] << 16) | (header[6] << 8) | header[7];
+
+                if (payloadSize == 0)
+                {
+                    continue;
+                }
+
+                byte[] payload = new byte[payloadSize];
+                int payloadBytesRead = await ReadExactAsync(multiplexedStream, payload, 0, payloadSize);
+
+                string content = Encoding.UTF8.GetString(payload, 0, payloadBytesRead);
+                writeContent(content);
+
+                if (payloadBytesRead < payloadSize)
+                {
+                    break;
+                }
+            }
+        }
+
+        private static async Task<int> ReadExactAsync(Stream stream, byte[] buffer, int offset, int count)
+        {
+            int totalRead = 0;
+            while (totalRead < count)
+            {
+                int bytesRead = await stream.ReadAsync(buffer, offset + totalRead, count - totalRead);
+                if (bytesRead == 0)
+                {
+                    break;
+                }
+                totalRead += bytesRead;
+            }
+            return totalRead;
         }
 
         public override async Task<bool> TryDelete(string id)

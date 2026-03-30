@@ -10,8 +10,12 @@ using Microsoft.Azure.Gaming.VmAgent.Model;
 using Microsoft.Azure.Gaming.AgentInterfaces;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace VmAgent.Core.UnitTests
 {
@@ -171,6 +175,92 @@ namespace VmAgent.Core.UnitTests
             string result = _dockerContainerEngine.GetGameWorkingDir(request, isLinuxContainersOnWindows: false);
 
             Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task DemuxDockerStream_SingleStdoutFrame_ExtractsContent()
+        {
+            string logLine = "BASH=/bin/bash\n";
+            byte[] payload = Encoding.UTF8.GetBytes(logLine);
+            byte[] frame = CreateDockerStreamFrame(1, payload); // 1 = stdout
+
+            using var stream = new MemoryStream(frame);
+            var output = new StringBuilder();
+
+            await DockerContainerEngine.DemuxDockerStream(stream, content => output.Append(content));
+
+            Assert.AreEqual(logLine, output.ToString());
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task DemuxDockerStream_MultipleFrames_ExtractsAllContent()
+        {
+            string line1 = "BASH=/bin/bash\n";
+            string line2 = "HOME=/root\n";
+            byte[] frame1 = CreateDockerStreamFrame(1, Encoding.UTF8.GetBytes(line1));
+            byte[] frame2 = CreateDockerStreamFrame(2, Encoding.UTF8.GetBytes(line2)); // 2 = stderr
+
+            byte[] combined = new byte[frame1.Length + frame2.Length];
+            Buffer.BlockCopy(frame1, 0, combined, 0, frame1.Length);
+            Buffer.BlockCopy(frame2, 0, combined, frame1.Length, frame2.Length);
+
+            using var stream = new MemoryStream(combined);
+            var output = new StringBuilder();
+
+            await DockerContainerEngine.DemuxDockerStream(stream, content => output.Append(content));
+
+            Assert.AreEqual(line1 + line2, output.ToString());
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task DemuxDockerStream_EmptyStream_ProducesNoOutput()
+        {
+            using var stream = new MemoryStream(Array.Empty<byte>());
+            var output = new StringBuilder();
+
+            await DockerContainerEngine.DemuxDockerStream(stream, content => output.Append(content));
+
+            Assert.AreEqual(string.Empty, output.ToString());
+        }
+
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task DemuxDockerStream_ZeroLengthPayload_SkipsFrame()
+        {
+            string logLine = "actual content\n";
+            byte[] emptyFrame = CreateDockerStreamFrame(1, Array.Empty<byte>());
+            byte[] contentFrame = CreateDockerStreamFrame(1, Encoding.UTF8.GetBytes(logLine));
+
+            byte[] combined = new byte[emptyFrame.Length + contentFrame.Length];
+            Buffer.BlockCopy(emptyFrame, 0, combined, 0, emptyFrame.Length);
+            Buffer.BlockCopy(contentFrame, 0, combined, emptyFrame.Length, contentFrame.Length);
+
+            using var stream = new MemoryStream(combined);
+            var output = new StringBuilder();
+
+            await DockerContainerEngine.DemuxDockerStream(stream, content => output.Append(content));
+
+            Assert.AreEqual(logLine, output.ToString());
+        }
+
+        /// <summary>
+        /// Creates a Docker multiplexed stream frame with the standard 8-byte header.
+        /// </summary>
+        private static byte[] CreateDockerStreamFrame(byte streamType, byte[] payload)
+        {
+            byte[] frame = new byte[8 + payload.Length];
+            frame[0] = streamType;
+            // bytes 1-3 are padding (zeros)
+            // bytes 4-7 are payload size as big-endian uint32
+            frame[4] = (byte)((payload.Length >> 24) & 0xFF);
+            frame[5] = (byte)((payload.Length >> 16) & 0xFF);
+            frame[6] = (byte)((payload.Length >> 8) & 0xFF);
+            frame[7] = (byte)(payload.Length & 0xFF);
+            Buffer.BlockCopy(payload, 0, frame, 8, payload.Length);
+            return frame;
         }
     }
 }

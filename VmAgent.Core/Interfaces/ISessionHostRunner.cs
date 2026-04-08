@@ -22,7 +22,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         string GetVmAgentIpAddress();
 
-        Task WaitOnServerExit(string containerId);
+        Task<int> WaitOnServerExit(string containerId);
 
         Task CollectLogs(string id, string logsFolder, ISessionHostManager sessionHostManager);
 

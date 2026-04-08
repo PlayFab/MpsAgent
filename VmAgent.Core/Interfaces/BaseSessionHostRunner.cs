@@ -50,6 +50,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
 
         abstract public Task<bool> TryDelete(string id);
 
-        abstract public Task WaitOnServerExit(string containerId);
+        abstract public Task<int> WaitOnServerExit(string containerId);
     }
 }

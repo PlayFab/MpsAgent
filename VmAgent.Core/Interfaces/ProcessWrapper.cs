@@ -4,12 +4,15 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
 
     public class ProcessWrapper : IProcessWrapper
     {
+        private readonly ConcurrentDictionary<int, Process> _trackedProcesses = new ConcurrentDictionary<int, Process>();
+
         public void Kill(int id)
         {
             try
@@ -31,7 +34,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public int Start(ProcessStartInfo startInfo)
         {
-            return Process.Start(startInfo).Id;
+            Process process = Process.Start(startInfo);
+            _trackedProcesses[process.Id] = process;
+            return process.Id;
         }
 
         public int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler, Action<object, EventArgs> ProcessExitedHandler)
@@ -49,6 +54,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
+            _trackedProcesses[process.Id] = process;
             return process.Id;
         }
 
@@ -57,11 +63,19 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Process.GetProcesses().Select(x => x.Id);
         }
 
-        public void WaitForProcessExit(int id)
+        public int WaitForProcessExit(int id)
         {
-            // TODO: this may need a bit more polish, it is currently only used by LocalMultiplayerAgent.
-            Process process = Process.GetProcessById(id);
+            // Use the tracked process reference if available, so that exit codes are
+            // captured reliably even when the process crashes early (before this method
+            // is called).  Falling back to GetProcessById for processes that were not
+            // started through this wrapper.
+            if (!_trackedProcesses.TryRemove(id, out Process process))
+            {
+                process = Process.GetProcessById(id);
+            }
+
             process.WaitForExit();
+            return process.ExitCode;
         }
     }
 }

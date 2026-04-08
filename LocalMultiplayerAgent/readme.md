@@ -43,7 +43,7 @@ Configure `MultiplayerSettings.json` with `RunContainer: true` (see `Multiplayer
 
 > **Troubleshooting:** If MacOS prevents you from running LocalMultiplayerAgent, run `xattr -d com.apple.quarantine ./LocalMultiplayerAgent` to remove the quarantine attribute.
 
-For detailed instructions, see [Linux Containers on MacOS](../macos.md).
+For detailed instructions, see [Linux Containers on MacOS](../docs/macos.md).
 
 ## MultiplayerSettings.json
 

@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             // In another case, we might have built the image locally but tagged with a fake registry name (e.g. myacr.io/mygame:0.1),
             // Then make sure to change the value to false if you want to use the image from local.
             if (Globals.GameServerEnvironment == GameServerEnvironment.Windows || Globals.Settings.ForcePullFromAcrOnLinuxContainersOnWindows
-                || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 await sessionHostRunner.RetrieveResources(startParameters);
             }

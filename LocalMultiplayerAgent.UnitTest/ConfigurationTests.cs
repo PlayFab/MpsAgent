@@ -171,12 +171,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [TestCategory("BVT")]
         public void SessionHostStartWithContainer()
         {
-            // Container mode is not supported on Linux OS, so this test only applies on Windows/MacOS
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Assert.Inconclusive("Container mode validation is not supported on Linux OS");
-            }
-
             dynamic config = GetValidConfig();
             config.RunContainer = true;
 
@@ -329,12 +323,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         [DataRow("C:\\Assets\\GameServer.bat")]
         public void StartGameCommandThatContainsMountPathShouldSucceed(string startGameCommand)
         {
-            // Container mode is not supported on Linux OS, so this test only applies on Windows/MacOS
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Assert.Inconclusive("Container mode validation is not supported on Linux OS");
-            }
-
             dynamic config = GetValidConfig();
             config.RunContainer = true;
             config.AssetDetails[0].MountPath = "C:\\Assets";
@@ -348,12 +336,25 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
         /// <summary>
         /// When Globals.GameServerEnvironment is Linux and RunContainer is false,
-        /// validation should fail because Linux game servers require container mode.
+        /// validation should fail on non-Linux OS because Linux game servers require container mode there.
+        /// On native Linux, process mode is allowed.
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
         public void LinuxGameServerEnvironmentWithoutContainerFails()
         {
+            // On native Linux OS, process mode is allowed for Linux game servers
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Assert.Inconclusive("On native Linux OS, Linux process mode is valid");
+            }
+
+            // On MacOS, process mode is rejected by a different check
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Inconclusive("Process mode validation is not supported on MacOS");
+            }
+
             var previousEnv = Globals.GameServerEnvironment;
             try
             {
@@ -406,19 +407,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         /// <summary>
         /// When Globals.GameServerEnvironment is Windows and RunContainer is true (container mode),
         /// validation should succeed — this is the standard Windows container scenario.
-        /// This test is skipped on Linux OS because the validator rejects RunContainer=true on Linux.
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
         public void WindowsContainerModeIsValid()
         {
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
-            {
-                // On Linux OS, RunContainer=true is rejected by the validator (container mode not yet supported on Linux)
-                // This test validates Windows container mode which only applies on Windows/MacOS
-                return;
-            }
-
             var previousEnv = Globals.GameServerEnvironment;
             try
             {
@@ -458,13 +451,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
                 MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
                 settings.SetDefaultsIfNotSpecified();
 
-                // On non-Linux OS, RunContainer=true with Linux env should work
-                // On Linux OS, RunContainer=true is rejected (container mode not supported on Linux OS)
-                // We only test the StartGameCommand validation logic here
-                if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
-                {
-                    new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
-                }
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
             }
             finally
             {
@@ -518,11 +505,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
                 MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
                 settings.SetDefaultsIfNotSpecified();
 
-                // On Linux OS, RunContainer=true is rejected. On Windows/MacOS, this should be valid.
-                if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
-                {
-                    new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
-                }
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
             }
             finally
             {
@@ -557,11 +540,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         }
 
         /// <summary>
-        /// On Linux OS, RunContainer=true should be rejected (container mode not yet supported on Linux).
+        /// On Linux OS, both RunContainer=true (container mode) and RunContainer=false (process mode)
+        /// should be accepted.
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
-        public void LinuxOsRejectsContainerMode()
+        public void LinuxOsAcceptsContainerMode()
         {
             if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
             {
@@ -581,7 +565,38 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
                 MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
                 settings.SetDefaultsIfNotSpecified();
-                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
+            }
+            finally
+            {
+                Globals.GameServerEnvironment = previousEnv;
+            }
+        }
+
+        /// <summary>
+        /// On Linux OS, process mode (RunContainer=false) should also be accepted.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void LinuxOsAcceptsProcessMode()
+        {
+            if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+            {
+                // This test only applies when running on Linux OS
+                return;
+            }
+
+            var previousEnv = Globals.GameServerEnvironment;
+            try
+            {
+                Globals.GameServerEnvironment = GameServerEnvironment.Linux;
+
+                dynamic config = GetValidConfig();
+                config.RunContainer = false;
+
+                MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+                settings.SetDefaultsIfNotSpecified();
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
             }
             finally
             {

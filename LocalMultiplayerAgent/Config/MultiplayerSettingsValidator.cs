@@ -121,15 +121,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 }
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && _settings.RunContainer)
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && !_settings.RunContainer
+                && !RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Console.WriteLine("Running LocalMultiplayerAgent as container mode is not yet supported on Linux. Please set RunContainer to false in MultiplayerSettings.json");
-                return false;
-            }
-
-            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && !_settings.RunContainer)
-            {
-                Console.WriteLine("The specified settings are invalid. Using Linux Game Servers requires running in a container.");
+                Console.WriteLine("The specified settings are invalid. Using Linux Game Servers requires running in a container (except on native Linux where process mode is also supported).");
                 return false;
             }
 

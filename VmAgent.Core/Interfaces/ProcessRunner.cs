@@ -126,7 +126,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             // Replacing the mount path is for back compat when we didn't have first class support for process based servers
             // (and were based off of the parameters for containers).
             string executablePath = sessionHostsStartInfo.AssetDetails[0].MountPath?.Length > 0
-                ? parts[0].Replace(sessionHostsStartInfo.AssetDetails[0].MountPath, $"{localPathForAsset0}\\")
+                ? parts[0].Replace(sessionHostsStartInfo.AssetDetails[0].MountPath, $"{localPathForAsset0}{Path.DirectorySeparatorChar}")
                 : Path.Combine(localPathForAsset0, parts[0]);
             string args = parts.Length > 1 ? string.Join(' ', parts.Skip(1)) : string.Empty;
             return (executablePath, args);

@@ -39,7 +39,7 @@ chmod +x setup_macos.sh
 ./setup_macos.sh
 ```
 
-Configure `MultiplayerSettings.json` with `RunContainer: true` (see `MultiplayerSettingsLinuxContainersOnMacOSSample.json` for a reference configuration). The agent automatically detects MacOS and configures for Linux containers — no additional flags are needed.
+Configure `MultiplayerSettings.json` with `RunContainer: true` (see `Samples/MultiplayerSettingsLinuxContainersOnMacOSSample.json` for a reference configuration). The agent automatically detects MacOS and configures for Linux containers — no additional flags are needed.
 
 > **Troubleshooting:** If MacOS prevents you from running LocalMultiplayerAgent, run `xattr -d com.apple.quarantine ./LocalMultiplayerAgent` to remove the quarantine attribute.
 

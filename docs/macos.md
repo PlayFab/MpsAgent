@@ -15,7 +15,7 @@ chmod +x setup_macos.sh
 ./setup_macos.sh
 ```
 
-- Properly configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `MultiplayerSettingsLinuxContainersOnMacOSSample.json`:
+- Properly configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `Samples/MultiplayerSettingsLinuxContainersOnMacOSSample.json`:
 
 ```json
 {

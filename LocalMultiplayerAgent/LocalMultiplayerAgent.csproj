@@ -29,11 +29,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
-    <Content Update="MultiplayerSettingsLinuxContainersOnWindowsSample.json">
+    <Content Update="Samples\MultiplayerSettingsLinuxContainersOnWindowsSample.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
-    <Content Update="MultiplayerSettingsLinuxContainersOnMacOSSample.json">
+    <Content Update="Samples\MultiplayerSettingsLinuxContainersOnMacOSSample.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Samples\MultiplayerSettingsLinuxContainersOnLinuxSample.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Samples\MultiplayerSettingsLinuxProcessOnLinuxSample.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>

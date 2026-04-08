@@ -23,7 +23,7 @@ chmod +x setup_linux.sh
 ./setup_linux.sh
 ```
 
-3. Configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `MultiplayerSettingsLinuxContainersOnLinuxSample.json`:
+3. Configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `Samples/MultiplayerSettingsLinuxContainersOnLinuxSample.json`:
 
 ```json
 {
@@ -94,7 +94,7 @@ Process mode runs your game server as a native Linux process without Docker.
 
 1. Download the latest version of LocalMultiplayerAgent for Linux (linux-x64) from the [Releases](https://github.com/PlayFab/MpsAgent/releases/) page on GitHub
 
-2. Configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `MultiplayerSettingsLinuxProcessOnLinuxSample.json`:
+2. Configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `Samples/MultiplayerSettingsLinuxProcessOnLinuxSample.json`:
 
 ```json
 {

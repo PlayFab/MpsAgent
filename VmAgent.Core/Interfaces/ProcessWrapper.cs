@@ -4,18 +4,30 @@
 namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
 
-    public class ProcessWrapper : IProcessWrapper
+    public class ProcessWrapper : IProcessWrapper, IDisposable
     {
+        private readonly ConcurrentDictionary<int, Process> _trackedProcesses = new ConcurrentDictionary<int, Process>();
+
         public void Kill(int id)
         {
             try
             {
-                Process process = Process.GetProcessById(id);
-                process.Kill(true);
+                // Use the tracked process reference when available to avoid PID reuse
+                // issues and to ensure the dictionary entry is cleaned up.
+                if (!_trackedProcesses.TryRemove(id, out Process process))
+                {
+                    process = Process.GetProcessById(id);
+                }
+
+                using (process)
+                {
+                    process.Kill(true);
+                }
             }
             catch (ArgumentException)
             {
@@ -31,7 +43,10 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public int Start(ProcessStartInfo startInfo)
         {
-            return Process.Start(startInfo).Id;
+            Process process = Process.Start(startInfo)
+                ?? throw new InvalidOperationException("Process.Start returned null for: " + startInfo.FileName);
+            _trackedProcesses[process.Id] = process;
+            return process.Id;
         }
 
         public int StartWithEventHandler(ProcessStartInfo startInfo, Action<object, DataReceivedEventArgs> StdOutputHandler, Action<object, DataReceivedEventArgs> ErrorOutputHandler, Action<object, EventArgs> ProcessExitedHandler)
@@ -49,6 +64,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
+            _trackedProcesses[process.Id] = process;
             return process.Id;
         }
 
@@ -57,11 +73,41 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Process.GetProcesses().Select(x => x.Id);
         }
 
-        public void WaitForProcessExit(int id)
+        public int WaitForProcessExit(int id)
         {
-            // TODO: this may need a bit more polish, it is currently only used by LocalMultiplayerAgent.
-            Process process = Process.GetProcessById(id);
-            process.WaitForExit();
+            if (!_trackedProcesses.TryRemove(id, out Process process))
+            {
+                throw new InvalidOperationException(
+                    $"Process {id} is not tracked. All processes should be started through this wrapper.");
+            }
+
+            using (process)
+            {
+                try
+                {
+                    process.WaitForExit();
+                    return process.ExitCode;
+                }
+                finally
+                {
+                    try { process.CancelOutputRead(); }
+                    catch (InvalidOperationException) { /* expected when output was not redirected */ }
+
+                    try { process.CancelErrorRead(); }
+                    catch (InvalidOperationException) { /* expected when error was not redirected */ }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var kvp in _trackedProcesses)
+            {
+                if (_trackedProcesses.TryRemove(kvp.Key, out Process process))
+                {
+                    process.Dispose();
+                }
+            }
         }
     }
 }

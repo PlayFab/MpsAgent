@@ -84,7 +84,9 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             
             _logger.LogInformation("Waiting for heartbeats from the game server.....");
 
-            await sessionHostRunner.WaitOnServerExit(typeSpecificId).ConfigureAwait(false);
+            int exitCode = await sessionHostRunner.WaitOnServerExit(typeSpecificId).ConfigureAwait(false);
+            _logger.LogInformation($"Game server exited with exit code {exitCode}.");
+            Console.WriteLine($"Game server exited with exit code {exitCode}.");
             string logFolder = Path.Combine(Globals.VmConfiguration.VmDirectories.GameLogsRootFolderVm, sessionHostInfo.LogFolderId);
             await sessionHostRunner.CollectLogs(typeSpecificId, logFolder, sessionHostManager);
             await sessionHostRunner.TryDelete(typeSpecificId);

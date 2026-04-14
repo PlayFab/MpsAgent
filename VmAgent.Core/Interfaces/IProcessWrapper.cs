@@ -17,6 +17,6 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         IEnumerable<int> List();
 
-        void WaitForProcessExit(int id);
+        int WaitForProcessExit(int id);
     }
 }

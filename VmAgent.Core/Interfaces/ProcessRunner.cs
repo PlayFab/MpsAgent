@@ -166,10 +166,11 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
             return Task.FromResult(_processWrapper.List().Select(x => x.ToString()));
         }
 
-        public override Task WaitOnServerExit(string containerId)
+        public override Task<int> WaitOnServerExit(string containerId)
         {
-            _processWrapper.WaitForProcessExit(int.Parse(containerId));
-            return Task.CompletedTask;
+            int exitCode = _processWrapper.WaitForProcessExit(int.Parse(containerId));
+            _logger.LogInformation($"Process {containerId} exited with exit code {exitCode}.");
+            return Task.FromResult(exitCode);
         }
 
         public override string GetVmAgentIpAddress()

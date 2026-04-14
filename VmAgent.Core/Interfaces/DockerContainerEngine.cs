@@ -129,10 +129,12 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             }
         }
 
-        public override async Task WaitOnServerExit(string containerId)
+        public override async Task<int> WaitOnServerExit(string containerId)
         {
             ContainerWaitResponse containerWaitResponse = await _dockerClient.Containers.WaitContainerAsync(containerId).ConfigureAwait(false);
-            _logger.LogInformation($"Container {containerId} exited with exit code {containerWaitResponse.StatusCode}.");
+            int exitCode = (int)containerWaitResponse.StatusCode;
+            _logger.LogInformation($"Container {containerId} exited with exit code {exitCode}.");
+            return exitCode;
         }
 
         private async Task<string> CreateContainer(

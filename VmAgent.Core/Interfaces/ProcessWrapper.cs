@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
     using System.Diagnostics;
     using System.Linq;
 
-    public class ProcessWrapper : IProcessWrapper
+    public class ProcessWrapper : IProcessWrapper, IDisposable
     {
         private readonly ConcurrentDictionary<int, Process> _trackedProcesses = new ConcurrentDictionary<int, Process>();
 
@@ -17,8 +17,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
         {
             try
             {
-                Process process = Process.GetProcessById(id);
-                process.Kill(true);
+                // Use the tracked process reference when available to avoid PID reuse
+                // issues and to ensure the dictionary entry is cleaned up.
+                if (!_trackedProcesses.TryRemove(id, out Process process))
+                {
+                    process = Process.GetProcessById(id);
+                }
+
+                try
+                {
+                    process.Kill(true);
+                }
+                finally
+                {
+                    process.Dispose();
+                }
             }
             catch (ArgumentException)
             {
@@ -34,7 +47,8 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public int Start(ProcessStartInfo startInfo)
         {
-            Process process = Process.Start(startInfo);
+            Process process = Process.Start(startInfo)
+                ?? throw new InvalidOperationException("Process.Start returned null for: " + startInfo.FileName);
             _trackedProcesses[process.Id] = process;
             return process.Id;
         }
@@ -65,17 +79,38 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
 
         public int WaitForProcessExit(int id)
         {
-            // Use the tracked process reference if available, so that exit codes are
-            // captured reliably even when the process crashes early (before this method
-            // is called).  Falling back to GetProcessById for processes that were not
-            // started through this wrapper.
             if (!_trackedProcesses.TryRemove(id, out Process process))
             {
-                process = Process.GetProcessById(id);
+                throw new InvalidOperationException(
+                    $"Process {id} is not tracked. All processes should be started through this wrapper.");
             }
 
-            process.WaitForExit();
-            return process.ExitCode;
+            try
+            {
+                process.WaitForExit();
+                return process.ExitCode;
+            }
+            finally
+            {
+                try { process.CancelOutputRead(); }
+                catch (InvalidOperationException) { }
+
+                try { process.CancelErrorRead(); }
+                catch (InvalidOperationException) { }
+
+                process.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var kvp in _trackedProcesses)
+            {
+                if (_trackedProcesses.TryRemove(kvp.Key, out Process process))
+                {
+                    process.Dispose();
+                }
+            }
         }
     }
 }

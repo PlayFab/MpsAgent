@@ -9,9 +9,12 @@ using Microsoft.Azure.Gaming.VmAgent.Core.Interfaces;
 using Microsoft.Azure.Gaming.VmAgent.Model;
 using Microsoft.Azure.Gaming.AgentInterfaces;
 using Microsoft.Extensions.Logging.Abstractions;
+using Docker.DotNet.Models;
 using Moq;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using ISystemOperations = Microsoft.Azure.Gaming.VmAgent.Core.Interfaces.ISystemOperations;
 
 namespace VmAgent.Core.UnitTests
 {
@@ -171,6 +174,28 @@ namespace VmAgent.Core.UnitTests
             string result = _dockerContainerEngine.GetGameWorkingDir(request, isLinuxContainersOnWindows: false);
 
             Assert.IsNull(result);
+        }
+        [TestMethod]
+        [TestCategory("BVT")]
+        public async Task WaitOnServerExit_ReturnsContainerExitCode()
+        {
+            var mockDockerClient = new Mock<Docker.DotNet.IDockerClient>();
+            var mockContainerOperations = new Mock<Docker.DotNet.IContainerOperations>();
+
+            long expectedStatusCode = 137;
+            mockContainerOperations
+                .Setup(x => x.WaitContainerAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(new ContainerWaitResponse { StatusCode = expectedStatusCode });
+
+            mockDockerClient.Setup(x => x.Containers).Returns(mockContainerOperations.Object);
+
+            var logger = new MultiLogger(NullLogger.Instance);
+            var vmConfiguration = new VmConfiguration(56001, "testVmId", new VmDirectories("root"), true);
+            var engine = new DockerContainerEngine(vmConfiguration, logger, _mockSystemOperations.Object, mockDockerClient.Object);
+
+            int exitCode = await engine.WaitOnServerExit("test-container-id");
+
+            Assert.AreEqual(137, exitCode);
         }
     }
 }

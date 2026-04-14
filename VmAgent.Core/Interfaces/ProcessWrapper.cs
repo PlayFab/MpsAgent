@@ -24,13 +24,9 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     process = Process.GetProcessById(id);
                 }
 
-                try
+                using (process)
                 {
                     process.Kill(true);
-                }
-                finally
-                {
-                    process.Dispose();
                 }
             }
             catch (ArgumentException)
@@ -85,20 +81,21 @@ namespace Microsoft.Azure.Gaming.VmAgent.Core.Interfaces
                     $"Process {id} is not tracked. All processes should be started through this wrapper.");
             }
 
-            try
+            using (process)
             {
-                process.WaitForExit();
-                return process.ExitCode;
-            }
-            finally
-            {
-                try { process.CancelOutputRead(); }
-                catch (InvalidOperationException) { }
+                try
+                {
+                    process.WaitForExit();
+                    return process.ExitCode;
+                }
+                finally
+                {
+                    try { process.CancelOutputRead(); }
+                    catch (InvalidOperationException) { /* expected when output was not redirected */ }
 
-                try { process.CancelErrorRead(); }
-                catch (InvalidOperationException) { }
-
-                process.Dispose();
+                    try { process.CancelErrorRead(); }
+                    catch (InvalidOperationException) { /* expected when error was not redirected */ }
+                }
             }
         }
 

@@ -16,8 +16,8 @@ namespace VmAgent.Core.UnitTests
     {
         /// <summary>
         /// Verifies that Kill() removes the Process from the tracked dictionary
-        /// so that it doesn't leak. After Kill, WaitForProcessExit should fall
-        /// back to GetProcessById (which will throw because the process is gone).
+        /// so that it doesn't leak. After Kill, WaitForProcessExit should throw
+        /// InvalidOperationException because the process is no longer tracked.
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
@@ -26,17 +26,11 @@ namespace VmAgent.Core.UnitTests
             var wrapper = new ProcessWrapper();
             int pid = wrapper.Start(GetSleepProcessStartInfo());
 
-            // Kill should remove from _trackedProcesses and dispose
             wrapper.Kill(pid);
 
-            // WaitForProcessExit should now fall back to GetProcessById.
-            // This throws ArgumentException if the process no longer exists,
-            // or InvalidOperationException if the OS still has the PID but
-            // the Process object wasn't the one that started it.
+            // WaitForProcessExit should throw because the process was removed from tracking by Kill
             Action act = () => wrapper.WaitForProcessExit(pid);
-            act.Should().Throw<Exception>()
-                .Which.Should().Match<Exception>(e =>
-                    e is ArgumentException || e is InvalidOperationException);
+            act.Should().Throw<InvalidOperationException>();
 
             wrapper.Dispose();
         }
@@ -60,9 +54,7 @@ namespace VmAgent.Core.UnitTests
 
             // Calling again should throw since it was removed from tracking
             Action act = () => wrapper.WaitForProcessExit(pid);
-            act.Should().Throw<Exception>()
-                .Which.Should().Match<Exception>(e =>
-                    e is ArgumentException || e is InvalidOperationException);
+            act.Should().Throw<InvalidOperationException>();
 
             wrapper.Dispose();
         }
@@ -123,7 +115,9 @@ namespace VmAgent.Core.UnitTests
             wrapper.Dispose();
 
             // Clean up the actual OS process
-            try { Process.GetProcessById(pid).Kill(true); } catch { }
+            try { Process.GetProcessById(pid).Kill(true); }
+            catch (ArgumentException) { /* process already exited */ }
+            catch (InvalidOperationException) { /* process already exited */ }
         }
 
         /// <summary>
@@ -145,61 +139,43 @@ namespace VmAgent.Core.UnitTests
 
             // Process should be removed from tracking
             Action act = () => wrapper.WaitForProcessExit(pid);
-            act.Should().Throw<Exception>()
-                .Which.Should().Match<Exception>(e =>
-                    e is ArgumentException || e is InvalidOperationException);
+            act.Should().Throw<InvalidOperationException>();
 
             wrapper.Dispose();
         }
 
-        private static ProcessStartInfo GetSleepProcessStartInfo()
-        {
-            // Cross-platform sleep: use dotnet to run a trivial inline program
-            // that sleeps, or just use a long-running process
-            if (OperatingSystem.IsWindows())
-            {
-                return new ProcessStartInfo
+        private static ProcessStartInfo GetSleepProcessStartInfo() =>
+            OperatingSystem.IsWindows()
+                ? new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
                     Arguments = "/c timeout /t 30 /nobreak >nul",
                     UseShellExecute = false,
                     CreateNoWindow = true
-                };
-            }
-            else
-            {
-                return new ProcessStartInfo
+                }
+                : new ProcessStartInfo
                 {
                     FileName = "sleep",
                     Arguments = "30",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
-            }
-        }
 
-        private static ProcessStartInfo GetExitProcessStartInfo(int exitCode)
-        {
-            if (OperatingSystem.IsWindows())
-            {
-                return new ProcessStartInfo
+        private static ProcessStartInfo GetExitProcessStartInfo(int exitCode) =>
+            OperatingSystem.IsWindows()
+                ? new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
                     Arguments = $"/c exit {exitCode}",
                     UseShellExecute = false,
                     CreateNoWindow = true
-                };
-            }
-            else
-            {
-                return new ProcessStartInfo
+                }
+                : new ProcessStartInfo
                 {
                     FileName = "/bin/sh",
                     Arguments = $"-c \"exit {exitCode}\"",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
-            }
-        }
     }
 }

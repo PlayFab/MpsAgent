@@ -60,14 +60,14 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             ISessionHostRunner sessionHostRunner =
                 _sessionHostRunnerFactory.CreateSessionHostRunner(startParameters.SessionHostType, _vmConfiguration, _logger);
 
-            // RetrieveResources does a docker pull
-            // If we're running Linux containers on Windows, we might want to pull image from ACR first to save the image on local.
-            // In this case, you need to simply change the value to true for forcePullFromAcrOnLinuxContainersOnWindows in MultiplayerSettings.json
-            // so if this image is not locally built, docker create will do a docker pull first
-            // In another case, we might have built the image locally but tagged with a fake registry name (e.g. myacr.io/mygame:0.1),
-            // Then make sure to change the value to false if you want to use the image from local.
-            if (Globals.GameServerEnvironment == GameServerEnvironment.Windows || Globals.Settings.ForcePullFromAcrOnLinuxContainersOnWindows
-                || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // RetrieveResources does a docker pull.
+            // Windows game servers always pull from the registry.
+            // For Linux containers on Windows (LCOW), set ForcePullFromAcrOnLinuxContainersOnWindows to true to pull.
+            // For macOS/Linux, set ForcePullContainerImageFromRegistry to true to pull from a remote registry.
+            // If your image is locally built (e.g. via "docker build"), leave both flags false to skip the pull.
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Windows
+                || Globals.Settings.ForcePullFromAcrOnLinuxContainersOnWindows
+                || Globals.Settings.ForcePullContainerImageFromRegistry)
             {
                 await sessionHostRunner.RetrieveResources(startParameters);
             }

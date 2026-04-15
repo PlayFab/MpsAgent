@@ -28,6 +28,7 @@ chmod +x setup_linux.sh
 ```json
 {
   "RunContainer": true,
+  "ForcePullContainerImageFromRegistry": true,
   "OutputFolder": "",
   "NumHeartBeatsForActivateResponse": 10,
   "NumHeartBeatsForTerminateResponse": 60,
@@ -71,7 +72,8 @@ chmod +x setup_linux.sh
 > Notes:
 > 1. Set `RunContainer` to true for container mode.
 > 2. Modify `ImageDetails` with your game server Docker image details. The image may be built locally (using [docker build](https://docs.docker.com/engine/reference/commandline/build/) command) or be hosted in a remote container registry.
-> 3. `StartGameCommand` and `AssetDetails` are optional. You don't normally use them when you use a Docker container since all game assets + start game server command can be packaged in the corresponding [Dockerfile](https://docs.docker.com/engine/reference/builder/). `DeploymentMetadata` is also optional and can contain up to 30 dictionary mappings of custom metadata to be passed to the container as the `buildMetadata` field.
+> 3. If your image is hosted in a remote container registry, set `ForcePullContainerImageFromRegistry` to `true` so the agent pulls it before starting. If your image is locally built, set it to `false` (or omit it) to skip the pull.
+> 4. `StartGameCommand` and `AssetDetails` are optional. You don't normally use them when you use a Docker container since all game assets + start game server command can be packaged in the corresponding [Dockerfile](https://docs.docker.com/engine/reference/builder/). `DeploymentMetadata` is also optional and can contain up to 30 dictionary mappings of custom metadata to be passed to the container as the `buildMetadata` field.
 
 4. Run LocalMultiplayerAgent:
 

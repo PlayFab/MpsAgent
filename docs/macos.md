@@ -20,6 +20,7 @@ chmod +x setup_macos.sh
 ```json
 {
   "RunContainer": true,
+  "ForcePullContainerImageFromRegistry": true,
   "OutputFolder": "",
   "NumHeartBeatsForActivateResponse": 10,
   "NumHeartBeatsForTerminateResponse": 60,
@@ -63,8 +64,9 @@ chmod +x setup_macos.sh
 > This file is also included in the latest LocalMultiplayerAgent zip package. Some notes:
 > 1. You must set `RunContainer` to true. MacOS only supports Linux containers.
 > 2. Modify `ImageDetails` with your game server Docker image details. The image may be built locally (using [docker build](https://docs.docker.com/engine/reference/commandline/build/) command) or be hosted in a remote container registry.
-> 3. `StartGameCommand` and `AssetDetails` are optional. You don't normally use them when you use a Docker container since all game assets + start game server command can be packaged in the corresponding [Dockerfile](https://docs.docker.com/engine/reference/builder/). `DeploymentMetadata` is also optional and can contain up to 30 dictionary mappings of custom metadata to be passed to the container as the `buildMetadata` field.
-> 4. Process mode (bare process without containers) is not supported on MacOS. You must use `RunContainer: true`.
+> 3. If your image is hosted in a remote container registry, set `ForcePullContainerImageFromRegistry` to `true` so the agent pulls it before starting. If your image is locally built, set it to `false` (or omit it) to skip the pull.
+> 4. `StartGameCommand` and `AssetDetails` are optional. You don't normally use them when you use a Docker container since all game assets + start game server command can be packaged in the corresponding [Dockerfile](https://docs.docker.com/engine/reference/builder/). `DeploymentMetadata` is also optional and can contain up to 30 dictionary mappings of custom metadata to be passed to the container as the `buildMetadata` field.
+> 5. Process mode (bare process without containers) is not supported on MacOS. You must use `RunContainer: true`.
 
 - After you perform all the previous steps, you can then run LocalMultiplayerAgent:
 

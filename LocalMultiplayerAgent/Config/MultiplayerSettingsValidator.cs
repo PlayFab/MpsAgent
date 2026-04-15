@@ -69,7 +69,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
                 if (_settings.AgentListeningPort != 56001)
                 {
-                    Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running setup.ps1 with the agent port specified.");
+                    string setupScript = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "setup_linux.sh"
+                        : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "setup_macos.sh"
+                        : "Setup.ps1";
+                    Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running {setupScript} with the agent port specified.");
                 }
 
                 if (_settings.RunContainer)

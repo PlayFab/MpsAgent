@@ -30,7 +30,7 @@
     ]
   ],
   "ProcessStartParameters": {
-    "StartGameCommand": "<your_game_server_executable>"
+    "StartGameCommand": "<your_game_server_executable (relative to extracted assets, e.g. MyServer or MyServer --port 7777)>"
   },
   "SessionConfig": {
     "SessionId": "ba67d671-512a-4e7d-a38c-2329ce181946",

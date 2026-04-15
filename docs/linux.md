@@ -127,7 +127,7 @@ Process mode runs your game server as a native Linux process without Docker.
     ]
   ],
   "ProcessStartParameters": {
-    "StartGameCommand": "<your_game_server_executable>"
+    "StartGameCommand": "<your_game_server_executable (relative to extracted assets, e.g. MyServer or MyServer --port 7777)>"
   },
   "SessionConfig": {
     "SessionId": "ba67d671-512a-4e7d-a38c-2329ce181946",
@@ -140,7 +140,7 @@ Process mode runs your game server as a native Linux process without Docker.
 > Notes:
 > 1. Set `RunContainer` to false for process mode.
 > 2. `AssetDetails` is required for process mode. Set `LocalFilePath` to the path of your game server zip package.
-> 3. `StartGameCommand` in `ProcessStartParameters` should be the path to your game server executable (relative to the extracted assets).
+> 3. `StartGameCommand` in `ProcessStartParameters` is required for process mode. It should be the executable name relative to the extracted assets root (e.g. `MyServer` or `MyServer --port 7777`). Arguments can be appended after a space.
 
 3. Run LocalMultiplayerAgent:
 

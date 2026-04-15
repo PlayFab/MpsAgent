@@ -349,7 +349,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
                 Assert.Inconclusive("On native Linux OS, Linux process mode is valid");
             }
 
-            // On MacOS, process mode is rejected by a different check
+            // On MacOS, process mode is rejected by the macOS-specific check above (line 118-124), which fires first
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 Assert.Inconclusive("Process mode validation is not supported on MacOS");
@@ -431,7 +431,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
         /// <summary>
         /// Validates that StartGameCommand is not required when using Linux game server environment
-        /// (since it can be baked into the container image).
+        /// in container mode (since it can be baked into the container image via CMD/ENTRYPOINT).
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
@@ -445,7 +445,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
                 dynamic config = GetValidConfig();
                 config.RunContainer = true;
                 config.ContainerStartParameters.StartGameCommand = "";
-                // Remove asset details (assets are optional for Linux)
+                // Remove asset details (assets are optional for Linux containers)
                 config.AssetDetails = new JArray();
 
                 MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
@@ -486,7 +486,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
         }
 
         /// <summary>
-        /// Validates that assets are optional for Linux game servers.
+        /// Validates that assets are optional for Linux game servers in container mode.
         /// </summary>
         [TestMethod]
         [TestCategory("BVT")]
@@ -593,6 +593,89 @@ namespace Microsoft.Azure.Gaming.VmAgent.UnitTests
 
                 dynamic config = GetValidConfig();
                 config.RunContainer = false;
+
+                MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+                settings.SetDefaultsIfNotSpecified();
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeTrue();
+            }
+            finally
+            {
+                Globals.GameServerEnvironment = previousEnv;
+            }
+        }
+
+        /// <summary>
+        /// Linux process mode (RunContainer=false) requires StartGameCommand.
+        /// ProcessRunner crashes on null/empty StartGameCommand, so the validator must reject it.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void LinuxProcessModeRequiresStartGameCommand()
+        {
+            var previousEnv = Globals.GameServerEnvironment;
+            try
+            {
+                Globals.GameServerEnvironment = GameServerEnvironment.Linux;
+
+                dynamic config = GetValidConfig();
+                config.RunContainer = false;
+                config.ProcessStartParameters.StartGameCommand = "";
+
+                MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+                settings.SetDefaultsIfNotSpecified();
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+            }
+            finally
+            {
+                Globals.GameServerEnvironment = previousEnv;
+            }
+        }
+
+        /// <summary>
+        /// Linux process mode (RunContainer=false) requires AssetDetails.
+        /// ProcessRunner crashes on empty AssetDetails, so the validator must reject it.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void LinuxProcessModeRequiresAssets()
+        {
+            var previousEnv = Globals.GameServerEnvironment;
+            try
+            {
+                Globals.GameServerEnvironment = GameServerEnvironment.Linux;
+
+                dynamic config = GetValidConfig();
+                config.RunContainer = false;
+                config.AssetDetails = new JArray();
+
+                MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
+                settings.SetDefaultsIfNotSpecified();
+                new MultiplayerSettingsValidator(settings, _mockSystemOperations.Object).IsValid().Should().BeFalse();
+            }
+            finally
+            {
+                Globals.GameServerEnvironment = previousEnv;
+            }
+        }
+
+        /// <summary>
+        /// Linux container mode (RunContainer=true) still allows empty StartGameCommand and empty assets.
+        /// The Dockerfile provides CMD/ENTRYPOINT and packages all assets into the image.
+        /// This test ensures the process-mode fix does not regress container mode.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("BVT")]
+        public void LinuxContainerModeAllowsEmptyStartGameCommandAndAssets()
+        {
+            var previousEnv = Globals.GameServerEnvironment;
+            try
+            {
+                Globals.GameServerEnvironment = GameServerEnvironment.Linux;
+
+                dynamic config = GetValidConfig();
+                config.RunContainer = true;
+                config.ContainerStartParameters.StartGameCommand = "";
+                config.AssetDetails = new JArray();
 
                 MultiplayerSettings settings = JsonConvert.DeserializeObject<MultiplayerSettings>(config.ToString());
                 settings.SetDefaultsIfNotSpecified();

@@ -1,6 +1,6 @@
 # Development instructions for LocalMultiplayerAgent
 
-LocalMultiplayerAgent runs on **Windows** and **MacOS (Apple Silicon) (beta)**. Please see the start up scripts for each platform for setting up firewalls and installing additional dependencies.
+LocalMultiplayerAgent runs on **Windows**, **MacOS (Apple Silicon) (beta)**, and **Linux (x64) (beta)**. Please see the start up scripts for each platform for setting up firewalls and installing additional dependencies.
 
 Instructions for using LocalMultiplayerAgent can be found in the [LocalMultiplayerAgent documentation](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview).
 
@@ -39,11 +39,11 @@ chmod +x setup_macos.sh
 ./setup_macos.sh
 ```
 
-Configure `MultiplayerSettings.json` with `RunContainer: true` (see `MultiplayerSettingsLinuxContainersOnMacOSSample.json` for a reference configuration). The agent automatically detects MacOS and configures for Linux containers — no additional flags are needed.
+Configure `MultiplayerSettings.json` with `RunContainer: true` (see `Samples/MultiplayerSettingsLinuxContainersOnMacOSSample.json` for a reference configuration). The agent automatically detects MacOS and configures for Linux containers — no additional flags are needed.
 
 > **Troubleshooting:** If MacOS prevents you from running LocalMultiplayerAgent, run `xattr -d com.apple.quarantine ./LocalMultiplayerAgent` to remove the quarantine attribute.
 
-For detailed instructions, see [Linux Containers on MacOS](../macos.md).
+For detailed instructions, see [Linux Containers on MacOS](../docs/macos.md).
 
 ## MultiplayerSettings.json
 

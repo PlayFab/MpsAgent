@@ -49,6 +49,13 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
         public bool ForcePullFromAcrOnLinuxContainersOnWindows { get; set; }
 
+        /// <summary>
+        /// When true, pulls the container image from the registry before starting.
+        /// Set to true when using a remote container registry on macOS or Linux.
+        /// When false (default), the agent assumes the image is available locally.
+        /// </summary>
+        public bool ForcePullContainerImageFromRegistry { get; set; }
+
         public IDictionary<string, string> DeploymentMetadata { get; set; }
 
         public string MaintenanceEventType { get; set; }

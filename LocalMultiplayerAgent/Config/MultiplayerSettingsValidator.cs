@@ -69,7 +69,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
 
                 if (_settings.AgentListeningPort != 56001)
                 {
-                    Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running setup.ps1 with the agent port specified.");
+                    string setupScript = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "setup_linux.sh"
+                        : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "setup_macos.sh"
+                        : "Setup.ps1";
+                    Console.WriteLine($"Warning: You have specified an AgentListeningPort ({_settings.AgentListeningPort}) that is not the default.  Please make sure that port is open on your firewall by running {setupScript} with the agent port specified.");
                 }
 
                 if (_settings.RunContainer)
@@ -121,15 +124,10 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 }
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && _settings.RunContainer)
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && !_settings.RunContainer
+                && !RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Console.WriteLine("Running LocalMultiplayerAgent as container mode is not yet supported on Linux. Please set RunContainer to false in MultiplayerSettings.json");
-                return false;
-            }
-
-            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && !_settings.RunContainer)
-            {
-                Console.WriteLine("The specified settings are invalid. Using Linux Game Servers requires running in a container.");
+                Console.WriteLine("The specified settings are invalid. Using Linux Game Servers requires running in a container (except on native Linux where process mode is also supported).");
                 return false;
             }
 
@@ -154,16 +152,17 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 startGameCommand = _settings.ProcessStartParameters.StartGameCommand;
             }        
 
-            // StartGameCommand is optional on Linux
+            // StartGameCommand is optional for Linux containers (the Dockerfile provides CMD/ENTRYPOINT),
+            // but required for process mode on any OS since ProcessRunner needs it.
             if (string.IsNullOrWhiteSpace(startGameCommand))
             {
-                if (Globals.GameServerEnvironment == GameServerEnvironment.Windows)
+                if (Globals.GameServerEnvironment == GameServerEnvironment.Windows || !_settings.RunContainer)
                 {
                     Console.WriteLine("StartGameCommand must be specified.");
                     isSuccess = false;
                 }
             }
-            else if (startGameCommand.Contains("<your_game_server_exe>"))
+            else if (startGameCommand.Contains("<your_game_server_exe"))
             {
                 Console.WriteLine($"StartGameCommand '{startGameCommand}' is invalid");
                 isSuccess = false;
@@ -253,9 +252,15 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent.Config
                 return true;
             }
 
+            if (Globals.GameServerEnvironment == GameServerEnvironment.Linux && _settings.RunContainer)
+            {
+                return true; // Assets are optional for Linux containers, since we're packing the entire game onto a container image
+            }
+
             if (Globals.GameServerEnvironment == GameServerEnvironment.Linux)
             {
-                return true; // Assets are optional in Linux, since we're packing the entire game onto a container image
+                Console.WriteLine("Assets must be specified for game servers running in process mode.");
+                return false;
             }
 
             Console.WriteLine("Assets must be specified for game servers running on Windows.");

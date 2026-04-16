@@ -124,7 +124,7 @@ namespace Microsoft.Azure.Gaming.VmAgent.ContainerEngines
             catch (Exception e)
             {
                 throw new Exception(
-                    $"Failed to find network '{SessionHostContainerConfiguration.DockerNetworkName}'. Ensure you have properly setup networking via setup.ps1",
+                    $"Failed to find network '{SessionHostContainerConfiguration.DockerNetworkName}'. Ensure you have properly setup networking via the appropriate setup script (Setup.ps1 on Windows, setup_macos.sh on MacOS, setup_linux.sh on Linux).",
                     e);
             }
         }

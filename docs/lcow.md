@@ -10,7 +10,7 @@ To run your containerized Linux game servers on Windows, you'll need to perform 
 - You should mount one of your hard drives, instructions [here](https://docs.docker.com/docker-for-windows/#file-sharing)
 - Your game server image can be published on a container registry or can be locally built.
 - You should run `SetupLinuxContainersOnWindows.ps1` Powershell file which will create a Docker network called "PlayFab"
-- You should properly configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `MultiplayerSettingsLinuxContainersOnWindowsSample.json`:
+- You should properly configure your *MultiplayerSettings.json* file. Below you can see a sample, included in `Samples/MultiplayerSettingsLinuxContainersOnWindowsSample.json`:
 
 ```json
 {

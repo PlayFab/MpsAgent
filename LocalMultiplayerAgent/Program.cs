@@ -34,8 +34,8 @@ namespace Microsoft.Azure.Gaming.LocalMultiplayerAgent
             Console.WriteLine($"Check this page for debugging tips: {debuggingUrl}");
 
             // lcow stands for Linux Containers On Windows => https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
-            // On MacOS, we only support Linux containers, so -lcow is not needed
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            // On MacOS and Linux, we only support Linux game servers, so -lcow is not needed
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 Globals.GameServerEnvironment = GameServerEnvironment.Linux;
             }

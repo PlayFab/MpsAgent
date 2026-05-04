@@ -17,7 +17,7 @@ For the canonical, end-to-end walkthrough of configuring and running LMA, see th
 
 For **Windows game servers running as a process on Windows** (the original LMA scenario), use the default [`../MultiplayerSettings.json`](../MultiplayerSettings.json) at the LMA root, which is already configured for that case.
 
-> **Note on `GameServerEnvironment`:** there is no `GameServerEnvironment` field in `MultiplayerSettings.json`. LMA infers it: on macOS and Linux it is always `Linux`; on Windows it is `Windows` for process mode and `Linux` for container mode (Linux Containers on Windows). See [`Program.cs`](../Program.cs).
+> **Note on `GameServerEnvironment`:** there is no `GameServerEnvironment` field in `MultiplayerSettings.json`. LMA infers it: on macOS and Linux it is always `Linux`; on Windows it is `Windows` for process mode, remains `Windows` for Windows container runs, and switches to `Linux` only for the Linux Containers on Windows scenario when LMA is launched with the `-lcow` flag. See [`Program.cs`](../Program.cs).
 
 ## What you typically need to edit
 

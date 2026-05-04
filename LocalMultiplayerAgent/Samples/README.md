@@ -1,32 +1,100 @@
 # MultiplayerSettings.json samples
 
-This folder contains starter `MultiplayerSettings.json` files for the most common LocalMultiplayerAgent (LMA) configurations. To use one, copy its contents over `LocalMultiplayerAgent/MultiplayerSettings.json` (LMA always loads `MultiplayerSettings.json` from its working directory) and then edit the highlighted fields for your game server. If you're running the Linux Containers on Windows scenario, also pass the `-lcow` flag when launching LMA.
+This folder contains starter `MultiplayerSettings.json` files for the most common LocalMultiplayerAgent (LMA) configurations. To use one, copy its contents over `LocalMultiplayerAgent/MultiplayerSettings.json` (LMA always loads `MultiplayerSettings.json` from its working directory) and edit the highlighted fields for your game server. If you're running the Linux Containers on Windows scenario, also pass the `-lcow` flag when launching LMA.
 
-If you'd rather generate a settings file interactively, see the [MultiplayerSettings.json generator tool](../SettingsJsonGenerator/README.md).
+If you'd rather generate a settings file interactively, see the [MultiplayerSettings.json generator tool](../SettingsJsonGenerator/README.md). For the canonical, end-to-end walkthrough of configuring and running LMA, see the [LocalMultiplayerAgent overview on Microsoft Learn](https://learn.microsoft.com/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview).
 
-For the canonical, end-to-end walkthrough of configuring and running LMA, see the [LocalMultiplayerAgent overview on Microsoft Learn](https://learn.microsoft.com/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview).
+## Contents
 
-## Which sample should I use?
+- [Choosing a sample](#choosing-a-sample)
+- [What you typically need to edit](#what-you-typically-need-to-edit)
+  - [Container mode](#container-mode-any-platform)
+  - [Container mode with separate game assets](#container-mode-with-separate-game-assets-windows-containers-or-linux-containers-where-the-image-doesnt-include-the-game)
+  - [Process mode](#process-mode)
+- [Field reference](#field-reference)
+  - [Top-level](#top-level)
+  - [AssetDetails](#assetdetails)
+  - [PortMappingsList](#portmappingslist)
+  - [ContainerStartParameters](#containerstartparameters)
+  - [ProcessStartParameters](#processstartparameters)
+  - [SessionConfig](#sessionconfig)
+  - [GameCertificateDetails](#gamecertificatedetails)
+- [Common pitfalls](#common-pitfalls)
+- [See also](#see-also)
+
+## Choosing a sample
 
 | Sample file | Host OS | Game server OS | Mode | Notes |
 | --- | --- | --- | --- | --- |
-| [`MultiplayerSettingsLinuxContainersOnWindowsSample.json`](MultiplayerSettingsLinuxContainersOnWindowsSample.json) | Windows | Linux | Container | Requires Docker Desktop with WSL 2. Launch LMA with the `-lcow` flag. See [`docs/lcow.md`](../../docs/lcow.md). |
+| [`../MultiplayerSettings.json`](../MultiplayerSettings.json) (default) | Windows | Windows | Process | The original LMA scenario. Already set with `RunContainer: false`. |
+| [`../MultiplayerSettings.json`](../MultiplayerSettings.json) (default) | Windows | Windows | Container | Set `RunContainer: true`. The bundled `ContainerStartParameters` already targets a Windows Server Core image; ensure `StartGameCommand` references the asset `MountPath` (e.g., `C:\Assets\MyServer.exe`). |
+| [`MultiplayerSettingsLinuxContainersOnWindowsSample.json`](MultiplayerSettingsLinuxContainersOnWindowsSample.json) | Windows | Linux | Container (LCOW) | Requires Docker Desktop with WSL 2. Launch LMA with the `-lcow` flag. See [`docs/lcow.md`](../../docs/lcow.md). |
 | [`MultiplayerSettingsLinuxContainersOnLinuxSample.json`](MultiplayerSettingsLinuxContainersOnLinuxSample.json) | Linux (x64) | Linux | Container | Requires Docker. See [`docs/linux.md`](../../docs/linux.md). |
 | [`MultiplayerSettingsLinuxContainersOnMacOSSample.json`](MultiplayerSettingsLinuxContainersOnMacOSSample.json) | macOS (Apple Silicon) | Linux | Container | Requires Docker Desktop for Mac. See [`docs/macos.md`](../../docs/macos.md). |
 | [`MultiplayerSettingsLinuxProcessOnLinuxSample.json`](MultiplayerSettingsLinuxProcessOnLinuxSample.json) | Linux (x64) | Linux | Process | No Docker required; the agent runs your binary directly. |
 
-For **Windows game servers running as a process on Windows** (the original LMA scenario), use the default [`../MultiplayerSettings.json`](../MultiplayerSettings.json) at the LMA root, which is already configured for that case.
-
-> **Note on `GameServerEnvironment`:** there is no `GameServerEnvironment` field in `MultiplayerSettings.json`. LMA infers it: on macOS and Linux it is always `Linux`; on Windows it is `Windows` for process mode, remains `Windows` for Windows container runs, and switches to `Linux` only for the Linux Containers on Windows scenario when LMA is launched with the `-lcow` flag. See [`Program.cs`](../Program.cs).
+> **Note on `GameServerEnvironment`:** there is no `GameServerEnvironment` field in `MultiplayerSettings.json`. LMA infers it: on macOS and Linux it is always `Linux`; on Windows it is `Windows` for process mode, remains `Windows` for Windows container runs, and switches to `Linux` only for the Linux Containers on Windows (LCOW) scenario when LMA is launched with the `-lcow` flag. See [`Program.cs`](../Program.cs).
 
 ## What you typically need to edit
 
-For most users, only a handful of fields need to be changed from the sample defaults:
+For most users, only a handful of fields differ from the sample defaults. Snippets below show only the fields you usually edit; copy them into the appropriate sample file rather than using them standalone.
 
-- **Container mode** — `ContainerStartParameters.ImageDetails` (`Registry`, `ImageName`, `ImageTag`, optional `Username`/`Password` for private registries) and `PortMappingsList[*].GamePort.Number` to match the port your game server listens on inside the container.
-- **Process mode** — `AssetDetails[0].LocalFilePath` (path to your game server zip), `ProcessStartParameters.StartGameCommand` (executable inside the zip, optionally with arguments), and `PortMappingsList[*].GamePort.Number`.
+### Container mode (any platform)
 
-Everything else can usually be left at the sample defaults.
+Point LMA at your image and tell it which port the game server listens on inside the container:
+
+```jsonc
+"ContainerStartParameters": {
+  "ImageDetails": {
+    "Registry": "myregistry.azurecr.io",  // your registry; omit for Docker Hub
+    "ImageName": "mygame",                // your image
+    "ImageTag": "0.1",                    // optional; defaults to "latest" if omitted
+    "Username": "",                       // private registries only
+    "Password": ""
+  }
+},
+"PortMappingsList": [
+  [
+    { "NodePort": 56100, "GamePort": { "Name": "gameport", "Number": 7777, "Protocol": "TCP" } }
+  ]
+]
+```
+
+To pull from a remote registry on macOS or Linux, also set `"ForcePullContainerImageFromRegistry": true`. For LCOW (Linux Containers on Windows), use `"ForcePullFromAcrOnLinuxContainersOnWindows": true` instead. (For Windows containers on Windows, LMA always pulls regardless of either flag.)
+
+### Container mode with separate game assets (Windows containers, or Linux containers where the image doesn't include the game)
+
+In addition to the snippet above, define `AssetDetails` and ensure `StartGameCommand` references the asset `MountPath`:
+
+```jsonc
+"AssetDetails": [
+  { "LocalFilePath": "C:\\path\\to\\game.zip", "MountPath": "C:\\Assets" }
+],
+"ContainerStartParameters": {
+  "StartGameCommand": "C:\\Assets\\MyServer.exe",  // must contain the MountPath above
+  "ImageDetails": { /* ... */ }
+}
+```
+
+For Windows containers, the validator rejects a `StartGameCommand` that does not contain at least one of the configured `MountPath` values. Linux containers commonly bake the game into the image instead; in that case, omit `AssetDetails` entirely (as the Linux-container samples in this folder do).
+
+### Process mode
+
+```jsonc
+"AssetDetails": [
+  { "LocalFilePath": "/path/to/game.zip" }   // MountPath is ignored in process mode
+],
+"ProcessStartParameters": {
+  "StartGameCommand": "MyServer --port 7777" // executable inside the zip, optionally with arguments
+},
+"PortMappingsList": [
+  [
+    { "NodePort": 56100, "GamePort": { "Name": "gameport", "Number": 7777, "Protocol": "TCP" } }
+  ]
+]
+```
+
+Everything else can usually be left at the sample defaults. See [Common pitfalls](#common-pitfalls) for a few first-run gotchas.
 
 ---
 
@@ -47,18 +115,18 @@ Top-level fields in `MultiplayerSettings.json` are deserialized into [`Multiplay
 | `MaintenanceEventStatus` | `string` | no | Status of the simulated event (e.g., `Scheduled`, `Started`). |
 | `MaintenanceEventSource` | `string` | no | Source of the simulated event (e.g., `Platform`, `User`). |
 | `AgentListeningPort` | `int` | yes | TCP port on which LMA listens for GSDK heartbeats from the game server. This must be set explicitly in `MultiplayerSettings.json`; `56001` is the common sample value. If you change it, run the platform setup script (`Setup.ps1` / `setup_linux.sh` / `setup_macos.sh`) with the new port to open the firewall. |
-| `TitleId` | `string` (hex) | yes (validation) | Hex string identifying your PlayFab title. May be left empty in the file; LMA fills it in with a random value via `SetDefaultsIfNotSpecified()`. |
-| `BuildId` | `Guid` | yes (validation) | GUID identifying the build. Leave as `00000000-0000-0000-0000-000000000000` to have LMA generate one at startup. |
-| `Region` | `string` | yes | Azure region name reported to the game server (e.g., `WestUs`). Any non-empty string is accepted locally. |
-| `AssetDetails` | `AssetDetail[]` | conditional | Game server packages to extract before running. Required for process mode and for Windows containers. Optional for Linux containers (the image already contains the game). See [AssetDetails](#assetdetails) below. |
+| `TitleId` | `string` (hex) | no (auto-generated) | Hex string identifying your PlayFab title. Leave empty in the file to have LMA fill it in with a random value via `SetDefaultsIfNotSpecified()`; the validator then requires the post-default value to be a valid hex string. |
+| `BuildId` | `Guid` | no (auto-generated) | GUID identifying the build. Leave as `00000000-0000-0000-0000-000000000000` to have LMA generate one at startup. |
+| `Region` | `string` | yes | Azure region name reported to the game server (e.g., `WestUs`). Any non-empty, non-whitespace string is accepted locally. |
+| `AssetDetails` | `AssetDetail[]` | conditional | Game server packages to extract before running. Required for process mode and for Windows containers. Optional for Linux containers when the game is baked into the image. See [AssetDetails](#assetdetails) below. |
 | `GameCertificateDetails` | `GameCertificateDetails[]` | no | Local `.pfx` certificates to install for the game server to consume. See [GameCertificateDetails](#gamecertificatedetails) below. |
-| `PortMappingsList` | `PortMapping[][]` | yes | List of port-mapping lists, one inner list per session host. See [PortMappingsList](#portmappingslist) below. |
+| `PortMappingsList` | `List<List<PortMapping>>` | yes | List of port-mapping lists, one inner list per session host. See [PortMappingsList](#portmappingslist) below. |
 | `ContainerStartParameters` | `object` | required when `RunContainer = true` | Container image and start command. See [ContainerStartParameters](#containerstartparameters) below. |
 | `ProcessStartParameters` | `object` | required when `RunContainer = false` | Process start command. See [ProcessStartParameters](#processstartparameters) below. |
 | `SessionConfig` | `object` | no | Simulated allocation payload. If omitted, LMA creates a default `SessionConfig` with a generated `SessionId`. See [SessionConfig](#sessionconfig) below. |
 | `ForcePullFromAcrOnLinuxContainersOnWindows` | `bool` | no | When `true`, LMA pulls the container image from the configured registry before starting on the Linux Containers on Windows scenario. Defaults to `false`. |
-| `ForcePullContainerImageFromRegistry` | `bool` | no | When `true`, LMA pulls the container image from the registry before starting. Set to `true` when using a remote registry on macOS or Linux. Defaults to `false` (assumes the image is already available locally). |
-| `DeploymentMetadata` | `Dictionary<string,string>` | no | Free-form key/value metadata exposed to the game server via GSDK. The samples use `Environment` and `FeaturesEnabled` as illustrative keys; any keys are accepted. |
+| `ForcePullContainerImageFromRegistry` | `bool` | no | When `true`, LMA pulls the container image from the registry before starting. Set to `true` when using a remote registry on macOS or Linux. Defaults to `false` (skip the pull, assuming the image is locally available, e.g., from `docker build`). **Note:** for Windows containers (when `GameServerEnvironment` resolves to `Windows`), LMA always pulls regardless of this flag. |
+| `DeploymentMetadata` | `IDictionary<string,string>` | no | Free-form key/value metadata exposed to the game server via GSDK. The samples use `Environment` and `FeaturesEnabled` as illustrative keys; any keys are accepted. |
 
 ### AssetDetails
 
@@ -95,7 +163,7 @@ Used only when `RunContainer = true`.
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `StartGameCommand` | `string` | conditional | The command to run inside the container. Required for Windows containers (and must reference the asset `MountPath`). Optional for Linux containers if the image's `CMD`/`ENTRYPOINT` already starts the game. |
-| `ImageDetails.Registry` | `string` | no | Optional FQDN of the container registry (e.g., `mcr.microsoft.com`, `myregistry.azurecr.io`, `mydockerregistry.io`). |
+| `ImageDetails.Registry` | `string` | conditional | FQDN of the container registry (e.g., `mcr.microsoft.com`, `myregistry.azurecr.io`). Optional when the image is on Docker Hub or already cached locally. Effectively required when `ForcePullContainerImageFromRegistry` (or, on LCOW, `ForcePullFromAcrOnLinuxContainersOnWindows`) is `true` and the image isn't on Docker Hub. |
 | `ImageDetails.ImageName` | `string` | yes | Image repository name (e.g., `playfab/multiplayer`, `mygame`). |
 | `ImageDetails.ImageTag` | `string` | no | Optional image tag (e.g., `wsc-10.0.20348.3207`, `0.1`). If omitted, LMA defaults to `latest`. |
 | `ImageDetails.ImageDigest` | `string` | no | Image digest. Currently not used by LMA's `DockerContainerEngine`; specify `ImageTag` for image selection. |
@@ -120,7 +188,7 @@ Values used to simulate the session allocation payload that the production MPS s
 | --- | --- | --- | --- |
 | `SessionId` | `Guid` | yes | GUID identifying the simulated session. |
 | `SessionCookie` | `string` | no | Opaque string passed to the game server in the allocation. LMA prints a warning if not specified. |
-| `InitialPlayers` | `string[]` | no | Initial player IDs included in the simulated allocation. |
+| `InitialPlayers` | `List<string>` | no | Initial player IDs included in the simulated allocation. |
 | `Metadata` | `Dictionary<string,string>` | no | Free-form session metadata exposed to the game server. |
 
 ### GameCertificateDetails
@@ -129,6 +197,19 @@ Values used to simulate the session allocation payload that the production MPS s
 | --- | --- | --- | --- |
 | `Name` | `string` | yes | Friendly name the game server uses to look up the certificate. Must be unique within the array. |
 | `Path` | `string` | yes | Local filesystem path to a `.pfx` certificate file. Must exist and end with `.pfx`. Each path must be unique within the array. |
+
+---
+
+## Common pitfalls
+
+A few first-run failure modes worth knowing about:
+
+- **`OutputFolder` must exist if you set it.** The `MultiplayerSettingsLinuxContainersOnWindowsSample.json` sample sets `OutputFolder` to `C:\output\UnityServerLinux`, which doesn't exist on a fresh install. Either create that directory before running, or clear the field — LMA will then default to the agent's executable directory.
+- **A non-default `AgentListeningPort` requires a firewall update.** If you change `AgentListeningPort` away from `56001`, re-run the platform setup script (`Setup.ps1` / `setup_linux.sh` / `setup_macos.sh`) with the new port to open it.
+- **Windows containers always pull from the registry.** When LMA's `GameServerEnvironment` resolves to `Windows` (Windows containers on Windows), the image is pulled before each run regardless of `ForcePullContainerImageFromRegistry`. The flag only takes effect on macOS, Linux, and the LCOW (Linux Containers on Windows) scenarios.
+- **Windows-container `StartGameCommand` must reference an asset `MountPath`.** The validator rejects bare commands like `MyServer.exe`; use the full mounted path (e.g., `C:\Assets\MyServer.exe` matching `AssetDetails[0].MountPath`).
+- **macOS does not support process mode.** `RunContainer` must be `true` on macOS hosts.
+- **`<your_game_server_exe>` placeholders fail validation.** Replace placeholder values like `<your_game_server_exe>` and `<path_to_game_server_package>` with real values before running, or the validator will reject the configuration.
 
 ---
 

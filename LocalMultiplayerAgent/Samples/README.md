@@ -62,11 +62,11 @@ Top-level fields in `MultiplayerSettings.json` are deserialized into [`Multiplay
 
 ### AssetDetails
 
-Each entry in `AssetDetails` describes one game-server asset package (a local `.zip`) to extract into the container or process working directory.
+Each entry in `AssetDetails` describes one game-server asset archive to extract into the container or process working directory. Use a local `.zip` file on Windows hosts; on Linux and macOS hosts, `.tar` and `.tar.gz` archives are also supported.
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `LocalFilePath` | `string` | yes | Absolute path to a local `.zip` file containing your game server. The file must exist when LMA starts. |
+| `LocalFilePath` | `string` | yes | Absolute path to a local asset archive containing your game server. The file must exist when LMA starts. Supported formats are `.zip` on Windows hosts, and `.zip`, `.tar`, or `.tar.gz` on Linux and macOS hosts. |
 | `MountPath` | `string` | yes for containers | Path **inside the container** where the asset is extracted (e.g., `C:\Assets` for Windows containers, `/data/Assets` for Linux containers). For Windows containers, the `StartGameCommand` must contain this path. Ignored / set to `null` in process mode. |
 
 Notes:

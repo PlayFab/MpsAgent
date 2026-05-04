@@ -46,7 +46,7 @@ Top-level fields in `MultiplayerSettings.json` are deserialized into [`Multiplay
 | `MaintenanceEventType` | `string` | no | Type of simulated scheduled event (e.g., `Reboot`, `Redeploy`, `Freeze`, `Preempt`, `Terminate`). Only used when maintenance events are enabled. See [Azure scheduled events](https://learn.microsoft.com/azure/virtual-machines/windows/scheduled-events#event-properties). |
 | `MaintenanceEventStatus` | `string` | no | Status of the simulated event (e.g., `Scheduled`, `Started`). |
 | `MaintenanceEventSource` | `string` | no | Source of the simulated event (e.g., `Platform`, `User`). |
-| `AgentListeningPort` | `int` | yes | TCP port on which LMA listens for GSDK heartbeats from the game server. Defaults to `56001`; if you change it, run the platform setup script (`Setup.ps1` / `setup_linux.sh` / `setup_macos.sh`) with the new port to open the firewall. |
+| `AgentListeningPort` | `int` | yes | TCP port on which LMA listens for GSDK heartbeats from the game server. This must be set explicitly in `MultiplayerSettings.json`; `56001` is the common sample value. If you change it, run the platform setup script (`Setup.ps1` / `setup_linux.sh` / `setup_macos.sh`) with the new port to open the firewall. |
 | `TitleId` | `string` (hex) | yes (validation) | Hex string identifying your PlayFab title. May be left empty in the file; LMA fills it in with a random value via `SetDefaultsIfNotSpecified()`. |
 | `BuildId` | `Guid` | yes (validation) | GUID identifying the build. Leave as `00000000-0000-0000-0000-000000000000` to have LMA generate one at startup. |
 | `Region` | `string` | yes | Azure region name reported to the game server (e.g., `WestUs`). Any non-empty string is accepted locally. |

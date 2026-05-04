@@ -47,5 +47,7 @@ For detailed instructions, see [Linux Containers on MacOS](../docs/macos.md).
 
 ## MultiplayerSettings.json
 
+The [Samples folder README](./Samples/README.md) contains ready-to-use `MultiplayerSettings.json` examples for each supported platform / mode combination, plus a field-by-field reference for the schema.
+
 The [MultiplayerSettings.json generator tool](./SettingsJsonGenerator/README.md) can assist you with configuring your `MultiplayerSettings.json` file, and configuring it for your server.
 The [LMA Build Tool](./BuildTool/readme.md) can assist you with configuring your [`BuildSettings.json`](./BuildTool/BuildSettings.json) file for creating builds through LocalMultiplayerAgent.

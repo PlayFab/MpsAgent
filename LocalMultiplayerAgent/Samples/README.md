@@ -51,7 +51,7 @@ Top-level fields in `MultiplayerSettings.json` are deserialized into [`Multiplay
 | `BuildId` | `Guid` | yes (validation) | GUID identifying the build. Leave as `00000000-0000-0000-0000-000000000000` to have LMA generate one at startup. |
 | `Region` | `string` | yes | Azure region name reported to the game server (e.g., `WestUs`). Any non-empty string is accepted locally. |
 | `AssetDetails` | `AssetDetail[]` | conditional | Game server packages to extract before running. Required for process mode and for Windows containers. Optional for Linux containers (the image already contains the game). See [AssetDetails](#assetdetails) below. |
-| `GameCertificateDetails` | `GameCertificateDetail[]` | no | Local `.pfx` certificates to install for the game server to consume. See [GameCertificateDetails](#gamecertificatedetails) below. |
+| `GameCertificateDetails` | `GameCertificateDetails[]` | no | Local `.pfx` certificates to install for the game server to consume. See [GameCertificateDetails](#gamecertificatedetails) below. |
 | `PortMappingsList` | `PortMapping[][]` | yes | List of port-mapping lists, one inner list per session host. See [PortMappingsList](#portmappingslist) below. |
 | `ContainerStartParameters` | `object` | required when `RunContainer = true` | Container image and start command. See [ContainerStartParameters](#containerstartparameters) below. |
 | `ProcessStartParameters` | `object` | required when `RunContainer = false` | Process start command. See [ProcessStartParameters](#processstartparameters) below. |

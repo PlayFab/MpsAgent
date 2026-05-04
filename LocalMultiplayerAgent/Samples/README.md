@@ -55,7 +55,7 @@ Top-level fields in `MultiplayerSettings.json` are deserialized into [`Multiplay
 | `PortMappingsList` | `PortMapping[][]` | yes | List of port-mapping lists, one inner list per session host. See [PortMappingsList](#portmappingslist) below. |
 | `ContainerStartParameters` | `object` | required when `RunContainer = true` | Container image and start command. See [ContainerStartParameters](#containerstartparameters) below. |
 | `ProcessStartParameters` | `object` | required when `RunContainer = false` | Process start command. See [ProcessStartParameters](#processstartparameters) below. |
-| `SessionConfig` | `object` | yes | Simulated allocation payload. See [SessionConfig](#sessionconfig) below. |
+| `SessionConfig` | `object` | no | Simulated allocation payload. If omitted, LMA creates a default `SessionConfig` with a generated `SessionId`. See [SessionConfig](#sessionconfig) below. |
 | `ForcePullFromAcrOnLinuxContainersOnWindows` | `bool` | no | When `true`, LMA pulls the container image from the configured registry before starting on the Linux Containers on Windows scenario. Defaults to `false`. |
 | `ForcePullContainerImageFromRegistry` | `bool` | no | When `true`, LMA pulls the container image from the registry before starting. Set to `true` when using a remote registry on macOS or Linux. Defaults to `false` (assumes the image is already available locally). |
 | `DeploymentMetadata` | `Dictionary<string,string>` | no | Free-form key/value metadata exposed to the game server via GSDK. The samples use `Environment` and `FeaturesEnabled` as illustrative keys; any keys are accepted. |

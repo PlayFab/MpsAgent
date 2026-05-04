@@ -95,10 +95,10 @@ Used only when `RunContainer = true`.
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `StartGameCommand` | `string` | conditional | The command to run inside the container. Required for Windows containers (and must reference the asset `MountPath`). Optional for Linux containers if the image's `CMD`/`ENTRYPOINT` already starts the game. |
-| `ImageDetails.Registry` | `string` | yes | FQDN of the container registry (e.g., `mcr.microsoft.com`, `myregistry.azurecr.io`, `mydockerregistry.io`). |
+| `ImageDetails.Registry` | `string` | no | Optional FQDN of the container registry (e.g., `mcr.microsoft.com`, `myregistry.azurecr.io`, `mydockerregistry.io`). |
 | `ImageDetails.ImageName` | `string` | yes | Image repository name (e.g., `playfab/multiplayer`, `mygame`). |
-| `ImageDetails.ImageTag` | `string` | yes (unless using digest) | Image tag (e.g., `wsc-10.0.20348.3207`, `0.1`). |
-| `ImageDetails.ImageDigest` | `string` | no | Image digest. Takes precedence over `ImageTag` when set. |
+| `ImageDetails.ImageTag` | `string` | no | Optional image tag (e.g., `wsc-10.0.20348.3207`, `0.1`). If omitted, LMA defaults to `latest`. |
+| `ImageDetails.ImageDigest` | `string` | no | Image digest. Currently not used by LMA's `DockerContainerEngine`; specify `ImageTag` for image selection. |
 | `ImageDetails.Username` | `string` | no | Registry username (for private registries). Leave empty for public registries. |
 | `ImageDetails.Password` | `string` | no | Registry password / token. Leave empty for public registries. **Do not commit secrets** — these values are redacted from logs by LMA. |
 | `ResourceLimits.Cpus` | `double` | no | Maximum CPUs the container may use (Docker `--cpus`). `0` (default) means no limit. |

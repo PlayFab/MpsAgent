@@ -32,7 +32,7 @@ Everything else can usually be left at the sample defaults.
 
 ## Field reference
 
-Top-level fields in `MultiplayerSettings.json` are deserialized into [`MultiplayerSettings`](../Config/MultiplayerSettings.cs). Validation rules live in [`MultiplayerSettingsValidator`](../Config/MultiplayerSettingsValidator.cs). Field names are case-sensitive.
+Top-level fields in `MultiplayerSettings.json` are deserialized into [`MultiplayerSettings`](../Config/MultiplayerSettings.cs). Validation rules live in [`MultiplayerSettingsValidator`](../Config/MultiplayerSettingsValidator.cs). Field names are matched case-insensitively by the current loader, though using the documented casing is recommended for clarity.
 
 ### Top-level
 
